@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Local Connect - Smart Services Booking System
 
 A frontend-only web app for booking local services with user, provider, and admin dashboards. The app uses browser Local Storage to simulate authentication, bookings, feedback, and support messages.
@@ -67,3 +68,7 @@ A frontend-only web app for booking local services with user, provider, and admi
 - This app is fully frontend-only and does not include a backend server.
 - All data is stored locally in the browser and can be cleared by clearing browser storage.
 - The app simulates realistic workflows for demos and presentations.
+=======
+# Local-Connect-Project
+A responsive service booking platform that connects users with trusted local professionals with search and booking features.
+>>>>>>> 70494bcec518b1a89322c6ff8eabe4651afa11b5
