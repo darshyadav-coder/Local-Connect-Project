@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking - Local Connect</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">Local Connect</div>
+
+      <div class="menu">
+        <a href="main.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="booking.html">Book Now</a>
+        <a href="user-dashboard.html">User</a>
+        <a href="provider-dashboard.html">Provider</a>
+        <a href="admin-dashboard.html">Admin</a>
+        <a href="Contact.html">Contact Support</a>
+        <a href="login.html">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="booking-section">
+    <div class="booking-form">
+
+      <h1>Book a Service</h1>
+
+      <p id="selected-service" style="font-weight: bold; color: #333;"></p>
+
+      <div class="booking-type-selector">
+        <div class="toggle-slider" id="toggle-slider"></div>
+        <button id="normal-booking-btn" class="booking-type-btn active">
+          Normal
+        </button>
+        <button id="emergency-booking-btn" class="booking-type-btn">
+          Emergency
+        </button>
+      </div>
+
+      <form id="booking-form">
+        <input type="text" placeholder="Full Name" required />
+
+        <input type="text" placeholder="Phone Number" required />
+
+        <!-- <select id="service-select" required>
+            <option>Select Service</option>
+            <option>House Cleaning</option>
+            <option>Electrical Repair</option>
+            <option>Plumbing</option>
+            <option>Carpentry</option>
+            <option>Gardening</option>
+            <option>Painting</option>
+          </select> -->
+
+        <input type="date" id="booking-date" required />
+
+        <div id="emergency-notice" class="emergency-notice" style="display: none;">
+          ⚠️ Emergency booking will be prioritized and may incur additional
+          charges.
+        </div>
+
+        <p style="font-weight: bold; color: #2e7d32; font-size: 18px; margin-top: 10px;">Total Price: <span id="price-display">₹0</span></p>
+        <p id="extra-charge" style="display: none; color: var(--danger-color); font-weight: bold; margin-bottom: 10px;">⚡ Emergency Charges: +₹200</p>
+
+        <button type="submit" class="btn" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;">Confirm Booking</button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+
+      <!-- Logo & About -->
+      <div class="footer-section">
+        <h2 class="footer-logo">Local Connect</h2>
+        <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <a href="main.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="booking.html">Booking</a>
+        <a href="feedback.html">Feedback</a>
+      </div>
+
+      <!-- For Users -->
+      <div class="footer-section">
+        <h3>User</h3>
+        <a href="login.html">Login</a>
+        <a href="signup.html">Signup</a>
+        <a href="user-dashboard.html">Dashboard</a>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer-section">
+        <h3>Contact</h3>
+        <p>Email: support@localconnect.com</p>
+        <p>Phone: +91 8982427031</p>
+        <p>Location: India</p>
+      </div>
+
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer-bottom">
+      <p>© 2026 Local Connect | All Rights Reserved</p>
+    </div>
+  </footer>
+
+  <script src="./js/data.js"></script>
+  <script src="./js/booking.js"></script>
+</body>
+
+</html>
