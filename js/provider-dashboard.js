@@ -35,6 +35,57 @@ function renderProviderDashboard() {
     renderEmergency(pendingEmergency);
     renderIncoming(pendingNormal);
     renderAccepted(myAccepted);
+    renderFeedback(myCompleted); // Added: Render feedback section
+}
+
+function renderFeedback(completedBookings) {
+    const feedbackBody = document.getElementById("feedback-body");
+    const trustScoreEl = document.getElementById("trust-score");
+
+    feedbackBody.innerHTML = "";
+    let totalRatings = 0;
+    let feedbackCount = 0;
+
+    if (completedBookings.length === 0) {
+        feedbackBody.innerHTML = "<tr><td colspan='5' style='text-align: center; color: var(--text-muted);'>No completed services yet.</td></tr>";
+        trustScoreEl.textContent = "No data";
+        return;
+    }
+
+    completedBookings.forEach(booking => {
+        if (booking.feedback) {
+            const rating = parseInt(booking.feedback.rating.split(' ')[1]); // Extract number from "⭐⭐ 2"
+            totalRatings += rating;
+            feedbackCount++;
+
+            feedbackBody.innerHTML += `
+                <tr>
+                    <td>${booking.service}</td>
+                    <td>${booking.customerName}</td>
+                    <td>${booking.feedback.rating}</td>
+                    <td>${booking.feedback.comment}</td>
+                    <td>${new Date(booking.date).toLocaleDateString()}</td>
+                </tr>
+            `;
+        } else {
+            feedbackBody.innerHTML += `
+                <tr>
+                    <td>${booking.service}</td>
+                    <td>${booking.customerName}</td>
+                    <td>No rating</td>
+                    <td>No feedback yet</td>
+                    <td>${new Date(booking.date).toLocaleDateString()}</td>
+                </tr>
+            `;
+        }
+    });
+
+    // Calculate Trust Score: Average rating * (feedback count / total completed) + completion rate
+    const completionRate = completedBookings.length > 0 ? (feedbackCount / completedBookings.length) * 100 : 0;
+    const avgRating = feedbackCount > 0 ? (totalRatings / feedbackCount) : 0;
+    const trustScore = Math.round((avgRating * 0.7) + (completionRate * 0.3)); // Weighted formula
+
+    trustScoreEl.textContent = `${trustScore}/100 (${avgRating.toFixed(1)}⭐ avg, ${feedbackCount}/${completedBookings.length} feedback)`;
 }
 
 function renderEmergency(requests) {

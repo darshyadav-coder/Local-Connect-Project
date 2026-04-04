@@ -82,6 +82,29 @@
           </div>
       </section>
 
+      <!-- FEEDBACK & TRUST SCORE -->
+      <section class="feedback-section" style="padding: 0; margin-bottom: 40px;">
+          <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px;">📊 My Performance & Feedback</h2>
+          <div class="card" style="margin-bottom: 20px;">
+              <h3>Trust Score: <span id="trust-score" style="color: var(--accent-color); font-weight: bold;">Calculating...</span></h3>
+              <p>Based on completed services, ratings, and feedback.</p>
+          </div>
+          <div class="table-container">
+              <table>
+                  <tr>
+                      <th>Service</th>
+                      <th>Customer</th>
+                      <th>Rating</th>
+                      <th>Feedback</th>
+                      <th>Date</th>
+                  </tr>
+                  <tbody id="feedback-body">
+                      <!-- Javascript will load feedback here! -->
+                  </tbody>
+              </table>
+          </div>
+      </section>
+
     </div>
   </div>
 
@@ -101,7 +124,7 @@
                 <a href="main.html">Home</a>
                 <a href="services.html">Services</a>
                 <a href="booking.html">Booking</a>
-                <a href="feedback.html">Feedback</a>
+                <a href="user-dashboard.html#feedback-section">Feedback</a> <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
             </div>
 
             <!-- For Users -->

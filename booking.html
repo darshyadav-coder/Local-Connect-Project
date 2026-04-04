@@ -44,21 +44,17 @@
       </div>
 
       <form id="booking-form">
-        <input type="text" placeholder="Full Name" required />
+        <label for="name-input">Full Name</label>
+        <input id="name-input" type="text" placeholder="Full Name" required />
+        <span class="error" id="name-error" style="color: red; display: none;"></span>
 
-        <input type="text" placeholder="Phone Number" required />
+        <label for="phone-input">Phone Number</label>
+        <input id="phone-input" type="text" placeholder="Phone Number" required />
+        <span class="error" id="phone-error" style="color: red; display: none;"></span>
 
-        <!-- <select id="service-select" required>
-            <option>Select Service</option>
-            <option>House Cleaning</option>
-            <option>Electrical Repair</option>
-            <option>Plumbing</option>
-            <option>Carpentry</option>
-            <option>Gardening</option>
-            <option>Painting</option>
-          </select> -->
-
+        <label for="booking-date">Booking Date</label>
         <input type="date" id="booking-date" required />
+        <span class="error" id="date-error" style="color: red; display: none;"></span>
 
         <div id="emergency-notice" class="emergency-notice" style="display: none;">
           ⚠️ Emergency booking will be prioritized and may incur additional
@@ -88,7 +84,7 @@
         <a href="main.html">Home</a>
         <a href="services.html">Services</a>
         <a href="booking.html">Booking</a>
-        <a href="feedback.html">Feedback</a>
+        <a href="user-dashboard.html#feedback-section">Feedback</a> <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
       </div>
 
       <!-- For Users -->

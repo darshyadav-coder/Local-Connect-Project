@@ -99,7 +99,7 @@ function renderFeedback(bookings) {
     const feedbackList = bookings.filter(b => b.feedback);
 
     if (feedbackList.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color: var(--text-muted);'>No feedback submitted yet.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color: var(--text-muted);'>No feedback submitted yet.</td></tr>";
         return;
     }
 
@@ -108,8 +108,10 @@ function renderFeedback(bookings) {
             <tr>
                 <td><strong>${b.service}</strong></td>
                 <td>${b.provider}</td>
+                <td>${b.customerName || b.userName}</td>
                 <td>${b.feedback.rating}</td>
                 <td style="font-style: italic;">"${b.feedback.comment}"</td>
+                <td>${new Date(b.date).toLocaleDateString()}</td>
             </tr>
         `;
     });

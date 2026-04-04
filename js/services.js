@@ -1,122 +1,12 @@
 // service.html js part
 
-// get elements
-
-// const container = document.getElementById("sub-services-container")
-// const title = document.getElementById("page-title")
-// const searchInput = document.getElementById("service-search")
-
-// // get selected category from main page
-// const selectedCategory = localStorage.getItem("category")
-
-// // find selected service from shared data
-// const selectedService = services.find(s => s.id === selectedCategory);
-
-// // if category is selected -> show its sub-services
-
-// if (selectedService) {
-//   title.innerText = selectedService.name + " Services";
-
-//   selectedService.subServices.forEach(sub => {
-//     const card = `
-//     <div class="service-card" onclick="selectSubService('${sub}')">
-//     <i class="fa-solid ${selectedService.icon}"></i>
-//     <h3>${sub}</h3>
-//     <p>${selectedService.name} Service</p>
-//     <a href="booking.html" class="btn">Book Now</a>
-//     </div>`;
-//     container.innerHTML += card;
-//   });
-// }
-
-// // if no category selected -> show all services
-
-// else {
-//   title.innerText = "All services";
-
-//    services.forEach(service => {
-//     service.subServices.forEach(sub => {
-//       const card = `
-//         <div class="service-card" onclick="selectSubService('${sub}')">
-//           <i class="fa-solid ${service.icon}"></i>
-//           <h3>${service.name}</h3>
-//           <p>${service.description || "Explore services"}</p>
-//           <a href="booking.html" class="btn">Book Now</a>
-//         </div>
-//       `;
-//       container.innerHTML += card;
-//     });
-//   });
-// }
-
-// // store selected sub-service
-
-// function selectSubService(serviceName) {
-//   localStorage.setItem("selectedService", serviceName);
-// }
-
-// const selectCategory = localStorage.getItem("category")
-// localStorage.setItem("selectedCategory", selectCategory);
-
-// function openCategory(id) {
-//   localStorage.setItem("category",id);
-//   window.location.reload();
-// }
-
-// if (!selectedCategory) {
-//   title.innerText = "All service Categories";
-// }
-
-// // search functionality (live filter)
-
-// if (searchInput) {
-//   searchInput.addEventListener("keyup", function() {
-
-//     let value = this.value.toLowerCase();
-//     let cards = document.querySelectorAll(".service-card");
-
-//     cards.forEach(card => {
-//       let text = card.innerText.toLowerCase();
-
-//       if (text.includes(value)) {
-//         card.style.display = "";
-//       } else {
-//         card.style.display = "none";
-//       }
-//     });
-//   });
-// }
-
-// const searchInput = document.getElementById("service-search");  //get search box
-// const cards = document.querySelectorAll(".service-card");       //get all service cards
-// const noResult = document.getElementById("no-result");          //get "no result" message
-
-// if (searchInput && noResult) {
-// searchInput.addEventListener("keyup", function () {            // run when user types, keyup → triggers after key is released
-//   let value = this.value.toLowerCase();                        //gets input and convert it to lowercase
-//   let found = false;                                           //track if match exists
-
-//   cards.forEach((card) => {                                    //loops all cards
-//     let text = card.innerText.toLowerCase();                   //gets card text
-
-//     if (text.includes(value)) {                                //if matches search
-//       card.style.display = "";                                 //show card + mark found
-//       found = true;                                            
-//     } else {
-//       card.style.display = "none";                             // hide card
-//     }
-//   });
-//   noResult.style.display = found ? "none" : "block";          // show message if nothing found
-// });
-// };
-
-
 // ==========================
 // ELEMENTS
 // ==========================
 const container = document.getElementById("services-container");
 const title = document.getElementById("page-title");
 const searchInput = document.getElementById("service-search");
+const priceFilter = document.getElementById("price-filter");
 const noResult = document.getElementById("no-result");
 
 // ==========================
@@ -203,30 +93,74 @@ if (selectedCategory) {
     renderCategories();
 }
 
-
 // ==========================
-// SEARCH FUNCTION
+// RENDER REVIEWS FUNCTION (Transparency for Users)
 // ==========================
-if (searchInput) {
-    searchInput.addEventListener("keyup", function () {
+function renderReviews() {
+    const reviewsContainer = document.getElementById("reviews-container");
+    const allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
+    const reviews = allBookings.filter(b => b.feedback).slice(-6); // Show last 6 reviews
 
-        let value = this.value.toLowerCase();
-        let cards = document.querySelectorAll(".service-card");
-        let found = false;
+    reviewsContainer.innerHTML = "";
+    if (reviews.length === 0) {
+        reviewsContainer.innerHTML = "<p style='color: var(--text-muted); text-align: center;'>No reviews yet. Be the first to book and share your experience!</p>";
+        return;
+    }
 
-        cards.forEach(card => {
-            let text = card.innerText.toLowerCase();
-
-            if (text.includes(value)) {
-                card.style.display = "";
-                found = true;
-            } else {
-                card.style.display = "none";
-            }
-        });
-
-        if (noResult) {
-            noResult.style.display = found ? "none" : "block";
-        }
+    reviews.forEach(review => {
+        reviewsContainer.innerHTML += `
+            <div class="review-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: var(--shadow-md); max-width: 300px;">
+                <h4>${review.service}</h4>
+                <p style="color: var(--accent-color); font-weight: bold;">${review.feedback.rating}</p>
+                <p style="font-style: italic;">"${review.feedback.comment}"</p>
+                <p style="color: var(--text-muted); font-size: 12px;">- ${review.customerName || review.userName}, ${new Date(review.date).toLocaleDateString()}</p>
+            </div>
+        `;
     });
+}
+
+// Call renderReviews after rendering services
+renderReviews();
+
+// ==========================
+// SEARCH AND FILTER FUNCTION
+// ==========================
+function filterServices() {
+    let searchValue = searchInput ? searchInput.value.toLowerCase() : '';
+    let priceValue = priceFilter ? priceFilter.value : '';
+    let cards = document.querySelectorAll(".service-card");
+    let found = false;
+
+    cards.forEach(card => {
+        let text = card.innerText.toLowerCase();
+        let price = parseInt(card.innerText.match(/₹(\d+)/)?.[1] || 0); // Extract price from card text
+        let showCard = true;
+
+        // Search filter
+        if (searchValue && !text.includes(searchValue)) {
+            showCard = false;
+        }
+
+        // Price filter
+        if (priceValue) {
+            if (priceValue === 'low' && price >= 300) showCard = false;
+            else if (priceValue === 'medium' && (price < 300 || price > 600)) showCard = false;
+            else if (priceValue === 'high' && price <= 600) showCard = false;
+        }
+
+        card.style.display = showCard ? "" : "none";
+        if (showCard) found = true;
+    });
+
+    if (noResult) {
+        noResult.style.display = found ? "none" : "block";
+    }
+}
+
+if (searchInput) {
+    searchInput.addEventListener("keyup", filterServices);
+}
+
+if (priceFilter) {
+    priceFilter.addEventListener("change", filterServices);
 }
