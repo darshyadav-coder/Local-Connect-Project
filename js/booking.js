@@ -81,20 +81,131 @@ dateInput.addEventListener('input', () => {
 // ==========================
 let selectedService = JSON.parse(localStorage.getItem("selectedService"));
 
+// Clear the refresh flag after using it
+sessionStorage.removeItem("serviceRefresh");
+
 let basePrice = 0;
 
 // show selected service
 if (selectedService) {
-    selectedServiceText.innerText = `Service: ${selectedService.name}`;
-    basePrice = selectedService.price;
+    selectedServiceText.innerHTML = `
+        <span>Service: ${selectedService.name}</span>
+        <button type="button" id="change-service-btn" style="margin-left: 15px; padding: 5px 10px; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Change Service</button>
+    `;
+    document.getElementById("service-selection").style.display = "none";
+
+    // Add change service functionality
+    document.getElementById("change-service-btn").addEventListener("click", () => {
+        selectedService = null;
+        selectedServiceText.innerText = "Please select a service below";
+        document.getElementById("service-selection").style.display = "block";
+        loadServiceSelection();
+        basePrice = 0;
+        updatePrice();
+    });
 } else {
-    selectedServiceText.innerText = "No service selected";
+    selectedServiceText.innerText = "Please select a service below";
+    document.getElementById("service-selection").style.display = "block";
+    loadServiceSelection();
 }
 
 // ==========================
-// BOOKING TYPE
+// SERVICE SELECTION FUNCTION
 // ==========================
-let bookingType = localStorage.getItem("bookingType") || "normal";
+function loadServiceSelection() {
+    const serviceGrid = document.getElementById("service-grid");
+    serviceGrid.innerHTML = "";
+
+    servicesData.forEach(service => {
+        const serviceCard = document.createElement("div");
+        serviceCard.className = "service-card";
+        serviceCard.style.cssText = "cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s ease;";
+        serviceCard.innerHTML = `
+            <i class="fa-solid ${service.icon}" style="font-size: 24px; color: var(--accent-color); margin-bottom: 10px;"></i>
+            <h4 style="margin: 0 0 5px 0; color: var(--text-dark);">${service.name}</h4>
+            <p style="margin: 0; color: var(--text-muted); font-size: 14px;">${service.description}</p>
+        `;
+
+        serviceCard.addEventListener("click", () => {
+            selectedService = {
+                id: service.id,
+                name: service.name,
+                price: 0 // Will be set when sub-service is selected
+            };
+
+            // Show sub-services for selection
+            showSubServiceSelection(service);
+        });
+
+        serviceGrid.appendChild(serviceCard);
+    });
+}
+
+function showSubServiceSelection(service) {
+    const serviceGrid = document.getElementById("service-grid");
+    serviceGrid.innerHTML = `<h4 style="grid-column: 1 / -1; text-align: center; color: var(--text-dark); margin-bottom: 15px;">Select ${service.name} Service</h4>`;
+
+    service.subServices.forEach(sub => {
+        const subServiceCard = document.createElement("div");
+        subServiceCard.className = "service-card";
+        subServiceCard.style.cssText = "cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; text-align: center; transition: all 0.3s ease;";
+        subServiceCard.innerHTML = `
+            <i class="fa-solid ${service.icon}" style="font-size: 20px; color: var(--accent-color); margin-bottom: 8px;"></i>
+            <h5 style="margin: 0 0 5px 0; color: var(--text-dark);">${sub.name}</h5>
+            <p style="margin: 0; color: var(--text-muted); font-size: 14px;">Starting from ₹${sub.price}</p>
+        `;
+
+        subServiceCard.addEventListener("click", () => {
+            selectedService = sub;
+            selectedServiceText.innerText = `Service: ${selectedService.name}`;
+            document.getElementById("service-selection").style.display = "none";
+            basePrice = selectedService.price;
+            updatePrice();
+
+            // Highlight selected service
+            subServiceCard.style.borderColor = "var(--accent-color)";
+            subServiceCard.style.backgroundColor = "#f0f8ff";
+        });
+
+        serviceGrid.appendChild(subServiceCard);
+    });
+
+    // Add back button
+    const backButton = document.createElement("button");
+    backButton.className = "btn";
+    backButton.style.cssText = "grid-column: 1 / -1; margin-top: 15px; background: var(--text-muted);";
+    backButton.textContent = "← Back to Categories";
+    backButton.addEventListener("click", () => {
+        loadServiceSelection();
+    });
+    serviceGrid.appendChild(backButton);
+}
+let bookingType = localStorage.getItem("bookingType");
+const bookingRefresh = sessionStorage.getItem("bookingRefresh");
+
+// Only use stored booking type if this is a direct flow from main page buttons
+// Direct navigation to booking page defaults to normal
+if (!bookingRefresh) {
+    localStorage.removeItem("bookingType");
+    bookingType = "normal";
+}
+
+// Clear the refresh flag after using it
+sessionStorage.removeItem("bookingRefresh");
+
+// Initialize UI based on stored booking type
+if (bookingType === "emergency") {
+    emergencyBtn.classList.add("active");
+    normalBtn.classList.remove("active");
+    document.getElementById("toggle-slider").classList.add("move");
+} else {
+    normalBtn.classList.add("active");
+    emergencyBtn.classList.remove("active");
+    document.getElementById("toggle-slider").classList.remove("move");
+}
+
+// Initialize price display
+updatePrice();
 
 // ==========================
 // UPDATE PRICE

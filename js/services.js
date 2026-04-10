@@ -12,7 +12,18 @@ const noResult = document.getElementById("no-result");
 // ==========================
 // GET CATEGORY
 // ==========================
-const selectedCategory = localStorage.getItem("category");
+let selectedCategory = localStorage.getItem("category");
+const categoryRefresh = sessionStorage.getItem("categoryRefresh");
+
+// Only use stored category if this is a reload from category selection
+// Direct navigation clears the category
+if (!categoryRefresh) {
+    localStorage.removeItem("category");
+    selectedCategory = null;
+}
+
+// Clear the refresh flag after using it
+sessionStorage.removeItem("categoryRefresh");
 
 // ==========================
 // RENDER FUNCTIONS
@@ -40,6 +51,7 @@ function renderCategories() {
     document.querySelectorAll(".service-card").forEach(card => {
         card.addEventListener("click", () => {
             const id = card.getAttribute("data-id");
+            sessionStorage.setItem("categoryRefresh", "true");
             localStorage.setItem("category", id);
             window.location.reload();
         });
@@ -71,6 +83,7 @@ function renderSubServices(service) {
         btn.addEventListener("click", () => {
             const selected = service.subServices[index];
 
+            sessionStorage.setItem("serviceRefresh", "true");
             localStorage.setItem("selectedService", JSON.stringify(selected));
             window.location.href = "booking.html";
         });

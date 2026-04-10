@@ -23,6 +23,7 @@ if (container && typeof servicesData !== "undefined") {
     document.querySelectorAll(".service-card").forEach(card => {
         card.addEventListener("click", () => {
             const id = card.getAttribute("data-id");
+            sessionStorage.setItem("categoryRefresh", "true");
             localStorage.setItem("category", id);
             window.location.href = "services.html";
         })
@@ -95,6 +96,7 @@ const emergencyBtn = document.getElementById("emergency-btn")
 
 if (emergencyBtn) {
     emergencyBtn.addEventListener('click', () => {
+        sessionStorage.setItem("bookingRefresh", "true");
         localStorage.setItem("bookingType", "emergency");
 
         // Viva Feature: Using our custom Toast instead of a boring alert() box!
@@ -112,7 +114,9 @@ const ctaBtn = document.querySelector(".cta .btn");
 
 if (ctaBtn) {
     ctaBtn.addEventListener("click", () => {
+        sessionStorage.setItem("bookingRefresh", "true");
         localStorage.setItem("bookingType", "normal");
+        window.location.href = "booking.html";
     });
 }
 
@@ -140,5 +144,5 @@ function showToast(message) {
     setTimeout(() => {
         toast.classList.remove("show");
         setTimeout(() => toast.remove(), 400); // Wait for slide-out animation to finish
-    }, 3000);
+    }, 4000);
 }
