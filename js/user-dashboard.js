@@ -13,9 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    // Hide feedback initially
-    const feedbackSection = document.getElementById("feedback-section");
-    if (feedbackSection) feedbackSection.style.display = "none";
+    // Load notifications
+    loadNotifications(loggedInUser.email);
 
     // 2. Data Retrieval (Simulating Database Fetch)
     const allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
@@ -52,7 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Action / Feedback Logic
         let feedbackHtml = `<td>Not Available</td>`;
         if (booking.status === "Pending") {
-            feedbackHtml = `<td><button class="btn" style="padding: 6px 12px; font-size: 13px; background-color: var(--danger-color);" onclick="cancelBooking('${booking.id}')">Cancel Booking</button></td>`;
+            feedbackHtml = `<td>
+                <button class="btn" style="padding: 6px 12px; font-size: 13px; background-color: var(--danger-color); margin-bottom: 5px;" onclick="cancelBooking('${booking.id}')">Cancel</button>
+                <button class="btn" style="padding: 6px 12px; font-size: 13px; background-color: var(--primary-color);" onclick="rescheduleBooking('${booking.id}', '${booking.date}')">Reschedule</button>
+            </td>`;
         } else if (booking.status === "Completed") {
             if (booking.feedback) {
                 feedbackHtml = `<td><span style="color:var(--accent-color);font-weight:bold;">Thanks for feedback!</span></td>`;
@@ -127,3 +129,76 @@ window.cancelBooking = function (bookingId) {
         }
     }
 };
+
+// Handle Booking Rescheduling
+window.rescheduleBooking = function (bookingId, currentDate) {
+    const newDate = prompt("Enter new date (YYYY-MM-DD):", currentDate);
+    if (newDate && newDate !== currentDate) {
+        const today = new Date().toISOString().split("T")[0];
+        if (newDate < today) {
+            alert("Please select a future date.");
+            return;
+        }
+
+        let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
+        const bIndex = allBookings.findIndex(b => b.id === bookingId);
+
+        if (bIndex > -1) {
+            allBookings[bIndex].date = newDate;
+            allBookings[bIndex].status = "Pending"; // Reset status when rescheduled
+            localStorage.setItem("allBookings", JSON.stringify(allBookings));
+            alert("✅ Booking rescheduled successfully.");
+            window.location.reload();
+        }
+    }
+};
+
+// Load and display notifications
+function loadNotifications(userEmail) {
+    const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+    const userNotifications = notifications.filter(n => n.email === userEmail).slice(-5); // Last 5 notifications
+
+    if (userNotifications.length > 0) {
+        const notificationsSection = document.getElementById("notifications-section");
+        const notificationsList = document.getElementById("notifications-list");
+
+        notificationsSection.style.display = "block";
+        notificationsList.innerHTML = "";
+
+        userNotifications.reverse().forEach(notification => {
+            const notificationDiv = document.createElement("div");
+            notificationDiv.className = `notification ${notification.read ? 'read' : 'unread'}`;
+            notificationDiv.style.cssText = `
+                padding: 10px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                background: ${notification.read ? '#f8fafc' : '#e0f2fe'};
+                border-left: 3px solid ${notification.read ? '#e2e8f0' : 'var(--accent-color)'};
+            `;
+
+            notificationDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <strong>${notification.subject}</strong>
+                        <p style="margin: 5px 0; color: var(--text-muted); font-size: 14px;">${notification.message}</p>
+                        <small style="color: var(--text-muted);">${new Date(notification.timestamp).toLocaleString()}</small>
+                    </div>
+                    ${!notification.read ? '<span style="color: var(--accent-color); font-weight: bold;">●</span>' : ''}
+                </div>
+            `;
+
+            notificationsList.appendChild(notificationDiv);
+
+            // Mark as read when clicked
+            notificationDiv.addEventListener("click", () => {
+                if (!notification.read) {
+                    notification.read = true;
+                    localStorage.setItem("notifications", JSON.stringify(notifications));
+                    notificationDiv.style.background = "#f8fafc";
+                    notificationDiv.style.borderLeftColor = "#e2e8f0";
+                    notificationDiv.querySelector('span')?.remove();
+                }
+            });
+        });
+    }
+}

@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Load dynamic data perfectly
   renderProviderDashboard();
+  renderAvailabilityCalendar();
 });
 
 function renderProviderDashboard() {
@@ -203,6 +204,13 @@ window.acceptBooking = function (id) {
       loggedInUser.fullname || loggedInUser.email.split("@")[0];
     localStorage.setItem("allBookings", JSON.stringify(allBookings));
 
+    // Send notification
+    simulateNotification(allBookings[index].userEmail, "provider_assigned", {
+      provider: allBookings[index].provider,
+      service: allBookings[index].service,
+      date: allBookings[index].date
+    });
+
     // Re-render the view
     renderProviderDashboard();
   }
@@ -224,6 +232,143 @@ window.completeBooking = function (id) {
   if (index > -1) {
     allBookings[index].status = "Completed";
     localStorage.setItem("allBookings", JSON.stringify(allBookings));
+
+    // Send notification
+    simulateNotification(allBookings[index].userEmail, "booking_completed", {
+      service: allBookings[index].service
+    });
+
     renderProviderDashboard();
   }
 };
+
+// ==========================
+// AVAILABILITY CALENDAR
+// ==========================
+
+function renderAvailabilityCalendar() {
+  const calendarContainer = document.getElementById("availability-calendar");
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  const availability = JSON.parse(localStorage.getItem("providerAvailability")) || {};
+  const providerAvailability = availability[loggedInUser.email] || {};
+
+  // Generate next 7 days
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = new Date();
+
+  calendarContainer.innerHTML = "";
+
+  // Add day headers
+  days.forEach(day => {
+    const dayHeader = document.createElement("div");
+    dayHeader.textContent = day;
+    dayHeader.style.cssText = "font-weight: bold; text-align: center; padding: 10px; background: var(--bg-color); border-radius: 8px;";
+    calendarContainer.appendChild(dayHeader);
+  });
+
+  // Add availability slots for next 7 days
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dateStr = date.toISOString().split('T')[0];
+    const dayName = days[date.getDay()];
+
+    const daySlot = document.createElement("div");
+    daySlot.className = "calendar-day";
+    daySlot.dataset.date = dateStr;
+
+    const isAvailable = providerAvailability[dateStr];
+    daySlot.style.cssText = `
+      padding: 15px;
+      border: 2px solid ${isAvailable ? 'var(--accent-color)' : '#e2e8f0'};
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      background: ${isAvailable ? 'rgba(16, 185, 129, 0.1)' : 'white'};
+      transition: all 0.3s ease;
+    `;
+
+    daySlot.innerHTML = `
+      <div style="font-size: 18px; font-weight: bold; color: var(--text-dark);">${date.getDate()}</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">${isAvailable ? 'Available' : 'Unavailable'}</div>
+    `;
+
+    daySlot.addEventListener("click", () => toggleDayAvailability(loggedInUser.email, dateStr));
+    daySlot.addEventListener("mouseover", () => {
+      daySlot.style.transform = "translateY(-2px)";
+      daySlot.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+    });
+    daySlot.addEventListener("mouseleave", () => {
+      daySlot.style.transform = "translateY(0)";
+      daySlot.style.boxShadow = "none";
+    });
+
+    calendarContainer.appendChild(daySlot);
+  }
+
+  // Add toggle availability button functionality
+  const toggleBtn = document.getElementById("toggle-availability");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const allAvailable = Object.values(providerAvailability).every(v => v);
+      const newAvailability = !allAvailable;
+
+      const availability = JSON.parse(localStorage.getItem("providerAvailability")) || {};
+      availability[loggedInUser.email] = availability[loggedInUser.email] || {};
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+        availability[loggedInUser.email][dateStr] = newAvailability;
+      }
+
+      localStorage.setItem("providerAvailability", JSON.stringify(availability));
+      renderAvailabilityCalendar();
+
+      alert(`${newAvailability ? 'Available' : 'Unavailable'} for the next 7 days!`);
+    });
+  }
+}
+
+function toggleDayAvailability(providerEmail, dateStr) {
+  const availability = JSON.parse(localStorage.getItem("providerAvailability")) || {};
+  if (!availability[providerEmail]) availability[providerEmail] = {};
+
+  availability[providerEmail][dateStr] = !availability[providerEmail][dateStr];
+  localStorage.setItem("providerAvailability", JSON.stringify(availability));
+
+  renderAvailabilityCalendar();
+}
+
+// Simulate notifications
+function simulateNotification(email, type, data = {}) {
+    const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+    let message = "";
+    let subject = "";
+
+    switch(type) {
+        case "provider_assigned":
+            subject = "Provider Assigned";
+            message = `${data.provider} has been assigned to your ${data.service} booking on ${data.date}.`;
+            break;
+        case "booking_completed":
+            subject = "Service Completed";
+            message = `Your ${data.service} service has been completed. Please provide feedback in your dashboard.`;
+            break;
+    }
+
+    notifications.push({
+        id: Date.now().toString(),
+        email: email,
+        type: type,
+        subject: subject,
+        message: message,
+        timestamp: new Date().toISOString(),
+        read: false,
+        data: data
+    });
+
+    localStorage.setItem("notifications", JSON.stringify(notifications));
+}

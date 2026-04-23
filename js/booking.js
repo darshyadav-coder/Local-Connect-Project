@@ -554,6 +554,12 @@ payNowBtn.addEventListener("click", async () => {
             let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
             allBookings.push(booking);
             localStorage.setItem("allBookings", JSON.stringify(allBookings));
+
+            // Send notification
+            simulateNotification(currentBookingData.userEmail, "booking_confirmed", {
+              service: currentBookingData.service,
+              date: currentBookingData.date
+            });
             // -------------------------
 
             setTimeout(() => {
@@ -633,3 +639,45 @@ function handlePaymentFailure(errorMessage) {
 // INITIAL LOAD
 // ==========================
 updatePrice();
+
+// ==========================
+// NOTIFICATION SYSTEM
+// ==========================
+function simulateNotification(email, type, data = {}) {
+    const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+    let message = "";
+    let subject = "";
+
+    switch(type) {
+        case "booking_confirmed":
+            subject = "Booking Confirmed";
+            message = `Your booking for ${data.service} on ${data.date} has been confirmed. A provider will be assigned soon.`;
+            break;
+        case "booking_completed":
+            subject = "Service Completed";
+            message = `Your ${data.service} service has been completed. Please provide feedback in your dashboard.`;
+            break;
+        case "booking_cancelled":
+            subject = "Booking Cancelled";
+            message = `Your booking for ${data.service} has been cancelled.`;
+            break;
+        case "provider_assigned":
+            subject = "Provider Assigned";
+            message = `${data.provider} has been assigned to your ${data.service} booking on ${data.date}.`;
+            break;
+    }
+
+    notifications.push({
+        id: Date.now().toString(),
+        email: email,
+        type: type,
+        subject: subject,
+        message: message,
+        timestamp: new Date().toISOString(),
+        read: false,
+        data: data
+    });
+
+    localStorage.setItem("notifications", JSON.stringify(notifications));
+}

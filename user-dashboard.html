@@ -30,6 +30,7 @@
     <div class="sidebar">
       <h3>User Panel</h3>
       <a href="user-dashboard.html" class="active">My Dashboard</a>
+      <a href="user-profile.html">My Profile</a>
       <a href="booking.html">Book Service</a>
       <a href="services.html">All Services</a>
       <a href="Contact.html">Support</a>
@@ -50,19 +51,17 @@
       </h1>
 
       <!-- Notifications -->
-      <div class="card" style="
+      <div class="card" id="notifications-section" style="
             margin-bottom: 30px;
             border-left: 4px solid var(--accent-color);
             border-top: none;
             text-align: left;
+            display: none;
           ">
-        <h3 style="color: var(--text-dark); margin-bottom: 5px">
-          🔔 Notifications
+        <h3 style="color: var(--text-dark); margin-bottom: 15px">
+          🔔 Recent Notifications
         </h3>
-        <p style="color: var(--text-muted)">
-          Welcome to your Local Connect portal. Manage your service requests
-          here.
-        </p>
+        <div id="notifications-list"></div>
       </div>
 
       <!-- Stats Grid leveraging CSS Grid -->
