@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tbody.innerHTML = "";
 
     if (userBookings.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='5' style='text-align: center;'>No bookings found. Start a new booking!</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>No bookings found. Start a new booking!</td></tr>";
     }
 
     userBookings.forEach(booking => {
@@ -43,6 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
         let statusClass = "status-pending";
         if (booking.status === "Completed") statusClass = "status-completed";
         if (booking.status === "Cancelled" || booking.status === "Rejected") statusClass = "status-cancelled";
+
+        // Payment logic
+        let paymentInfo = booking.paymentStatus === 'Paid'
+            ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓<br><small style="color:var(--text-muted);font-size:10px;">${booking.paymentId || ''}</small></span>`
+            : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
 
         // Action / Feedback Logic
         let feedbackHtml = `<td>Not Available</td>`;
@@ -64,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
             <td>${booking.date}</td>
             <td><span class="${statusClass}">${booking.status}</span></td>
+            <td>${paymentInfo}</td>
             <td>${booking.provider !== "Unassigned" ? booking.provider : "Waiting..."}</td>
             ${feedbackHtml}
         `;

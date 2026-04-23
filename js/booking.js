@@ -419,20 +419,14 @@ function validateForm() {
 }
 
 // ==========================
-// FORM SUBMIT
+// FORM SUBMIT -> MOVE TO CHECKOUT UI
 // ==========================
+let currentBookingData = null;
+
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
   if (!validateForm()) return;
-
-  // Add loading state for better UX
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Confirming Booking...";
-
-  let totalPrice = priceDisplay.innerText;
 
   // Viva Check: Ensure user is logged in
   let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -442,39 +436,198 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
-  // Simulate processing delay for realism
-  setTimeout(() => {
-    let booking = {
-      id: "BK-" + Date.now(), // Generate unique ID
-      userEmail: loggedInUser.email,
-      userName: loggedInUser.fullname || loggedInUser.email.split("@")[0], // Useful for display
-      customerName: nameInput.value.trim(),
-      phone: phoneInput.value.trim(),
-      service: selectedService.name,
-      price: totalPrice,
-      type: bookingType,
-      date: dateInput.value,
-      status: "Pending", // initial state
-      provider: "Unassigned", // provider hasn't picked it yet
-      feedback: null,
+  // Pre-calculate parameters
+  let totalPrice = priceDisplay.innerText;
+  let numericPrice = parseInt(totalPrice.replace("₹", ""));
+
+  currentBookingData = {
+    userEmail: loggedInUser.email,
+    userName: loggedInUser.fullname || loggedInUser.email.split("@")[0],
+    customerName: nameInput.value.trim(),
+    phone: phoneInput.value.trim(),
+    service: selectedService.name,
+    price: totalPrice,
+    numericPrice: numericPrice,
+    type: bookingType,
+    date: dateInput.value,
+  };
+
+  // Switch UI gracefully
+  form.style.display = "none";
+  document.getElementById("checkout-section").style.display = "block";
+
+  // Populate Order Summary
+  document.getElementById("summary-service").textContent = currentBookingData.service;
+  document.getElementById("summary-customer").textContent = currentBookingData.customerName;
+  document.getElementById("summary-date").textContent = currentBookingData.date;
+  document.getElementById("summary-price").textContent = currentBookingData.price;
+  document.getElementById("pay-now-text").textContent = `Pay ${currentBookingData.price}`;
+});
+
+// ==========================
+// CHECKOUT / PAYMENT HANDLING
+// ==========================
+const payNowBtn = document.getElementById("pay-now-btn");
+const cancelCheckoutBtn = document.getElementById("cancel-checkout-btn");
+const paymentMessage = document.getElementById("payment-status-message");
+
+// Cancel order and return back to form
+cancelCheckoutBtn.addEventListener("click", () => {
+  document.getElementById("checkout-section").style.display = "none";
+  form.style.display = "block";
+  currentBookingData = null;
+  paymentMessage.style.display = "none";
+});
+
+// Pay Now Workflow
+payNowBtn.addEventListener("click", async () => {
+  // 1. UI Loading State
+  payNowBtn.disabled = true;
+  cancelCheckoutBtn.disabled = true;
+  payNowBtn.style.background = "#94a3b8";
+  document.getElementById("pay-now-text").textContent = "Creating Order...";
+  paymentMessage.style.display = "none";
+
+  try {
+    // 2. Call backend module to create order
+    const orderResponse = await window.PaymentService.createOrder(currentBookingData);
+
+    if (!orderResponse.success) {
+      throw new Error(orderResponse.message || "Failed to create order on server");
+    }
+
+    document.getElementById("pay-now-text").textContent = "Awaiting Payment...";
+
+    // 3. Initialize Razorpay Gateway Options
+    let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+
+    var options = {
+      // BACKEND DEV: Replace this with your actual valid API Key!
+      // If it stays "rzp_test_dummykey123", Razorpay API will throw a 401 Unauthorized Error
+      "key": "rzp_test_dummykey123",
+      "amount": currentBookingData.numericPrice * 100,
+      "currency": "INR",
+      "name": "Local Connect",
+      "description": "Payment for " + currentBookingData.service,
+      // BACKEND DEV: Usually you pass the orderResponse.orderId here
+      // "order_id": orderResponse.orderId, 
+      "handler": async function (response) {
+        // ON SUCCESS FROM GATEWAY
+        document.getElementById("pay-now-text").textContent = "Verifying Payment...";
+
+        try {
+          // 4. Call backend to verify secret signatures dynamically
+          const verifyResponse = await window.PaymentService.verifyPayment({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            bookingContext: currentBookingData
+          });
+
+          if (verifyResponse.success) {
+            // 5. Success UI & Backend Save Integration
+            paymentMessage.style.display = "block";
+            paymentMessage.style.background = "#dcfce7";
+            paymentMessage.style.color = "#166534";
+            paymentMessage.textContent = "Payment Verified! Generating booking receipt...";
+            payNowBtn.style.background = "#10b981";
+            document.getElementById("pay-now-text").textContent = "Success ✓";
+
+            // --- MOCK DATABASE SAVE ---
+            // BACKEND DEV: You will probably remove this entirely since your API should write to a real DB
+            let booking = {
+              id: "BK-" + Date.now(),
+              userEmail: currentBookingData.userEmail,
+              userName: currentBookingData.userName,
+              customerName: currentBookingData.customerName,
+              phone: currentBookingData.phone,
+              service: currentBookingData.service,
+              price: currentBookingData.price,
+              type: currentBookingData.type,
+              date: currentBookingData.date,
+              status: "Pending",
+              provider: "Unassigned",
+              feedback: null,
+              paymentId: verifyResponse.paymentId || response.razorpay_payment_id,
+              paymentStatus: "Paid"
+            };
+            let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
+            allBookings.push(booking);
+            localStorage.setItem("allBookings", JSON.stringify(allBookings));
+            // -------------------------
+
+            setTimeout(() => {
+              window.location.href = "user-dashboard.html";
+            }, 1500);
+          } else {
+            throw new Error("Payment Verification Failed on server API.");
+          }
+        } catch (err) {
+          handlePaymentFailure(err.message);
+        }
+      },
+      "prefill": {
+        "name": currentBookingData.customerName,
+        "contact": currentBookingData.phone,
+        "email": loggedInUser.email
+      },
+      "theme": {
+        "color": "#2563eb"
+      },
+      "modal": {
+        "ondismiss": function () {
+          handlePaymentFailure("Payment modal closed. Transaction cancelled.");
+        }
+      }
     };
 
-    // Store in allBookings array!
-    let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-    allBookings.push(booking);
-    localStorage.setItem("allBookings", JSON.stringify(allBookings));
+    var rzp1 = new Razorpay(options);
 
-    // Reset loading state
-    submitBtn.disabled = false;
-    submitBtn.textContent = originalText;
+    rzp1.on('payment.failed', function (response) {
+      handlePaymentFailure(response.error.description);
+    });
 
-    showToast("Booking Confirmed! Redirecting to dashboard...", "success");
+    // Fire Razorpay Checkouts
+    try {
+      // Re-enable the cancel button in case Razorpay gets stuck on a network error or 401
+      cancelCheckoutBtn.disabled = false;
 
-    form.reset();
-    priceDisplay.innerText = "₹0";
-    window.location.href = "user-dashboard.html"; // Show them their pending booking
-  }, 1500); // 1.5 second delay for UX
+      if (options.key === "rzp_test_dummykey123") {
+        // Frontend Test Mode: Simulate Razorpay completing locally because the dummy key will just cause a 401 error 
+        console.warn("Using dummy API key! Simulating Razorpay success flow in 3 seconds to avoid 401 hang...");
+        setTimeout(() => {
+          options.handler({
+            razorpay_payment_id: "pay_sim_" + Math.random().toString(36).substr(2, 9),
+            razorpay_order_id: "order_sim",
+            razorpay_signature: "sim_signature_123"
+          });
+        }, 2500);
+      } else {
+        rzp1.open();
+      }
+    } catch (err) {
+      handlePaymentFailure("Gateway initialization failed: Backend Dev missing API key.");
+    }
+
+  } catch (error) {
+    console.error(error);
+    handlePaymentFailure(error.message);
+  }
 });
+
+function handlePaymentFailure(errorMessage) {
+  payNowBtn.disabled = false;
+  cancelCheckoutBtn.disabled = false;
+  payNowBtn.style.background = "#10b981"; // Reset green
+  document.getElementById("pay-now-text").textContent = "Retry Payment";
+
+  paymentMessage.style.display = "block";
+  paymentMessage.style.background = "#fee2e2";
+  paymentMessage.style.color = "#991b1b";
+
+  // Standard user-visible message
+  paymentMessage.textContent = "Payment Error: " + errorMessage;
+}
 
 // ==========================
 // INITIAL LOAD

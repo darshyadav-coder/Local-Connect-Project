@@ -84,7 +84,7 @@ function renderGlobalBookings(bookings) {
   tbody.innerHTML = "";
   if (bookings.length === 0) {
     tbody.innerHTML =
-      "<tr><td colspan='6' style='text-align:center;'>No bookings found system-wide.</td></tr>";
+      "<tr><td colspan='7' style='text-align:center;'>No bookings found system-wide.</td></tr>";
     return;
   }
 
@@ -95,6 +95,10 @@ function renderGlobalBookings(bookings) {
     if (b.status === "Cancelled" || b.status === "Rejected")
       statusClass = "status-cancelled";
 
+    let paymentInfo = b.paymentStatus === 'Paid'
+      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓<br><small style="color:var(--text-muted);">${b.paymentId || ''}</small></span>`
+      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+
     tbody.innerHTML += `
             <tr>
                 <td>${b.customerName || b.userName}</td>
@@ -103,6 +107,7 @@ function renderGlobalBookings(bookings) {
                 <td>${b.date}</td>
                 <td><span class="${statusClass}">${b.status}</span></td>
                 <td>${b.type === "emergency" ? '<span style="color:var(--danger-color); font-weight:bold;">Emergency 🚨</span>' : "Normal"}</td>
+                <td>${paymentInfo}</td>
             </tr>
         `;
   });

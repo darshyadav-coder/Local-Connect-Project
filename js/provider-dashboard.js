@@ -111,11 +111,16 @@ function renderEmergency(requests) {
   }
 
   requests.forEach((req) => {
+    let paymentInfo = req.paymentStatus === 'Paid'
+      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓</span>`
+      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+
     container.innerHTML += `
             <div class="request-card" style="border: 2px solid var(--danger-color); padding: 20px; margin-bottom: 15px; border-radius: 8px; background: white; box-shadow: var(--shadow-md);">
                 <p><strong>Service:</strong> ${req.service}</p>
                 <p><strong>Customer:</strong> ${req.customerName}</p>
                 <p><strong>Phone:</strong> ${req.phone}</p>
+                <p><strong>Payment:</strong> ${paymentInfo}</p>
                 <p style="color:var(--danger-color); font-weight:bold; margin-bottom: 15px;">🚨 Time: Immediate Action Required!</p>
                 <button class="btn" style="background: var(--danger-color);" onclick="acceptBooking('${req.id}')">Accept Emergency</button>
                 <button class="btn" style="background:var(--text-muted);" onclick="rejectBooking('${req.id}')">Decline</button>
@@ -129,17 +134,22 @@ function renderIncoming(requests) {
   tbody.innerHTML = "";
   if (requests.length === 0) {
     tbody.innerHTML =
-      "<tr><td colspan='5' style='text-align: center; color: var(--text-muted);'>No new normal requests at this moment</td></tr>";
+      "<tr><td colspan='6' style='text-align: center; color: var(--text-muted);'>No new normal requests at this moment</td></tr>";
     return;
   }
 
   requests.forEach((req) => {
+    let paymentInfo = req.paymentStatus === 'Paid'
+      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓</span>`
+      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+
     tbody.innerHTML += `
             <tr>
                 <td>${req.customerName}</td>
                 <td><strong>${req.service}</strong></td>
                 <td>${req.date}</td>
                 <td>Normal</td>
+                <td>${paymentInfo}</td>
                 <td>
                     <button class="btn" style="padding: 6px 14px; font-size: 13px;" onclick="acceptBooking('${req.id}')">Accept</button>
                     <button class="btn" style="background:var(--text-muted); padding: 6px 14px; font-size: 13px;" onclick="rejectBooking('${req.id}')">Decline</button>
@@ -159,11 +169,16 @@ function renderAccepted(requests) {
   }
 
   requests.forEach((req) => {
+    let paymentInfo = req.paymentStatus === 'Paid'
+      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓</span>`
+      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+
     container.innerHTML += `
             <div class="card" style="border-top: 4px solid var(--primary-color); text-align: left;">
                 <p><strong>Customer:</strong> ${req.customerName}</p>
                 <p><strong>Phone:</strong> <a href="tel:${req.phone}" style="color: var(--primary-color); text-decoration: none;">${req.phone}</a></p>
                 <p><strong>Service:</strong> ${req.service} (Scheduled: ${req.date})</p>
+                <p><strong>Payment:</strong> ${paymentInfo}</p>
                 <p style="color:var(--primary-color); font-weight:bold; margin-top: 10px;">Status: In Progress 🛠️</p>
                 <button class="btn" style="margin-top: 15px; width: 100%;" onclick="completeBooking('${req.id}')">Mark as Completed ✅</button>
             </div>
