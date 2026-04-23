@@ -1,5 +1,56 @@
 //main.html js part
 
+// Scroll effects and navbar changes
+document.addEventListener("DOMContentLoaded", () => {
+  // Navbar scroll effect
+  const navbar = document.querySelector('.navbar');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  });
+
+  // Intersection Observer for animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Observe service cards for animation
+  document.querySelectorAll('.service-card').forEach(card => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(30px)';
+    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(card);
+  });
+
+  // Dynamic Greeting
+  const heroTitle = document.querySelector(".hero h1");
+
+  if (heroTitle) {
+    let hour = new Date().getHours();
+    let greeting = "Welcome";
+
+    if (hour < 12) greeting = "Good Morning";
+    else if (hour < 18) greeting = "Good Afternoon";
+    else greeting = "Good Evening";
+
+    heroTitle.textContent = `${greeting}, Smart Local Services`;
+  }
+});
+
 const container = document.getElementById("services-container");
 
 if (container && typeof servicesData !== "undefined") {
@@ -40,22 +91,6 @@ if (container && typeof servicesData !== "undefined") {
     });
   }
 }
-// Dynamic Greeting
-
-document.addEventListener("DOMContentLoaded", () => {
-  const heroTitle = document.querySelector(".hero h1");
-
-  if (heroTitle) {
-    let hour = new Date().getHours();
-    let greeting = "Welcome";
-
-    if (hour < 12) greeting = "Good Morning";
-    else if (hour < 18) greeting = "Good Afternoon";
-    else greeting = "Good Evening";
-
-    heroTitle.textContent = `${greeting}, Smart Local Services`;
-  }
-});
 
 //Location-Based Detection
 const locationText = document.getElementById("user-location"); //get html element where location wil be displayed

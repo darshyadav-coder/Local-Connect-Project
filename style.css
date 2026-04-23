@@ -1,8 +1,10 @@
 /* ===== GOOGLE FONT (MODERN LOOK) ===== */
+/* Used across all HTML pages */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
 
 /* ===== CSS VARIABLES (Easy Color Management) ===== */
-/* Explain in Viva: We use CSS variables to keep our colors and styling consistent. 
+/* Used across all HTML pages */
+/* Explain in Viva: We use CSS variables to keep our colors and styling consistent.
    If we want to change a theme color, we only change it here! */
 :root {
   --primary-color: #2563eb;
@@ -23,18 +25,24 @@
   /* Dark slate for headings */
   --text-muted: #64748b;
   /* Lighter slate for paragraphs */
+  --text-light: #f1f5f9;
+  /* Very light background */
 
-  --border-radius: 12px;
-  /* Smooth rounded corners for modern look */
-  --transition: all 0.3s ease;
-  /* Reusable smooth animation */
-  --shadow-md:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-hover:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --border-radius: 16px;
+  /* More modern rounded corners */
+  --border-radius-lg: 24px;
+  /* Larger radius for special elements */
+  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Modern easing function */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.15);
 }
 
 /* ===== RESET ===== */
+/* Used across all HTML pages */
 * {
   margin: 0;
   padding: 0;
@@ -46,9 +54,11 @@ body {
   background-color: var(--bg-color);
   color: var(--text-dark);
   line-height: 1.6;
+  padding-top: 100px; /* Account for fixed navbar */
 }
 
 /* ===== CONTAINER ===== */
+/* Used across all HTML pages */
 /* Centers our content and keeps it from stretching too wide on large screens */
 .container {
   width: 90%;
@@ -57,72 +67,104 @@ body {
 }
 
 /* ===== NAVBAR ===== */
+/* Used across all HTML pages (main.html, services.html, booking.html, etc.) */
 .navbar {
-  background: var(--surface-color);
-  padding: 15px 0;
-  position: sticky;
-  /* Keeps navbar at the top when scrolling */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 20px 0;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.navbar.scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow-md);
+  padding: 15px 0;
 }
 
 .navbar .container {
   display: flex;
-  /* Flexbox to arrange logo and menu horizontally */
   justify-content: space-between;
   align-items: center;
 }
 
 .logo {
-  font-size: 26px;
-  font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--secondary-color)
-  );
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
-  /* Makes the gradient apply only to the text */
   background-clip: text;
   -webkit-text-fill-color: transparent;
   cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+}
+
+.logo::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-radius: 2px;
+  transition: var(--transition);
+}
+
+.logo:hover::after {
+  width: 100%;
 }
 
 .menu {
   display: flex;
-  gap: 20px;
+  gap: 30px;
+  align-items: center;
 }
 
 .menu a {
   text-decoration: none;
-  color: var(--text-muted);
-  font-weight: 500;
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 15px;
   transition: var(--transition);
   position: relative;
+  padding: 8px 16px;
+  border-radius: 20px;
 }
 
 .menu a:hover {
   color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateY(-2px);
 }
 
-/* Underline effect on hover */
 .menu a::after {
   content: "";
   position: absolute;
   width: 0;
   height: 2px;
-  bottom: -4px;
-  left: 0;
-  background-color: var(--primary-color);
+  bottom: 0;
+  left: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-radius: 1px;
   transition: var(--transition);
+  transform: translateX(-50%);
 }
 
 .menu a:hover::after {
-  width: 100%;
+  width: 80%;
 }
 
 /* ===== BUTTONS ===== */
+/* Used across all HTML pages */
 /* A universal button style to keep UI consistent */
 .btn {
   background: linear-gradient(
@@ -153,219 +195,384 @@ body {
   background: linear-gradient(135deg, var(--danger-color), #f87171);
   box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25);
   margin-right: 15px;
+  animation: pulse 2s infinite;
 }
 
 #emergency-btn:hover {
   box-shadow: 0 8px 15px rgba(239, 68, 68, 0.4);
+  animation-play-state: paused;
 }
 
+/* ===== MAIN.HTML STYLES ===== */
+
 /* ===== HERO SECTION ===== */
+/* Used in: main.html */
 .hero {
-  padding: 100px 0;
+  padding: 140px 0 120px;
   text-align: center;
-  background: linear-gradient(
-    rgba(248, 250, 252, 0.9),
-    rgba(248, 250, 252, 0.9)
-  );
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.05"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.05"/></pattern></defs><rect width="1000" height="1000" fill="url(%23grain)"/></svg>');
+  opacity: 0.1;
+}
+
+.hero .container {
+  position: relative;
+  z-index: 2;
 }
 
 .hero h1 {
-  font-size: 48px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: var(--text-dark);
+  font-size: 56px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fadeInUp 1s ease-out;
 }
 
 .hero p {
-  color: var(--text-muted);
+  font-size: 20px;
+  margin-bottom: 16px;
+  opacity: 0.9;
+  font-weight: 400;
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.hero p:last-of-type {
   font-size: 18px;
+  margin-bottom: 40px;
+  opacity: 0.8;
+  animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+#user-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 16px;
+  color: white;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 40px;
+  animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.hero .btn {
+  margin: 0 12px 16px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 30px;
+  box-shadow: var(--shadow-xl);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 1s ease-out 0.8s both;
+}
+
+.hero .btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.hero .btn:hover::before {
+  left: 100%;
+}
+
+.hero .btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ===== ANIMATIONS ===== */
+/* Used across all HTML pages */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== SECTIONS ===== */
+/* Used in: main.html */
+section {
+  padding: 100px 0;
+  position: relative;
+}
+
+section h2 {
+  text-align: center;
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 60px;
+  color: var(--text-dark);
+  position: relative;
+}
+
+section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-radius: 2px;
+}
+
+/* ===== SERVICE GRID & CARDS ===== */
+/* Used in: main.html, services.html */
+.services-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.service-grid-main,
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.service-card {
+  background: var(--surface-color);
+  padding: 50px 40px;
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  transition: var(--transition);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  transform: scaleX(0);
+  transition: var(--transition);
+}
+
+.service-card:hover::before {
+  transform: scaleX(1);
+}
+
+.service-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.service-card i {
+  font-size: 48px;
+  margin-bottom: 24px;
+  color: var(--primary-color);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.1));
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: var(--transition);
+  position: relative;
+  z-index: 2;
+}
+
+.service-card:hover i {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: var(--shadow-lg);
+}
+
+.service-card h3 {
+  margin-bottom: 16px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-dark);
+  position: relative;
+  z-index: 2;
+}
+
+.service-card p {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
+}
+
+.view-all-container {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.view-all-container .btn {
+  padding: 16px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 30px;
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.view-all-container .btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+}
+
+/* ===== FEATURES SECTION ===== */
+/* Used in: main.html */
+.features {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: white;
+  padding: 80px 0;
+}
+
+.features h2 {
+  color: white;
   margin-bottom: 30px;
+}
+
+.features p {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 500;
+  opacity: 0.9;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ===== CALL TO ACTION (CTA) ===== */
+/* Used in: main.html */
+.cta {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  text-align: center;
+  border-radius: var(--border-radius-lg);
+  padding: 80px 40px;
+  margin: 60px auto;
+  width: 90%;
+  max-width: 1200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+}
+
+.cta .container {
+  position: relative;
+  z-index: 2;
+}
+
+.cta h2 {
+  color: white;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.cta p {
+  font-size: 20px;
+  margin-bottom: 40px;
+  opacity: 0.9;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
 
-#user-location {
-  display: inline-block;
-  background: var(--surface-color);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  color: var(--primary-color);
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
-  margin-bottom: 30px;
-}
-
-/* ===== SECTIONS ===== */
-section {
-  padding: 80px 0;
-}
-
-section h2 {
-  text-align: center;
-  font-size: 32px;
-  margin-bottom: 40px;
-  color: var(--text-dark);
-}
-
-/* ===== SEARCH BOX ===== */
-.search-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-
-.search-box {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-}
-
-.search-box i {
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-}
-
-.search-input {
-  width: 100%;
-  padding: 16px 20px 16px 50px;
-  border: 2px solid #e2e8f0;
-  border-radius: 30px;
-  font-size: 16px;
-  outline: none;
-  transition: var(--transition);
-  background: var(--surface-color);
-}
-
-.search-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-}
-
-.filter-box {
-  display: flex;
-  align-items: center;
-}
-
-.filter-select {
-  padding: 12px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-  transition: var(--transition);
-  background: var(--surface-color);
-  cursor: pointer;
-}
-
-.filter-select:focus {
-  border-color: var(--primary-color);
-}
-
-/* ===== SERVICE GRID & CARDS ===== */
-/* Using CSS Grid for a responsive layout that automatically adjusts items */
-.service-grid-main,
-.service-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 40px;
-}
-
-.service-card {
-  background: var(--surface-color);
-  padding: 40px 30px;
-  border-radius: var(--border-radius);
-  text-align: center;
-  transition: var(--transition);
-  box-shadow: var(--shadow-md);
-  border: 1px solid #f1f5f9;
-  cursor: pointer;
-}
-
-.service-card:hover {
-  transform: translateY(-10px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--primary-color);
-}
-
-.service-card i {
-  font-size: 40px;
-  margin-bottom: 20px;
-  color: var(--primary-color);
-  background: #eff6ff;
-  width: 80px;
-  height: 80px;
-  line-height: 80px;
-  border-radius: 50%;
-  display: inline-block;
-  transition: var(--transition);
-}
-
-.service-card:hover i {
-  background: var(--primary-color);
-  color: white;
-}
-
-.service-card h3 {
-  margin-bottom: 10px;
-  font-size: 20px;
-  color: var(--text-dark);
-}
-
-.service-card p {
-  font-size: 15px;
-  color: var(--text-muted);
-}
-
-.view-all-container {
-  text-align: center;
-  margin-top: 30px;
-}
-
-.features p {
-  text-align: center;
-}
-/* ===== CALL TO ACTION (CTA) ===== */
-.cta {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  color: white;
-  text-align: center;
-  border-radius: var(--border-radius);
-  padding: 60px 20px;
-  margin: 40px auto;
-  width: 90%;
-  max-width: 1200px;
-}
-
-.cta h2 {
-  color: white;
-  margin-bottom: 15px;
-}
-
-.cta p {
-  font-size: 18px;
-  margin-bottom: 30px;
-  opacity: 0.9;
-}
-
 .cta .btn {
-  background: white;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
   color: var(--primary-color);
+  padding: 18px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 30px;
+  box-shadow: var(--shadow-xl);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta .btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.cta .btn:hover::before {
+  left: 100%;
+}
+
+.cta .btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== BOOKING FORM ===== */
+/* Used in: booking.html */
 .booking-section {
   display: flex;
   justify-content: center;
@@ -541,6 +748,7 @@ section h2 {
 }
 
 /* ===== FORMS (Login & Signup) ===== */
+/* Used in: login.html, signup.html */
 .auth-wrapper {
   display: flex;
   justify-content: center;
@@ -732,6 +940,7 @@ section h2 {
 }
 
 /* ===== DASHBOARDS ===== */
+/* Used in: admin-dashboard.html, user-dashboard.html, provider-dashboard.html */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
@@ -802,6 +1011,7 @@ section h2 {
 }
 
 /* ===== TABLES ===== */
+/* Used in: admin-dashboard.html, user-dashboard.html, provider-dashboard.html */
 .table-container {
   background: var(--surface-color);
   border-radius: var(--border-radius);
@@ -859,6 +1069,7 @@ table td {
 }
 
 /* ===== TOAST NOTIFICATION (Viva feature) ===== */
+/* Used across all HTML pages */
 /* A simple modern toast alert instead of using the raw window.alert() */
 .toast {
   position: fixed;
@@ -886,59 +1097,117 @@ table td {
 }
 
 /* ===== FOOTER ===== */
+/* Used in: main.html */
 .footer {
-  background: #0f172a;
-  /* Very dark slate */
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: #cbd5e1;
-  padding: 60px 0 20px;
-  margin-top: 60px;
+  padding: 80px 0 40px;
+  margin-top: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
 }
 
 .footer-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 50px;
   max-width: 1200px;
   margin: 0 auto;
   width: 90%;
+  position: relative;
+  z-index: 2;
 }
 
 .footer-section h3 {
   color: white;
-  margin-bottom: 20px;
-  font-size: 18px;
+  margin-bottom: 24px;
+  font-size: 20px;
+  font-weight: 600;
+  position: relative;
+}
+
+.footer-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-radius: 1px;
 }
 
 .footer-logo {
   color: white;
-  font-size: 24px;
-  margin-bottom: 15px;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+}
+
+.footer-section p {
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 
 .footer-section a {
   display: block;
   color: #94a3b8;
   text-decoration: none;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   transition: var(--transition);
+  position: relative;
+  padding: 4px 0;
 }
 
 .footer-section a:hover {
   color: white;
-  transform: translateX(5px);
-  /* Tiny slide effect on hover */
+  transform: translateX(8px);
+}
+
+.footer-section a::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  transition: var(--transition);
+}
+
+.footer-section a:hover::before {
+  width: 12px;
 }
 
 .footer-bottom {
   text-align: center;
-  border-top: 1px solid #1e293b;
-  margin-top: 40px;
-  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 50px;
+  padding-top: 30px;
   color: #64748b;
   font-size: 14px;
+  position: relative;
+  z-index: 2;
 }
 
 /* ===== ENHANCED ANIMATIONS FOR BETTER UX ===== */
+/* Used across all HTML pages */
 /* Service cards fade-in animation */
 .service-card {
   background: var(--surface-color);
@@ -1009,7 +1278,19 @@ textarea:focus {
   }
 }
 
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: var(--shadow-lg);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+  }
+}
+
 /* ===== PROFILE PAGE STYLES ===== */
+/* Used in: profile pages (if exists) */
 .profile-section {
   padding: 80px 0;
   background: var(--bg-color);
@@ -1066,6 +1347,7 @@ textarea:focus {
 }
 
 /* ===== FORGOT PASSWORD STYLES ===== */
+/* Used in: login.html (forgot password modal/page) */
 .auth-section {
   padding: 80px 0;
   background: var(--bg-color);
@@ -1111,6 +1393,7 @@ textarea:focus {
 }
 
 /* ===== NOTIFICATIONS STYLES ===== */
+/* Used in: dashboard pages */
 .notification {
   border-radius: 8px;
   margin-bottom: 10px;
