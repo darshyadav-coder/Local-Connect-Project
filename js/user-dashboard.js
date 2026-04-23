@@ -1,5 +1,5 @@
 // Viva: Pure Frontend Logic for User Dashboard Operations
-window.logout = function() {
+window.logout = function () {
     localStorage.removeItem("loggedInUser");
     window.location.href = "login.html";
 };
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. Data Retrieval (Simulating Database Fetch)
     const allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-    
+
     // Filter bookings belonging strictly to this user
     const userBookings = allBookings.filter(b => b.userEmail === loggedInUser.email);
 
@@ -44,9 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (booking.status === "Completed") statusClass = "status-completed";
         if (booking.status === "Cancelled" || booking.status === "Rejected") statusClass = "status-cancelled";
 
-        // Feedback Logic
+        // Action / Feedback Logic
         let feedbackHtml = `<td>Not Available</td>`;
-        if (booking.status === "Completed") {
+        if (booking.status === "Pending") {
+            feedbackHtml = `<td><button class="btn" style="padding: 6px 12px; font-size: 13px; background-color: var(--danger-color);" onclick="cancelBooking('${booking.id}')">Cancel Booking</button></td>`;
+        } else if (booking.status === "Completed") {
             if (booking.feedback) {
                 feedbackHtml = `<td><span style="color:var(--accent-color);font-weight:bold;">Thanks for feedback!</span></td>`;
             } else {
@@ -70,12 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Feedback Action 
-window.openFeedback = function(bookingId, serviceName) {
+window.openFeedback = function (bookingId, serviceName) {
     const feedbackSection = document.getElementById("feedback-section");
     feedbackSection.style.display = "block";
     document.getElementById("service-id").value = bookingId;
     document.getElementById("service-name").textContent = `Providing Feedback for: ${serviceName}`;
-    
+
     // Scroll down to feedback section
     feedbackSection.scrollIntoView({ behavior: 'smooth' });
 };
@@ -85,22 +87,37 @@ const feedbackForm = document.getElementById("feedback-form");
 if (feedbackForm) {
     feedbackForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        
+
         const bookingId = document.getElementById("service-id").value;
         const rating = e.target.rating.value;
         const comment = e.target.Comment.value;
 
         // Fetch "Database"
         let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-        
+
         // Find specific record and mutate it
         const bIndex = allBookings.findIndex(b => b.id === bookingId);
         if (bIndex > -1) {
             allBookings[bIndex].feedback = { rating, comment };
             localStorage.setItem("allBookings", JSON.stringify(allBookings));
-            
+
             alert("✅ Thank you for your feedback! It helps us improve.");
             window.location.reload();
         }
     });
 }
+
+// Handle Booking Cancellation
+window.cancelBooking = function (bookingId) {
+    if (confirm("Are you sure you want to cancel this booking?")) {
+        let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
+        const bIndex = allBookings.findIndex(b => b.id === bookingId);
+
+        if (bIndex > -1) {
+            allBookings[bIndex].status = "Cancelled";
+            localStorage.setItem("allBookings", JSON.stringify(allBookings));
+            alert("✅ Booking cancelled successfully.");
+            window.location.reload();
+        }
+    }
+};

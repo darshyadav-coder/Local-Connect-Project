@@ -1,124 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Local Connect:- Smart Services Booking System</title>
 
-    <meta name="description"
-        content="Book trusted local professionals like plumbers, electricians, and cleaners near you.">
+    <meta
+      name="description"
+      content="Book trusted local professionals like plumbers, electricians, and cleaners near you."
+    />
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
+  <body>
     <nav class="navbar">
-        <div class="container">
-            <div class="logo">Local Connect</div>
+      <div class="container">
+        <div class="logo">Local Connect</div>
 
-            <div class="menu">
-                <a href="main.html">Home</a>
-                <a href="services.html">Services</a>
-                <a href="booking.html">Book Now</a>
-                <a href="user-dashboard.html">User</a>
-                <a href="provider-dashboard.html">Provider</a>
-                <a href="admin-dashboard.html">Admin</a>
-                <a href="Contact.html">Customer Support</a>
-                <a href="login.html">Login</a>
-            </div>
+        <div class="menu">
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Book Now</a>
+          <a href="user-dashboard.html">User</a>
+          <a href="provider-dashboard.html">Provider</a>
+          <a href="admin-dashboard.html">Admin</a>
+          <a href="Contact.html">Customer Support</a>
+          <a href="login.html">Login</a>
         </div>
+      </div>
     </nav>
 
     <section class="hero">
-        <div class="container">
-            <h1>Smart Local Services Booking</h1>
-            <p>Book trusted local professionals near you</p>
-            <p>Fast, reliable, and affordable services at your doorstep</p>
+      <div class="container">
+        <h1>Smart Local Services Booking</h1>
+        <p>Book trusted local professionals near you</p>
+        <p>Fast, reliable, and affordable services at your doorstep</p>
 
-            <p id="user-location">📍 Detecting location...</p>
+        <p id="user-location">📍 Detecting location...</p>
 
-            <button id="emergency-btn" class="btn">Emergency Service</button>
+        <button id="emergency-btn" class="btn">Emergency Service</button>
 
-            <a href="#services" class="btn" role="button">Explore Services</a>
-        </div>
+        <a href="#services" class="btn" role="button">Explore Services</a>
+      </div>
     </section>
 
     <section class="services-section" id="services">
-        <div class="container">
+      <div class="container">
+        <h2>Popular Services</h2>
 
-            <h2>Popular Services</h2>
+        <div class="service-grid-main" id="services-container"></div>
 
-            <div class="service-grid-main" id="services-container"> </div>
-
-            <div class="view-all-container">
-                <button id="view-all-btn" class="btn">View All Services</button>
-            </div>
+        <div class="view-all-container">
+          <button id="view-all-btn" class="btn">View All Services</button>
         </div>
+      </div>
     </section>
 
     <section class="features">
-        <div class="container">
-            <h2>Why Choose Us?</h2>
-            <p>Trusted professionals | Quick booking | Affordable pricing</p>
-        </div>
+      <div class="container">
+        <h2>Why Choose Us?</h2>
+        <p>Trusted professionals | Quick booking | Affordable pricing</p>
+      </div>
     </section>
 
     <section class="cta">
-        <div class="container">
-            <h2>Need Help Instantly?</h2>
-            <p>Book trusted professionals in just a few clicks</p>
+      <div class="container">
+        <h2>Need Help Instantly?</h2>
+        <p>Book trusted professionals in just a few clicks</p>
 
-            <a href="booking.html" class="btn">Book a Service Now</a>
-        </div>
+        <a href="booking.html" class="btn">Book a Service Now</a>
+      </div>
     </section>
 
     <footer class="footer">
-        <div class="footer-container">
-
-            <!-- Logo & About -->
-            <div class="footer-section">
-                <h2 class="footer-logo">Local Connect</h2>
-                <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
-            </div>
-
-            <!-- Quick Links -->
-            <div class="footer-section">
-                <h3>Quick Links</h3>
-                <a href="main.html">Home</a>
-                <a href="services.html">Services</a>
-                <a href="booking.html">Booking</a>
-                <a href="user-dashboard.html#feedback-section">Feedback</a> <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
-            </div>
-
-            <!-- For Users -->
-            <div class="footer-section">
-                <h3>User</h3>
-                <a href="login.html">Login</a>
-                <a href="signup.html">Signup</a>
-                <a href="user-dashboard.html">Dashboard</a>
-            </div>
-
-            <!-- Contact -->
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <p>Email: support@localconnect.com</p>
-                <p>Phone: +91 8982427031</p>
-                <p>Location: India</p>
-            </div>
-
+      <div class="footer-container">
+        <!-- Logo & About -->
+        <div class="footer-section">
+          <h2 class="footer-logo">Local Connect</h2>
+          <p>
+            Your trusted platform to book local services like electricians,
+            plumbers, cleaners and more.
+          </p>
         </div>
 
-        <!-- Bottom Bar -->
-        <div class="footer-bottom">
-            <p>© 2026 Local Connect | All Rights Reserved</p>
+        <!-- Quick Links -->
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Booking</a>
+          <a href="user-dashboard.html#feedback-section">Feedback</a>
+          <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
         </div>
+
+        <!-- For Users -->
+        <div class="footer-section">
+          <h3>User</h3>
+          <a href="login.html">Login</a>
+          <a href="signup.html">Signup</a>
+          <a href="user-dashboard.html">Dashboard</a>
+        </div>
+
+        <!-- Contact -->
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Email: support@localconnect.com</p>
+          <p>Phone: +91 8982427031</p>
+          <p>Location: India</p>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom">
+        <p>© 2026 Local Connect | All Rights Reserved</p>
+      </div>
     </footer>
 
     <script src="./js/data.js"></script>
     <script src="./js/main.js"></script>
-
-</body>
-
+  </body>
 </html>

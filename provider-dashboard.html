@@ -1,157 +1,192 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Provider Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Provider Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="logo">Local Connect</div>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">Local Connect</div>
 
-            <div class="menu">
-                <a href="main.html">Home</a>
-                <a href="services.html">Services</a>
-                <a href="booking.html">Book Now</a>
-                <a href="user-dashboard.html">User</a>
-                <a href="provider-dashboard.html">Provider</a>
-                <a href="admin-dashboard.html">Admin</a>
-                <a href="Contact.html">Customer Support</a>
-                <a href="login.html">Login</a>
-            </div>
-        </div>
-    </nav>
+      <div class="menu">
+        <a href="main.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="booking.html">Book Now</a>
+        <a href="user-dashboard.html">User</a>
+        <a href="provider-dashboard.html">Provider</a>
+        <a href="admin-dashboard.html">Admin</a>
+        <a href="Contact.html">Customer Support</a>
+      </div>
+    </div>
+  </nav>
 
-    <!-- MAIN CONTENT -->
+  <!-- MAIN CONTENT -->
   <div class="dashboard-container">
     <!-- Premium Sidebar UI -->
     <div class="sidebar">
-      <h3 style="color: var(--primary-color);">Provider Panel</h3>
+      <h3 style="color: var(--primary-color)">Provider Panel</h3>
       <a href="provider-dashboard.html" class="active">Job Board</a>
       <a href="services.html">Services Catalog</a>
       <a href="Contact.html">Support</a>
-      <a href="#" onclick="logout(); return false;" style="margin-top: 20px; color: var(--danger-color); font-weight: bold;">Logout</a>
+      <a href="#" onclick="
+            logout();
+            return false;
+          " style="
+            margin-top: 20px;
+            color: var(--danger-color);
+            font-weight: bold;
+          ">Logout</a>
     </div>
 
     <!-- Main Workspace -->
     <div class="dashboard-content">
-      <h1 style="margin-bottom: 30px; color: var(--text-dark);">Provider Dashboard</h1>
+      <h1 style="margin-bottom: 30px; color: var(--text-dark)">
+        Provider Dashboard
+      </h1>
 
       <!-- Welcome Banner -->
-      <div class="card" style="margin-bottom: 30px; border-left: 4px solid var(--accent-color); border-top: none; text-align: left;">
-        <h3 style="color: var(--text-dark); margin-bottom: 5px;">👋 Welcome Back!</h3>
-        <p style="color: var(--text-muted);">Manage your active jobs and incoming service requests to boost your ratings.</p>
+      <div class="card" style="
+            margin-bottom: 30px;
+            border-left: 4px solid var(--accent-color);
+            border-top: none;
+            text-align: left;
+          ">
+        <h3 style="color: var(--text-dark); margin-bottom: 5px">
+          👋 Welcome Back!
+        </h3>
+        <p style="color: var(--text-muted)">
+          Manage your active jobs and incoming service requests to boost your
+          ratings.
+        </p>
       </div>
 
       <!-- EMERGENCY REQUESTS -->
-      <section class="emergency-requests" style="padding: 0; margin-bottom: 30px;">
-          <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px; color: var(--danger-color);">🚨 Priority Emergency Requests</h2>
-          <div id="emergency-requests-container">
-              <!-- Javascript will load emergency requests here! -->
-          </div>
+      <section class="emergency-requests" style="padding: 0; margin-bottom: 30px">
+        <h2 style="
+              text-align: left;
+              font-size: 24px;
+              margin-bottom: 20px;
+              color: var(--danger-color);
+            ">
+          🚨 Priority Emergency Requests
+        </h2>
+        <div id="emergency-requests-container">
+          <!-- Javascript will load emergency requests here! -->
+        </div>
       </section>
 
       <!-- INCOMING REQUESTS -->
-      <section class="incoming-requests" style="padding: 0; margin-bottom: 40px;">
-          <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px;">Incoming Standard Bookings</h2>
-          <div class="table-container">
-              <table>
-                  <tr>
-                      <th>Customer</th>
-                      <th>Service</th>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th>Action</th>
-                  </tr>
-                  <tbody id="incoming-requests-body">
-                      <!-- Javascript will load requests here! -->
-                  </tbody>
-              </table>
-          </div>
+      <section class="incoming-requests" style="padding: 0; margin-bottom: 40px">
+        <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px">
+          Incoming Standard Bookings
+        </h2>
+        <div class="table-container">
+          <table>
+            <tr>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Action</th>
+            </tr>
+            <tbody id="incoming-requests-body">
+              <!-- Javascript will load requests here! -->
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <!-- ACCEPTED BOOKINGS -->
-      <section class="accepted-bookings" style="padding: 0; margin-bottom: 40px;">
-          <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px;">My Accepted Bookings</h2>
-          <div id="accepted-bookings-container" class="dashboard-cards" style="margin-bottom: 0;">
-              <!-- Javascript will load cards here! -->
-          </div>
+      <section class="accepted-bookings" style="padding: 0; margin-bottom: 40px">
+        <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px">
+          My Accepted Bookings
+        </h2>
+        <div id="accepted-bookings-container" class="dashboard-cards" style="margin-bottom: 0">
+          <!-- Javascript will load cards here! -->
+        </div>
       </section>
 
       <!-- FEEDBACK & TRUST SCORE -->
-      <section class="feedback-section" style="padding: 0; margin-bottom: 40px;">
-          <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px;">📊 My Performance & Feedback</h2>
-          <div class="card" style="margin-bottom: 20px;">
-              <h3>Trust Score: <span id="trust-score" style="color: var(--accent-color); font-weight: bold;">Calculating...</span></h3>
-              <p>Based on completed services, ratings, and feedback.</p>
-          </div>
-          <div class="table-container">
-              <table>
-                  <tr>
-                      <th>Service</th>
-                      <th>Customer</th>
-                      <th>Rating</th>
-                      <th>Feedback</th>
-                      <th>Date</th>
-                  </tr>
-                  <tbody id="feedback-body">
-                      <!-- Javascript will load feedback here! -->
-                  </tbody>
-              </table>
-          </div>
+      <section class="feedback-section" style="padding: 0; margin-bottom: 40px">
+        <h2 style="text-align: left; font-size: 24px; margin-bottom: 20px">
+          📊 My Performance & Feedback
+        </h2>
+        <div class="card" style="margin-bottom: 20px">
+          <h3>
+            Trust Score:
+            <span id="trust-score" style="color: var(--accent-color); font-weight: bold">Calculating...</span>
+          </h3>
+          <p>Based on completed services, ratings, and feedback.</p>
+        </div>
+        <div class="table-container">
+          <table>
+            <tr>
+              <th>Service</th>
+              <th>Customer</th>
+              <th>Rating</th>
+              <th>Feedback</th>
+              <th>Date</th>
+            </tr>
+            <tbody id="feedback-body">
+              <!-- Javascript will load feedback here! -->
+            </tbody>
+          </table>
+        </div>
       </section>
-
     </div>
   </div>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="footer-container">
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-container">
+      <!-- Logo & About -->
+      <div class="footer-section">
+        <h2 class="footer-logo">Local Connect</h2>
+        <p>
+          Your trusted platform to book local services like electricians,
+          plumbers, cleaners and more.
+        </p>
+      </div>
 
-            <!-- Logo & About -->
-            <div class="footer-section">
-                <h2 class="footer-logo">Local Connect</h2>
-                <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
-            </div>
+      <!-- Quick Links -->
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <a href="main.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="booking.html">Booking</a>
+        <a href="user-dashboard.html#feedback-section">Feedback</a>
+        <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
+      </div>
 
-            <!-- Quick Links -->
-            <div class="footer-section">
-                <h3>Quick Links</h3>
-                <a href="main.html">Home</a>
-                <a href="services.html">Services</a>
-                <a href="booking.html">Booking</a>
-                <a href="user-dashboard.html#feedback-section">Feedback</a> <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
-            </div>
+      <!-- For Users -->
+      <div class="footer-section">
+        <h3>User</h3>
+        <a href="login.html">Login</a>
+        <a href="signup.html">Signup</a>
+        <a href="user-dashboard.html">Dashboard</a>
+      </div>
 
-            <!-- For Users -->
-            <div class="footer-section">
-                <h3>User</h3>
-                <a href="login.html">Login</a>
-                <a href="signup.html">Signup</a>
-                <a href="user-dashboard.html">Dashboard</a>
-            </div>
+      <!-- Contact -->
+      <div class="footer-section">
+        <h3>Contact</h3>
+        <p>Email: support@localconnect.com</p>
+        <p>Phone: +91 8982427031</p>
+        <p>Location: India</p>
+      </div>
+    </div>
 
-            <!-- Contact -->
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <p>Email: support@localconnect.com</p>
-                <p>Phone: +91 8982427031</p>
-                <p>Location: India</p>
-            </div>
+    <!-- Bottom Bar -->
+    <div class="footer-bottom">
+      <p>© 2026 Local Connect | All Rights Reserved</p>
+    </div>
+  </footer>
 
-        </div>
-
-        <!-- Bottom Bar -->
-        <div class="footer-bottom">
-            <p>© 2026 Local Connect | All Rights Reserved</p>
-        </div>
-    </footer>
-
-    <script src="./js/provider-dashboard.js"></script>
+  <script src="./js/provider-dashboard.js"></script>
 </body>
 
 </html>

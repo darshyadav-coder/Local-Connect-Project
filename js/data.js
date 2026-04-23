@@ -1,5 +1,17 @@
+/**
+ * =========================================================================
+ * VIVA DOCUMENTATION: DATA STORE (Mock Database)
+ * =========================================================================
+ * This file simulates a real backend database (like MongoDB or MySQL).
+ * Since we are building a pure frontend project, we use this static array 
+ * to store all categories, sub-services, icons, and pricing.
+ * 
+ * Data Structure:
+ * Each object represents a main Category, containing a nested array of 
+ * SubServices. This structure allows us to dynamically populate the 
+ * "Services" and "Booking" pages without hardcoding every UI element.
+ */
 const servicesData = [
-
   {
     id: "plumbing",
     name: "Plumbing",
@@ -11,8 +23,8 @@ const servicesData = [
       { id: "drain", name: "Drain Cleaning", price: 300 },
       { id: "tank", name: "Water Tank Repair", price: 400 },
       { id: "bath", name: "Bathroom Fittings", price: 350 },
-      { id: "toilet", name: "Toilet Repair", price: 250 }
-    ]
+      { id: "toilet", name: "Toilet Repair", price: 250 },
+    ],
   },
 
   {
@@ -26,8 +38,8 @@ const servicesData = [
       { id: "switch", name: "Switchboard Fix", price: 200 },
       { id: "inverter", name: "Inverter Setup", price: 700 },
       { id: "light", name: "Light Installation", price: 150 },
-      { id: "short", name: "Short Circuit Repair", price: 600 }
-    ]
+      { id: "short", name: "Short Circuit Repair", price: 600 },
+    ],
   },
 
   {
@@ -41,8 +53,8 @@ const servicesData = [
       { id: "kitchen", name: "Kitchen Cleaning", price: 400 },
       { id: "sofa", name: "Sofa Cleaning", price: 500 },
       { id: "carpet", name: "Carpet Cleaning", price: 450 },
-      { id: "office", name: "Office Cleaning", price: 1200 }
-    ]
+      { id: "office", name: "Office Cleaning", price: 1200 },
+    ],
   },
 
   {
@@ -56,8 +68,8 @@ const servicesData = [
       { id: "washing", name: "Washing Machine Repair", price: 600 },
       { id: "tv", name: "TV Repair", price: 500 },
       { id: "microwave", name: "Microwave Repair", price: 400 },
-      { id: "geyser", name: "Geyser Repair", price: 450 }
-    ]
+      { id: "geyser", name: "Geyser Repair", price: 450 },
+    ],
   },
 
   {
@@ -70,8 +82,8 @@ const servicesData = [
       { id: "door", name: "Door Installation", price: 700 },
       { id: "window", name: "Window Repair", price: 500 },
       { id: "cabinet", name: "Cabinet Making", price: 1200 },
-      { id: "polish", name: "Wood Polishing", price: 800 }
-    ]
+      { id: "polish", name: "Wood Polishing", price: 800 },
+    ],
   },
 
   {
@@ -84,8 +96,8 @@ const servicesData = [
       { id: "exterior", name: "Exterior Painting", price: 3000 },
       { id: "putty", name: "Wall Putty", price: 1500 },
       { id: "texture", name: "Texture Painting", price: 2500 },
-      { id: "waterproof", name: "Waterproofing", price: 1800 }
-    ]
+      { id: "waterproof", name: "Waterproofing", price: 1800 },
+    ],
   },
 
   {
@@ -98,8 +110,8 @@ const servicesData = [
       { id: "bike", name: "Bike Repair", price: 500 },
       { id: "wash", name: "Car Wash", price: 300 },
       { id: "oil", name: "Oil Change", price: 400 },
-      { id: "breakdown", name: "Emergency Breakdown", price: 1200 }
-    ]
+      { id: "breakdown", name: "Emergency Breakdown", price: 1200 },
+    ],
   },
 
   {
@@ -112,8 +124,8 @@ const servicesData = [
       { id: "facial", name: "Facial", price: 600 },
       { id: "makeup", name: "Makeup", price: 1500 },
       { id: "manicure", name: "Manicure & Pedicure", price: 800 },
-      { id: "spa", name: "Spa Services", price: 1200 }
-    ]
+      { id: "spa", name: "Spa Services", price: 1200 },
+    ],
   },
 
   {
@@ -126,8 +138,8 @@ const servicesData = [
       { id: "office", name: "Office Relocation", price: 8000 },
       { id: "packing", name: "Packing Services", price: 2000 },
       { id: "loading", name: "Loading & Unloading", price: 1500 },
-      { id: "transport", name: "Transport Services", price: 3000 }
-    ]
+      { id: "transport", name: "Transport Services", price: 3000 },
+    ],
   },
 
   {
@@ -139,8 +151,8 @@ const servicesData = [
       { id: "cctv", name: "CCTV Installation", price: 2000 },
       { id: "camera", name: "Camera Repair", price: 800 },
       { id: "lock", name: "Door Lock Installation", price: 500 },
-      { id: "system", name: "Security System Setup", price: 3000 }
-    ]
+      { id: "system", name: "Security System Setup", price: 3000 },
+    ],
   },
 
   {
@@ -153,8 +165,8 @@ const servicesData = [
       { id: "cockroach", name: "Cockroach Control", price: 800 },
       { id: "mosquito", name: "Mosquito Control", price: 700 },
       { id: "rodent", name: "Rodent Control", price: 1000 },
-      { id: "bedbug", name: "Bed Bug Treatment", price: 1200 }
-    ]
+      { id: "bedbug", name: "Bed Bug Treatment", price: 1200 },
+    ],
   },
 
   {
@@ -166,8 +178,8 @@ const servicesData = [
       { id: "lawn", name: "Lawn Cutting", price: 500 },
       { id: "plant", name: "Plantation", price: 300 },
       { id: "clean", name: "Garden Cleaning", price: 400 },
-      { id: "tree", name: "Tree Trimming", price: 700 }
-    ]
+      { id: "tree", name: "Tree Trimming", price: 700 },
+    ],
   },
 
   {
@@ -179,8 +191,8 @@ const servicesData = [
       { id: "tank", name: "Water Tank Cleaning", price: 800 },
       { id: "pipe", name: "Pipeline Repair", price: 600 },
       { id: "motor", name: "Motor Installation", price: 1000 },
-      { id: "borewell", name: "Borewell Maintenance", price: 1500 }
-    ]
+      { id: "borewell", name: "Borewell Maintenance", price: 1500 },
+    ],
   },
 
   {
@@ -192,8 +204,7 @@ const servicesData = [
       { id: "eplumbing", name: "Emergency Plumbing", price: 1000 },
       { id: "eelectrical", name: "Electrical Fault Repair", price: 1200 },
       { id: "eac", name: "Urgent AC Repair", price: 1500 },
-      { id: "etech", name: "Immediate Technician Help", price: 800 }
-    ]
-  }
-
+      { id: "etech", name: "Immediate Technician Help", price: 800 },
+    ],
+  },
 ];

@@ -1,110 +1,147 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Signup - Local Connect</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
+  <body>
     <nav class="navbar">
-        <div class="container">
-            <div class="logo">Local Connect</div>
+      <div class="container">
+        <div class="logo">Local Connect</div>
 
-            <div class="menu">
-                <a href="main.html">Home</a>
-                <a href="services.html">Services</a>
-                <a href="booking.html">Book Now</a>
-                <a href="user-dashboard.html">User</a>
-                <a href="provider-dashboard.html">Provider</a>
-                <a href="admin-dashboard.html">Admin</a>
-                <a href="Contact.html">Customer Support</a>
-                <a href="login.html">Login</a>
-            </div>
+        <div class="menu">
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Book Now</a>
+          <a href="user-dashboard.html">User</a>
+          <a href="provider-dashboard.html">Provider</a>
+          <a href="admin-dashboard.html">Admin</a>
+          <a href="Contact.html">Customer Support</a>
+          <a href="login.html">Login</a>
         </div>
+      </div>
     </nav>
 
     <main>
+      <div class="auth-wrapper">
+        <div class="signup-container">
+          <h1>Create Account</h1>
+          <p class="subtitle">Join us to book or provide local services!</p>
+          <form id="signupForm">
+            <input
+              type="text"
+              id="fullname"
+              name="fullname"
+              placeholder="Full Name"
+              required
+            />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email Address"
+              required
+            />
 
-        <div class="auth-wrapper">
-            <div class="signup-container">
-                <h1>Create Account</h1>
-                <p class="subtitle">Join us to book or provide local services!</p>
-                <form id="signupForm">
-                    <input type="text" id="fullname" name="fullname" placeholder="Full Name" required>
-                    <input type="email" id="email" name="email" placeholder="Email Address" required>
-
-                    <div style="position: relative;">
-                        <input type="password" id="password" name="password" placeholder="Password (Min 6 chars)"
-                            style="width: 100%;" required>
-                    </div>
-
-                    <input type="text" id="location" name="location" placeholder="Your City/Location" required>
-
-                    <select id="role" name="role" required>
-                        <option value="">Select Role</option>
-                        <option value="user">User</option>
-                        <option value="provider">Service Provider</option>
-                    </select>
-
-                    <p id="error-msg" style="color: var(--danger-color); font-size: 14px; text-align: left; margin: 0;">
-                    </p>
-
-                    <button type="submit" id="signupBtn" class="btn" style="width: 100%;">Create Account</button>
-
-                    <p>Already have an account? <a href="login.html">Login here</a></p>
-                </form>
+            <div style="position: relative">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Password (Min 6 chars)"
+                style="width: 100%"
+                required
+              />
             </div>
+
+            <input
+              type="text"
+              id="location"
+              name="location"
+              placeholder="Your City/Location"
+              required
+            />
+
+            <select id="role" name="role" required>
+              <option value="">Select Role</option>
+              <option value="user">User</option>
+              <option value="provider">Service Provider</option>
+            </select>
+
+            <p
+              id="error-msg"
+              style="
+                color: var(--danger-color);
+                font-size: 14px;
+                text-align: left;
+                margin: 0;
+              "
+            ></p>
+
+            <button
+              type="submit"
+              id="signupBtn"
+              class="btn"
+              style="width: 100%"
+            >
+              Create Account
+            </button>
+
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+          </form>
         </div>
+      </div>
     </main>
 
     <footer class="footer">
-        <div class="footer-container">
-
-            <!-- Logo & About -->
-            <div class="footer-section">
-                <h2 class="footer-logo">Local Connect</h2>
-                <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
-            </div>
-
-            <!-- Quick Links -->
-            <div class="footer-section">
-                <h3>Quick Links</h3>
-                <a href="main.html">Home</a>
-                <a href="services.html">Services</a>
-                <a href="booking.html">Booking</a>
-                <a href="user-dashboard.html#feedback-section">Feedback</a> <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
-            </div>
-
-            <!-- For Users -->
-            <div class="footer-section">
-                <h3>User</h3>
-                <a href="login.html">Login</a>
-                <a href="signup.html">Signup</a>
-                <a href="user-dashboard.html">Dashboard</a>
-            </div>
-
-            <!-- Contact -->
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <p>Email: support@localconnect.com</p>
-                <p>Phone: +91 8982427031</p>
-                <p>Location: India</p>
-            </div>
-
+      <div class="footer-container">
+        <!-- Logo & About -->
+        <div class="footer-section">
+          <h2 class="footer-logo">Local Connect</h2>
+          <p>
+            Your trusted platform to book local services like electricians,
+            plumbers, cleaners and more.
+          </p>
         </div>
 
-        <!-- Bottom Bar -->
-        <div class="footer-bottom">
-            <p>© 2026 Local Connect | All Rights Reserved</p>
+        <!-- Quick Links -->
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Booking</a>
+          <a href="user-dashboard.html#feedback-section">Feedback</a>
+          <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
         </div>
+
+        <!-- For Users -->
+        <div class="footer-section">
+          <h3>User</h3>
+          <a href="login.html">Login</a>
+          <a href="signup.html">Signup</a>
+          <a href="user-dashboard.html">Dashboard</a>
+        </div>
+
+        <!-- Contact -->
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Email: support@localconnect.com</p>
+          <p>Phone: +91 8982427031</p>
+          <p>Location: India</p>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom">
+        <p>© 2026 Local Connect | All Rights Reserved</p>
+      </div>
     </footer>
 
-
-    <script src="./js/main.js"></script> <!-- Included for our Toast logic! -->
+    <script src="./js/main.js"></script>
+    <!-- Included for our Toast logic! -->
     <script src="./js/signup.js"></script>
-</body>
-
+  </body>
 </html>
