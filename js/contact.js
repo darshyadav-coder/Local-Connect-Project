@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setTimeout(() => {
         // UI Switch
-        contactForm.style.display = "none";
-        successMsg.style.display = "block";
+        contactForm.classList.add("hidden");
+        successMsg.classList.remove("hidden");
 
         // Viva Database Simulation: Save it to localStorage!
         const contactMsgs =

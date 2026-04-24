@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
 
   if (!loggedInUser || loggedInUser.role !== "admin") {
-    alert("❌ You must log in as an Admin to view this dashboard.");
-    window.location.href = "login.html";
+    showToast("You must log in as an Admin to view this dashboard.", "error");
+    setTimeout(() => (window.location.href = "login.html"), 1500);
     return;
   }
 
@@ -64,16 +64,20 @@ function renderUsers(list, tableBodyId) {
   const tbody = document.getElementById(tableBodyId);
   tbody.innerHTML = "";
   if (list.length === 0) {
-    tbody.innerHTML =
-      "<tr><td colspan='3' style='text-align:center;'>No accounts found.</td></tr>";
+    const tableId = tableBodyId === "users-body" ? "Users" : "Providers";
+    tbody.innerHTML = createEmptyStateRow(
+      `No ${tableId} Yet`,
+      `There are no registered ${tableId.toLowerCase()} at this time.`,
+      3,
+    );
     return;
   }
   list.forEach((u) => {
     tbody.innerHTML += `
             <tr>
-                <td><strong>${u.fullname || "Anonymous"}</strong></td>
-                <td><a href="mailto:${u.email}" style="color:var(--primary-color);text-decoration:none;">${u.email}</a></td>
-                <td>${u.location || "N/A"}</td>
+                <td><strong>${sanitizeInput(u.fullname || "Anonymous")}</strong></td>
+                <td><a href="mailto:${sanitizeInput(u.email)}" class="no-decoration text-primary">${sanitizeInput(u.email)}</a></td>
+                <td>${sanitizeInput(u.location || "N/A")}</td>
             </tr>
         `;
   });
@@ -83,8 +87,11 @@ function renderGlobalBookings(bookings) {
   const tbody = document.getElementById("bookings-body");
   tbody.innerHTML = "";
   if (bookings.length === 0) {
-    tbody.innerHTML =
-      "<tr><td colspan='7' style='text-align:center;'>No bookings found system-wide.</td></tr>";
+    tbody.innerHTML = createEmptyStateRow(
+      "No Bookings Yet",
+      "No service bookings have been placed system-wide.",
+      7,
+    );
     return;
   }
 
@@ -95,18 +102,19 @@ function renderGlobalBookings(bookings) {
     if (b.status === "Cancelled" || b.status === "Rejected")
       statusClass = "status-cancelled";
 
-    let paymentInfo = b.paymentStatus === 'Paid'
-      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓<br><small style="color:var(--text-muted);">${b.paymentId || ''}</small></span>`
-      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+    let paymentInfo =
+      b.paymentStatus === "Paid"
+        ? `<span class="text-accent bold">Paid ✓<br><small class="text-muted">${sanitizeInput(b.paymentId || "")}</small></span>`
+        : `<span class="text-danger bold">Unpaid</span>`;
 
     tbody.innerHTML += `
             <tr>
-                <td>${b.customerName || b.userName}</td>
-                <td><strong>${b.service}</strong></td>
-                <td>${b.provider}</td>
-                <td>${b.date}</td>
-                <td><span class="${statusClass}">${b.status}</span></td>
-                <td>${b.type === "emergency" ? '<span style="color:var(--danger-color); font-weight:bold;">Emergency 🚨</span>' : "Normal"}</td>
+                <td>${sanitizeInput(b.customerName || b.userName)}</td>
+                <td><strong>${sanitizeInput(b.service)}</strong></td>
+                <td>${sanitizeInput(b.provider)}</td>
+                <td>${sanitizeInput(b.date)}</td>
+                <td><span class="${statusClass}">${sanitizeInput(b.status)}</span></td>
+                <td>${b.type === "emergency" ? '<span class="text-danger bold">Emergency 🚨</span>' : "Normal"}</td>
                 <td>${paymentInfo}</td>
             </tr>
         `;
@@ -119,19 +127,22 @@ function renderFeedback(bookings) {
   const feedbackList = bookings.filter((b) => b.feedback);
 
   if (feedbackList.length === 0) {
-    tbody.innerHTML =
-      "<tr><td colspan='6' style='text-align:center; color: var(--text-muted);'>No feedback submitted yet.</td></tr>";
+    tbody.innerHTML = createEmptyStateRow(
+      "No Feedback Yet",
+      "Customers haven't submitted any feedback yet.",
+      6,
+    );
     return;
   }
 
   feedbackList.forEach((b) => {
     tbody.innerHTML += `
             <tr>
-                <td><strong>${b.service}</strong></td>
-                <td>${b.provider}</td>
-                <td>${b.customerName || b.userName}</td>
-                <td>${b.feedback.rating}</td>
-                <td style="font-style: italic;">"${b.feedback.comment}"</td>
+                <td><strong>${sanitizeInput(b.service)}</strong></td>
+                <td>${sanitizeInput(b.provider)}</td>
+                <td>${sanitizeInput(b.customerName || b.userName)}</td>
+                <td>${sanitizeInput(b.feedback.rating)}</td>
+                <td class="italic">"${sanitizeInput(b.feedback.comment)}"</td>
                 <td>${new Date(b.date).toLocaleDateString()}</td>
             </tr>
         `;

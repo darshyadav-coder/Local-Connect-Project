@@ -9,8 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
 
   if (!loggedInUser || loggedInUser.role !== "provider") {
-    alert("❌ You must log in as a Service Provider to view this dashboard.");
-    window.location.href = "login.html";
+    showToast(
+      "You must log in as a Service Provider to view this dashboard.",
+      "error"
+    );
+    setTimeout(() => (window.location.href = "login.html"), 1500);
     return;
   }
 
@@ -25,20 +28,20 @@ function renderProviderDashboard() {
 
   // Filter categories dynamically (simulating SQL queries)
   const pendingEmergency = allBookings.filter(
-    (b) => b.status === "Pending" && b.type === "emergency",
+    (b) => b.status === "Pending" && b.type === "emergency"
   );
   const pendingNormal = allBookings.filter(
-    (b) => b.status === "Pending" && b.type === "normal",
+    (b) => b.status === "Pending" && b.type === "normal"
   );
 
   // We bind the provider's name securely to the booking so they only see their own accepted jobs
   const providerIdentifier =
     loggedInUser.fullname || loggedInUser.email.split("@")[0];
   const myAccepted = allBookings.filter(
-    (b) => b.status === "Accepted" && b.provider === providerIdentifier,
+    (b) => b.status === "Accepted" && b.provider === providerIdentifier
   );
   const myCompleted = allBookings.filter(
-    (b) => b.status === "Completed" && b.provider === providerIdentifier,
+    (b) => b.status === "Completed" && b.provider === providerIdentifier
   );
 
   // Render HTML Views
@@ -57,15 +60,19 @@ function renderFeedback(completedBookings) {
   let feedbackCount = 0;
 
   if (completedBookings.length === 0) {
-    feedbackBody.innerHTML =
-      "<tr><td colspan='5' style='text-align: center; color: var(--text-muted);'>No completed services yet.</td></tr>";
+    feedbackBody.innerHTML = createEmptyStateRow(
+      "No Completed Services",
+      "Complete some bookings to receive feedback and build your trust score.",
+      5
+    );
     trustScoreEl.textContent = "No data";
     return;
   }
 
   completedBookings.forEach((booking) => {
     if (booking.feedback) {
-      const rating = parseInt(booking.feedback.rating.split(" ")[1]); // Extract number from "⭐⭐ 2"
+      const ratingStr = booking.feedback.rating.split(" ")[1] || "5";
+      const rating = parseInt(ratingStr);
       totalRatings += rating;
       feedbackCount++;
 
@@ -74,7 +81,7 @@ function renderFeedback(completedBookings) {
                     <td>${booking.service}</td>
                     <td>${booking.customerName}</td>
                     <td>${booking.feedback.rating}</td>
-                    <td>${booking.feedback.comment}</td>
+                    <td class="italic">${booking.feedback.comment}</td>
                     <td>${new Date(booking.date).toLocaleDateString()}</td>
                 </tr>
             `;
@@ -83,21 +90,21 @@ function renderFeedback(completedBookings) {
                 <tr>
                     <td>${booking.service}</td>
                     <td>${booking.customerName}</td>
-                    <td>No rating</td>
-                    <td>No feedback yet</td>
+                    <td class="text-muted">No rating</td>
+                    <td class="text-muted">No feedback yet</td>
                     <td>${new Date(booking.date).toLocaleDateString()}</td>
                 </tr>
             `;
     }
   });
 
-  // Calculate Trust Score: Average rating * (feedback count / total completed) + completion rate
+  // Calculate Trust Score
   const completionRate =
     completedBookings.length > 0
       ? (feedbackCount / completedBookings.length) * 100
       : 0;
   const avgRating = feedbackCount > 0 ? totalRatings / feedbackCount : 0;
-  const trustScore = Math.round(avgRating * 0.7 + completionRate * 0.3); // Weighted formula
+  const trustScore = Math.round(avgRating * 0.7 + completionRate * 0.3);
 
   trustScoreEl.textContent = `${trustScore}/100 (${avgRating.toFixed(1)}⭐ avg, ${feedbackCount}/${completedBookings.length} feedback)`;
 }
@@ -106,25 +113,27 @@ function renderEmergency(requests) {
   const container = document.getElementById("emergency-requests-container");
   container.innerHTML = "";
   if (requests.length === 0) {
-    container.innerHTML =
-      "<p style='color: var(--text-muted);'>No emergency requests right now.</p>";
+    container.innerHTML = `<p class="text-muted text-center">No emergency requests right now.</p>`;
     return;
   }
 
   requests.forEach((req) => {
-    let paymentInfo = req.paymentStatus === 'Paid'
-      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓</span>`
-      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+    let paymentInfo =
+      req.paymentStatus === "Paid"
+        ? `<span class="text-success bold">Paid ✓</span>`
+        : `<span class="text-danger bold">Unpaid</span>`;
 
     container.innerHTML += `
-            <div class="request-card" style="border: 2px solid var(--danger-color); padding: 20px; margin-bottom: 15px; border-radius: 8px; background: white; box-shadow: var(--shadow-md);">
-                <p><strong>Service:</strong> ${req.service}</p>
-                <p><strong>Customer:</strong> ${req.customerName}</p>
-                <p><strong>Phone:</strong> ${req.phone}</p>
-                <p><strong>Payment:</strong> ${paymentInfo}</p>
-                <p style="color:var(--danger-color); font-weight:bold; margin-bottom: 15px;">🚨 Time: Immediate Action Required!</p>
-                <button class="btn" style="background: var(--danger-color);" onclick="acceptBooking('${req.id}')">Accept Emergency</button>
-                <button class="btn" style="background:var(--text-muted);" onclick="rejectBooking('${req.id}')">Decline</button>
+            <div class="request-card emergency-card">
+                <p><strong class="bold">Service:</strong> ${req.service}</p>
+                <p><strong class="bold">Customer:</strong> ${req.customerName}</p>
+                <p><strong class="bold">Phone:</strong> ${req.phone}</p>
+                <p><strong class="bold">Payment:</strong> ${paymentInfo}</p>
+                <p class="text-danger bold">🚨 Time: Immediate Action Required!</p>
+                <div class="modal-btn-group mt-2">
+                    <button class="btn btn-danger btn-flex" onclick="acceptBooking('${req.id}')">Accept</button>
+                    <button class="btn btn-muted btn-flex" onclick="rejectBooking('${req.id}')">Decline</button>
+                </div>
             </div>
         `;
   });
@@ -134,26 +143,29 @@ function renderIncoming(requests) {
   const tbody = document.getElementById("incoming-requests-body");
   tbody.innerHTML = "";
   if (requests.length === 0) {
-    tbody.innerHTML =
-      "<tr><td colspan='6' style='text-align: center; color: var(--text-muted);'>No new normal requests at this moment</td></tr>";
+    tbody.innerHTML = createEmptyStateRow(
+      "No Incoming Requests",
+      "All caught up! Check back later for new service requests."
+    );
     return;
   }
 
   requests.forEach((req) => {
-    let paymentInfo = req.paymentStatus === 'Paid'
-      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓</span>`
-      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+    let paymentInfo =
+      req.paymentStatus === "Paid"
+        ? `<span class="text-success bold">Paid ✓</span>`
+        : `<span class="text-danger bold">Unpaid</span>`;
 
     tbody.innerHTML += `
             <tr>
                 <td>${req.customerName}</td>
-                <td><strong>${req.service}</strong></td>
+                <td><strong class="bold">${req.service}</strong></td>
                 <td>${req.date}</td>
                 <td>Normal</td>
                 <td>${paymentInfo}</td>
                 <td>
-                    <button class="btn" style="padding: 6px 14px; font-size: 13px;" onclick="acceptBooking('${req.id}')">Accept</button>
-                    <button class="btn" style="background:var(--text-muted); padding: 6px 14px; font-size: 13px;" onclick="rejectBooking('${req.id}')">Decline</button>
+                    <button class="btn btn-sm" onclick="acceptBooking('${req.id}')">Accept</button>
+                    <button class="btn btn-sm btn-muted" onclick="rejectBooking('${req.id}')">Decline</button>
                 </td>
             </tr>
         `;
@@ -164,24 +176,24 @@ function renderAccepted(requests) {
   const container = document.getElementById("accepted-bookings-container");
   container.innerHTML = "";
   if (requests.length === 0) {
-    container.innerHTML =
-      "<p style='color: var(--text-muted);'>You haven't accepted any active bookings yet.</p>";
+    container.innerHTML = `<p class="text-muted text-center">You haven't accepted any active bookings yet.</p>`;
     return;
   }
 
   requests.forEach((req) => {
-    let paymentInfo = req.paymentStatus === 'Paid'
-      ? `<span style="color:var(--accent-color); font-weight:bold;">Paid ✓</span>`
-      : `<span style="color:var(--danger-color); font-weight:bold;">Unpaid</span>`;
+    let paymentInfo =
+      req.paymentStatus === "Paid"
+        ? `<span class="text-success bold">Paid ✓</span>`
+        : `<span class="text-danger bold">Unpaid</span>`;
 
     container.innerHTML += `
-            <div class="card" style="border-top: 4px solid var(--primary-color); text-align: left;">
-                <p><strong>Customer:</strong> ${req.customerName}</p>
-                <p><strong>Phone:</strong> <a href="tel:${req.phone}" style="color: var(--primary-color); text-decoration: none;">${req.phone}</a></p>
-                <p><strong>Service:</strong> ${req.service} (Scheduled: ${req.date})</p>
-                <p><strong>Payment:</strong> ${paymentInfo}</p>
-                <p style="color:var(--primary-color); font-weight:bold; margin-top: 10px;">Status: In Progress 🛠️</p>
-                <button class="btn" style="margin-top: 15px; width: 100%;" onclick="completeBooking('${req.id}')">Mark as Completed ✅</button>
+            <div class="card text-left">
+                <p><strong class="bold">Customer:</strong> ${req.customerName}</p>
+                <p><strong class="bold">Phone:</strong> <a href="tel:${req.phone}" class="text-primary no-decoration">${req.phone}</a></p>
+                <p><strong class="bold">Service:</strong> ${req.service} (Scheduled: ${req.date})</p>
+                <p><strong class="bold">Payment:</strong> ${paymentInfo}</p>
+                <p class="text-primary bold mt-2">Status: In Progress 🛠️</p>
+                <button class="btn w-100 mt-3" onclick="completeBooking('${req.id}')">Mark as Completed ✅</button>
             </div>
         `;
   });
@@ -198,47 +210,87 @@ window.acceptBooking = function (id) {
   // Find the exact booking ID
   const index = allBookings.findIndex((b) => b.id === id);
   if (index > -1) {
-    allBookings[index].status = "Accepted";
-    // Assign this exact provider to the booking so others can't see it!
-    allBookings[index].provider =
-      loggedInUser.fullname || loggedInUser.email.split("@")[0];
-    localStorage.setItem("allBookings", JSON.stringify(allBookings));
+    const booking = allBookings[index];
 
-    // Send notification
-    simulateNotification(allBookings[index].userEmail, "provider_assigned", {
-      provider: allBookings[index].provider,
-      service: allBookings[index].service,
-      date: allBookings[index].date
-    });
+    showConfirmDialog(
+      "Accept Booking?",
+      `Accept ${booking.service} for ${booking.customerName}?`,
+      () => {
+        allBookings[index].status = "Accepted";
+        // Assign this exact provider to the booking so others can't see it!
+        allBookings[index].provider =
+          loggedInUser.fullname || loggedInUser.email.split("@")[0];
+        localStorage.setItem("allBookings", JSON.stringify(allBookings));
 
-    // Re-render the view
-    renderProviderDashboard();
+        // Send notification
+        simulateNotification(allBookings[index].userEmail, "provider_assigned", {
+          provider: allBookings[index].provider,
+          service: allBookings[index].service,
+          date: allBookings[index].date,
+        });
+
+        showToast("✅ Booking accepted successfully!", "success");
+
+        // Re-render the view
+        setTimeout(() => renderProviderDashboard(), 800);
+      },
+      null,
+      "Accept",
+      "Cancel"
+    );
   }
 };
 
 window.rejectBooking = function (id) {
   let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
   const index = allBookings.findIndex((b) => b.id === id);
+
   if (index > -1) {
-    allBookings[index].status = "Rejected"; // Customer dashboard will reflect this
-    localStorage.setItem("allBookings", JSON.stringify(allBookings));
-    renderProviderDashboard();
+    const booking = allBookings[index];
+
+    showConfirmDialog(
+      "Decline Booking?",
+      `Are you sure you want to decline ${booking.service} for ${booking.customerName}?`,
+      () => {
+        allBookings[index].status = "Rejected";
+        localStorage.setItem("allBookings", JSON.stringify(allBookings));
+
+        showToast("✅ Booking declined.", "success");
+        setTimeout(() => renderProviderDashboard(), 800);
+      },
+      null,
+      "Yes, Decline",
+      "Keep It"
+    );
   }
 };
 
 window.completeBooking = function (id) {
   let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
   const index = allBookings.findIndex((b) => b.id === id);
+
   if (index > -1) {
-    allBookings[index].status = "Completed";
-    localStorage.setItem("allBookings", JSON.stringify(allBookings));
+    const booking = allBookings[index];
 
-    // Send notification
-    simulateNotification(allBookings[index].userEmail, "booking_completed", {
-      service: allBookings[index].service
-    });
+    showConfirmDialog(
+      "Mark as Completed?",
+      `Mark ${booking.service} as completed?`,
+      () => {
+        allBookings[index].status = "Completed";
+        localStorage.setItem("allBookings", JSON.stringify(allBookings));
 
-    renderProviderDashboard();
+        // Send notification
+        simulateNotification(allBookings[index].userEmail, "booking_completed", {
+          service: allBookings[index].service,
+        });
+
+        showToast("✅ Booking marked as completed!", "success");
+        setTimeout(() => renderProviderDashboard(), 800);
+      },
+      null,
+      "Mark Complete",
+      "Not Yet"
+    );
   }
 };
 
@@ -249,20 +301,21 @@ window.completeBooking = function (id) {
 function renderAvailabilityCalendar() {
   const calendarContainer = document.getElementById("availability-calendar");
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-  const availability = JSON.parse(localStorage.getItem("providerAvailability")) || {};
+  const availability =
+    JSON.parse(localStorage.getItem("providerAvailability")) || {};
   const providerAvailability = availability[loggedInUser.email] || {};
 
   // Generate next 7 days
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const today = new Date();
 
   calendarContainer.innerHTML = "";
 
   // Add day headers
-  days.forEach(day => {
+  days.forEach((day) => {
     const dayHeader = document.createElement("div");
     dayHeader.textContent = day;
-    dayHeader.style.cssText = "font-weight: bold; text-align: center; padding: 10px; background: var(--bg-color); border-radius: 8px;";
+    dayHeader.className = "calendar-header";
     calendarContainer.appendChild(dayHeader);
   });
 
@@ -270,38 +323,25 @@ function renderAvailabilityCalendar() {
   for (let i = 0; i < 7; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
-    const dateStr = date.toISOString().split('T')[0];
-    const dayName = days[date.getDay()];
+    const dateStr = date.toISOString().split("T")[0];
 
     const daySlot = document.createElement("div");
-    daySlot.className = "calendar-day";
+    daySlot.className = "calendar-day calendar-slot";
     daySlot.dataset.date = dateStr;
 
     const isAvailable = providerAvailability[dateStr];
-    daySlot.style.cssText = `
-      padding: 15px;
-      border: 2px solid ${isAvailable ? 'var(--accent-color)' : '#e2e8f0'};
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      background: ${isAvailable ? 'rgba(16, 185, 129, 0.1)' : 'white'};
-      transition: all 0.3s ease;
-    `;
+    if (isAvailable) {
+      daySlot.classList.add("slot-available");
+    }
 
     daySlot.innerHTML = `
-      <div style="font-size: 18px; font-weight: bold; color: var(--text-dark);">${date.getDate()}</div>
-      <div style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">${isAvailable ? 'Available' : 'Unavailable'}</div>
+      <div class="slot-date">${date.getDate()}</div>
+      <div class="slot-status">${isAvailable ? "Available" : "Unavailable"}</div>
     `;
 
-    daySlot.addEventListener("click", () => toggleDayAvailability(loggedInUser.email, dateStr));
-    daySlot.addEventListener("mouseover", () => {
-      daySlot.style.transform = "translateY(-2px)";
-      daySlot.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-    });
-    daySlot.addEventListener("mouseleave", () => {
-      daySlot.style.transform = "translateY(0)";
-      daySlot.style.boxShadow = "none";
-    });
+    daySlot.addEventListener("click", () =>
+      toggleDayAvailability(loggedInUser.email, dateStr)
+    );
 
     calendarContainer.appendChild(daySlot);
   }
@@ -310,29 +350,38 @@ function renderAvailabilityCalendar() {
   const toggleBtn = document.getElementById("toggle-availability");
   if (toggleBtn) {
     toggleBtn.addEventListener("click", () => {
-      const allAvailable = Object.values(providerAvailability).every(v => v);
+      const allAvailable = Object.values(providerAvailability).every((v) => v);
       const newAvailability = !allAvailable;
 
-      const availability = JSON.parse(localStorage.getItem("providerAvailability")) || {};
-      availability[loggedInUser.email] = availability[loggedInUser.email] || {};
+      const availability =
+        JSON.parse(localStorage.getItem("providerAvailability")) || {};
+      availability[loggedInUser.email] =
+        availability[loggedInUser.email] || {};
 
       for (let i = 0; i < 7; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = date.toISOString().split("T")[0];
         availability[loggedInUser.email][dateStr] = newAvailability;
       }
 
-      localStorage.setItem("providerAvailability", JSON.stringify(availability));
+      localStorage.setItem(
+        "providerAvailability",
+        JSON.stringify(availability)
+      );
       renderAvailabilityCalendar();
 
-      alert(`${newAvailability ? 'Available' : 'Unavailable'} for the next 7 days!`);
+      showToast(
+        `${newAvailability ? "Available" : "Unavailable"} for the next 7 days!`,
+        "info"
+      );
     });
   }
 }
 
 function toggleDayAvailability(providerEmail, dateStr) {
-  const availability = JSON.parse(localStorage.getItem("providerAvailability")) || {};
+  const availability =
+    JSON.parse(localStorage.getItem("providerAvailability")) || {};
   if (!availability[providerEmail]) availability[providerEmail] = {};
 
   availability[providerEmail][dateStr] = !availability[providerEmail][dateStr];
@@ -343,32 +392,32 @@ function toggleDayAvailability(providerEmail, dateStr) {
 
 // Simulate notifications
 function simulateNotification(email, type, data = {}) {
-    const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+  const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
 
-    let message = "";
-    let subject = "";
+  let message = "";
+  let subject = "";
 
-    switch(type) {
-        case "provider_assigned":
-            subject = "Provider Assigned";
-            message = `${data.provider} has been assigned to your ${data.service} booking on ${data.date}.`;
-            break;
-        case "booking_completed":
-            subject = "Service Completed";
-            message = `Your ${data.service} service has been completed. Please provide feedback in your dashboard.`;
-            break;
-    }
+  switch (type) {
+    case "provider_assigned":
+      subject = "Provider Assigned";
+      message = `${data.provider} has been assigned to your ${data.service} booking on ${data.date}.`;
+      break;
+    case "booking_completed":
+      subject = "Service Completed";
+      message = `Your ${data.service} service has been completed. Please provide feedback in your dashboard.`;
+      break;
+  }
 
-    notifications.push({
-        id: Date.now().toString(),
-        email: email,
-        type: type,
-        subject: subject,
-        message: message,
-        timestamp: new Date().toISOString(),
-        read: false,
-        data: data
-    });
+  notifications.push({
+    id: Date.now().toString(),
+    email: email,
+    type: type,
+    subject: subject,
+    message: message,
+    timestamp: new Date().toISOString(),
+    read: false,
+    data: data,
+  });
 
-    localStorage.setItem("notifications", JSON.stringify(notifications));
+  localStorage.setItem("notifications", JSON.stringify(notifications));
 }

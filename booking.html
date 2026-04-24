@@ -1,259 +1,154 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Booking - Local Connect</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="js/data.js"></script>
-</head>
-
-<body>
-  <nav class="navbar">
-    <div class="container">
-      <div class="logo">Local Connect</div>
-
-      <div class="menu">
-        <a href="main.html">Home</a>
-        <a href="services.html">Services</a>
-        <a href="booking.html">Book Now</a>
-        <a href="user-dashboard.html">User</a>
-        <a href="provider-dashboard.html">Provider</a>
-        <a href="admin-dashboard.html">Admin</a>
-        <a href="Contact.html">Customer Support</a>
-        <a href="login.html">Login</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking - Local Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/booking.css" />
+    <script src="./js/utils.js"></script>
+    <script src="js/data.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo">Local Connect</div>
+        <div class="menu">
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Book Now</a>
+          <a href="user-dashboard.html">User</a>
+          <a href="provider-dashboard.html">Provider</a>
+          <a href="admin-dashboard.html">Admin</a>
+          <a href="Contact.html">Customer Support</a>
+          <a href="login.html">Login</a>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <main class="booking-section">
-    <div class="booking-form">
-      <h1>🔧 Book a Service</h1>
+    <main class="booking-section">
+      <div class="booking-form">
+        <h1>🔧 Book a Service</h1>
 
-      <div class="booking-type-selector">
-        <div class="toggle-slider" id="toggle-slider"></div>
-        <button id="normal-booking-btn" class="booking-type-btn active">
-          Normal
-        </button>
-        <button id="emergency-booking-btn" class="booking-type-btn">
-          Emergency
-        </button>
-      </div>
+        <div class="booking-type-selector">
+          <div class="toggle-slider" id="toggle-slider"></div>
+          <button id="normal-booking-btn" class="booking-type-btn active">Normal</button>
+          <button id="emergency-booking-btn" class="booking-type-btn">Emergency</button>
+        </div>
 
-      <!-- Selected Service Display -->
-      <div id="selected-service-display" style="
-            margin: 25px 0;
-            padding: 18px;
-            background: linear-gradient(
-              135deg,
-              rgba(37, 99, 235, 0.08) 0%,
-              rgba(16, 185, 129, 0.08) 100%
-            );
-            border: 2px solid var(--primary-color);
-            border-radius: 12px;
-            display: none;
-          ">
-        <div style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            ">
-          <div>
-            <p style="
-                  margin: 0 0 5px 0;
-                  color: var(--text-muted);
-                  font-size: 13px;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                  font-weight: 600;
-                ">
-              Selected Service
-            </p>
-            <p id="selected-service" style="
-                  margin: 0;
-                  font-weight: 700;
-                  font-size: 18px;
-                  color: var(--text-dark);
-                  display: flex;
-                  align-items: center;
-                  gap: 8px;
-                ">
-              <i id="service-icon" class="fa-solid fa-wrench"></i>
-              <span id="service-name">Loading...</span>
-            </p>
+        <!-- Selected Service Display -->
+        <div id="selected-service-display" class="selected-service-banner hidden">
+          <div class="banner-content">
+            <div>
+              <p class="banner-label">Selected Service</p>
+              <p id="selected-service" class="banner-service-name">
+                <i id="service-icon" class="fa-solid fa-wrench"></i>
+                <span id="service-name">Loading...</span>
+              </p>
+            </div>
+            <button type="button" id="change-service-btn" class="btn btn-sm">✚ Change Service</button>
           </div>
-          <button type="button" id="change-service-btn" style="
-                padding: 8px 16px;
-                background: var(--primary-color);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 600;
-                transition: all 0.3s ease;
-              ">
-            ➕ Change Service
+        </div>
+
+        <!-- Service Selection Section -->
+        <div id="service-selection" class="selection-container hidden">
+          <h3 class="selection-header">Select a Service</h3>
+          <p class="selection-subtitle">Choose from our wide range of professional services</p>
+          <div class="service-grid" id="service-grid"></div>
+        </div>
+
+        <form id="booking-form">
+          <label for="name-input">Full Name</label>
+          <input id="name-input" type="text" placeholder="Full Name" required />
+          <span class="error hidden" id="name-error"></span>
+
+          <label for="phone-input">Phone Number</label>
+          <input id="phone-input" type="text" placeholder="Phone Number" required />
+          <span class="error hidden" id="phone-error"></span>
+
+          <label for="booking-date">Booking Date</label>
+          <input type="date" id="booking-date" required />
+          <span class="error hidden" id="date-error"></span>
+
+          <div id="emergency-notice" class="emergency-notice hidden">
+            ⚠️ Emergency booking will be prioritized and may incur additional charges.
+          </div>
+
+          <p class="price-summary">Total Price: <span id="price-display">₹0</span></p>
+          <p id="extra-charge" class="emergency-charge-label hidden">⚡ Emergency Charges: +₹200</p>
+
+          <button type="submit" class="btn w-100 btn-lg">Confirm Booking</button>
+        </form>
+
+        <!-- Checkout UI -->
+        <div id="checkout-section" class="checkout-container hidden">
+          <h2 class="section-header">Order Summary</h2>
+          <div class="order-summary-box">
+            <div class="summary-row">
+              <span class="summary-label">Service:</span>
+              <span id="summary-service" class="summary-value">...</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Customer:</span>
+              <span id="summary-customer" class="summary-value">...</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Date:</span>
+              <span id="summary-date" class="summary-value">...</span>
+            </div>
+            <div class="summary-total">
+              <span class="label">Total Amount:</span>
+              <span id="summary-price" class="value">₹0</span>
+            </div>
+          </div>
+
+          <div id="payment-status-message" class="hidden"></div>
+
+          <button id="pay-now-btn" class="btn btn-success-payment w-100 btn-lg">
+            <i class="fa-solid fa-lock"></i> <span id="pay-now-text">Pay Now</span>
+          </button>
+          <button id="cancel-checkout-btn" type="button" class="btn btn-muted-outline w-100 mt-2">
+            Cancel Order
           </button>
         </div>
       </div>
+    </main>
 
-      <!-- Service Selection Section (shown when no service selected) -->
-      <div id="service-selection" style="display: none; margin: 30px 0">
-        <h3 style="
-              color: var(--text-dark);
-              margin-bottom: 5px;
-              font-size: 18px;
-              font-weight: 600;
-            ">
-          Select a Service
-        </h3>
-        <p style="
-              color: var(--text-muted);
-              font-size: 14px;
-              margin-bottom: 20px;
-            ">
-          Choose from our wide range of professional services
-        </p>
-        <div class="service-grid" id="service-grid" style="
-              display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-              gap: 15px;
-              margin-bottom: 20px;
-            ">
-          <!-- Services will be loaded here -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-section">
+          <h2 class="footer-logo">Local Connect</h2>
+          <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Booking</a>
+          <a href="user-dashboard.html#feedback-section">Feedback</a>
+        </div>
+        <div class="footer-section">
+          <h3>User</h3>
+          <a href="login.html">Login</a>
+          <a href="signup.html">Signup</a>
+          <a href="user-dashboard.html">Dashboard</a>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Email: support@localconnect.com</p>
+          <p>Phone: +91 8982427031</p>
+          <p>Location: India</p>
         </div>
       </div>
-
-      <form id="booking-form">
-        <label for="name-input">Full Name</label>
-        <input id="name-input" type="text" placeholder="Full Name" required />
-        <span class="error" id="name-error" style="color: red; display: none"></span>
-
-        <label for="phone-input">Phone Number</label>
-        <input id="phone-input" type="text" placeholder="Phone Number" required />
-        <span class="error" id="phone-error" style="color: red; display: none"></span>
-
-        <label for="booking-date">Booking Date</label>
-        <input type="date" id="booking-date" required />
-        <span class="error" id="date-error" style="color: red; display: none"></span>
-
-        <div id="emergency-notice" class="emergency-notice" style="display: none">
-          ⚠️ Emergency booking will be prioritized and may incur additional
-          charges.
-        </div>
-
-        <p style="
-              font-weight: bold;
-              color: #2e7d32;
-              font-size: 18px;
-              margin-top: 10px;
-            ">
-          Total Price: <span id="price-display">₹0</span>
-        </p>
-        <p id="extra-charge" style="
-              display: none;
-              color: var(--danger-color);
-              font-weight: bold;
-              margin-bottom: 10px;
-            ">
-          ⚡ Emergency Charges: +₹200
-        </p>
-
-        <button type="submit" class="btn" style="
-              width: 100%;
-              margin-top: 20px;
-              font-size: 16px;
-              padding: 15px;
-            ">
-          Confirm Booking
-        </button>
-      </form>
-
-      <!-- Checkout UI (Initially Hidden) -->
-      <div id="checkout-section" style="display: none;">
-        <h2 style="font-size: 22px; margin-bottom: 20px; color: var(--text-dark);">Order Summary</h2>
-        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span style="color: var(--text-muted); font-weight: 500;">Service:</span>
-            <span id="summary-service" style="font-weight: 600; color: var(--text-dark);">...</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span style="color: var(--text-muted); font-weight: 500;">Customer:</span>
-            <span id="summary-customer" style="font-weight: 600; color: var(--text-dark);">...</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span style="color: var(--text-muted); font-weight: 500;">Date:</span>
-            <span id="summary-date" style="font-weight: 600; color: var(--text-dark);">...</span>
-          </div>
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;">
-          <div style="display: flex; justify-content: space-between; font-size: 18px;">
-            <span style="font-weight: bold; color: var(--text-dark);">Total Amount:</span>
-            <span id="summary-price" style="font-weight: bold; color: var(--primary-color);">₹0</span>
-          </div>
-        </div>
-
-        <div id="payment-status-message" style="display: none; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; text-align: center;"></div>
-
-        <button id="pay-now-btn" class="btn" style="width: 100%; font-size: 16px; padding: 15px; background: #10b981; border: none; cursor: pointer;">
-          <i class="fa-solid fa-lock" style="margin-right: 8px;"></i> <span id="pay-now-text">Pay Now</span>
-        </button>
-        <button id="cancel-checkout-btn" type="button" class="btn" style="width: 100%; margin-top: 10px; font-size: 14px; padding: 12px; background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); cursor: pointer;">
-          Cancel Order
-        </button>
+      <div class="footer-bottom">
+        <p>© 2026 Local Connect | All Rights Reserved</p>
       </div>
+    </footer>
 
-    </div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-container">
-      <!-- Logo & About -->
-      <div class="footer-section">
-        <h2 class="footer-logo">Local Connect</h2>
-        <p>
-          Your trusted platform to book local services like electricians,
-          plumbers, cleaners and more.
-        </p>
-      </div>
-
-      <!-- Quick Links -->
-      <div class="footer-section">
-        <h3>Quick Links</h3>
-        <a href="main.html">Home</a>
-        <a href="services.html">Services</a>
-        <a href="booking.html">Booking</a>
-        <a href="user-dashboard.html#feedback-section">Feedback</a>
-      </div>
-
-      <!-- For Users -->
-      <div class="footer-section">
-        <h3>User</h3>
-        <a href="login.html">Login</a>
-        <a href="signup.html">Signup</a>
-        <a href="user-dashboard.html">Dashboard</a>
-      </div>
-
-      <!-- Contact -->
-      <div class="footer-section">
-        <h3>Contact</h3>
-        <p>Email: support@localconnect.com</p>
-        <p>Phone: +91 8982427031</p>
-        <p>Location: India</p>
-      </div>
-    </div>
-
-    <!-- Bottom Bar -->
-    <div class="footer-bottom">
-      <p>© 2026 Local Connect | All Rights Reserved</p>
-    </div>
-  </footer>
-
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script src="./js/paymentService.js"></script>
-  <script src="./js/booking.js"></script>
-</body>
-
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="./js/paymentService.js"></script>
+    <script src="./js/booking.js"></script>
+    <script src="./js/navbar.js"></script>
+  </body>
 </html>

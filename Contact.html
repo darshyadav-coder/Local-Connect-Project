@@ -1,17 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Customer Support - Local Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/others.css" />
   </head>
-
   <body>
     <nav class="navbar">
       <div class="container">
         <div class="logo">Local Connect</div>
-
         <div class="menu">
           <a href="main.html">Home</a>
           <a href="services.html">Services</a>
@@ -25,103 +26,41 @@
       </div>
     </nav>
 
-    <div class="auth-wrapper" style="padding: 60px 20px">
-      <div class="login-container" style="max-width: 600px">
+    <div class="auth-wrapper">
+      <div class="login-container support-container">
         <h1>Customer Support</h1>
-        <p class="subtitle" style="text-align: center; margin-bottom: 30px">
-          Have a question or need general website help? Send us a message!
-        </p>
+        <p class="subtitle">Have a question or need general website help? Send us a message!</p>
 
         <form id="contact-form">
-          <input
-            type="text"
-            id="contact-name"
-            placeholder="Full Name"
-            required
-            style="margin-bottom: 15px"
-          />
-          <input
-            type="email"
-            id="contact-email"
-            placeholder="Email Address"
-            required
-            style="margin-bottom: 15px"
-          />
-          <input
-            type="text"
-            id="contact-subject"
-            placeholder="Subject"
-            required
-            style="margin-bottom: 15px"
-          />
-
-          <textarea
-            id="contact-message"
-            placeholder="How can we help you?"
-            rows="5"
-            style="
-              width: 100%;
-              padding: 12px;
-              border: 1px solid #cbd5e1;
-              border-radius: 8px;
-              font-family: inherit;
-              font-size: 1rem;
-              margin-bottom: 20px;
-              outline: none;
-              transition: border-color 0.3s ease;
-            "
-            required
-          ></textarea>
-
-          <button type="submit" class="btn" style="width: 100%; padding: 14px">
-            Send Message
-          </button>
+          <input type="text" id="contact-name" placeholder="Full Name" required />
+          <input type="email" id="contact-email" placeholder="Email Address" required />
+          <input type="text" id="contact-subject" placeholder="Subject" required />
+          <textarea id="contact-message" placeholder="How can we help you?" rows="5" required></textarea>
+          <button type="submit" class="btn w-100">Send Message</button>
         </form>
-        <p
-          id="success-msg"
-          style="
-            display: none;
-            color: var(--success-color);
-            font-weight: bold;
-            margin-top: 20px;
-            text-align: center;
-          "
-        >
-          ✅ Thank you! Your message has been sent to our support team.
-        </p>
+        <p id="success-msg" class="success-message hidden">✅ Thank you! Your message has been sent to our support team.</p>
       </div>
     </div>
 
     <footer class="footer">
       <div class="footer-container">
-        <!-- Logo & About -->
         <div class="footer-section">
           <h2 class="footer-logo">Local Connect</h2>
-          <p>
-            Your trusted platform to book local services like electricians,
-            plumbers, cleaners and more.
-          </p>
+          <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
         </div>
-
-        <!-- Quick Links -->
         <div class="footer-section">
           <h3>Quick Links</h3>
           <a href="main.html">Home</a>
           <a href="services.html">Services</a>
           <a href="booking.html">Booking</a>
           <a href="user-dashboard.html#feedback-section">Feedback</a>
-          <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
         </div>
-
-        <!-- For Users -->
         <div class="footer-section">
           <h3>User</h3>
           <a href="login.html">Login</a>
           <a href="signup.html">Signup</a>
           <a href="user-dashboard.html">Dashboard</a>
         </div>
-
-        <!-- Contact -->
         <div class="footer-section">
           <h3>Contact</h3>
           <p>Email: support@localconnect.com</p>
@@ -129,13 +68,13 @@
           <p>Location: India</p>
         </div>
       </div>
-
-      <!-- Bottom Bar -->
       <div class="footer-bottom">
         <p>© 2026 Local Connect | All Rights Reserved</p>
       </div>
     </footer>
 
+    <script src="./js/utils.js"></script>
     <script src="./js/contact.js"></script>
+    <script src="./js/navbar.js"></script>
   </body>
 </html>

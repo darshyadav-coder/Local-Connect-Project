@@ -1,52 +1,44 @@
-//main.html js part
+// main.html js part
 
-// Scroll effects and navbar changes
 document.addEventListener("DOMContentLoaded", () => {
   // Navbar scroll effect
-  const navbar = document.querySelector('.navbar');
-
-  window.addEventListener('scroll', () => {
+  const navbar = document.querySelector(".navbar");
+  window.addEventListener("scroll", () => {
     if (window.scrollY > 50) {
-      navbar.classList.add('scrolled');
+      navbar.classList.add("scrolled");
     } else {
-      navbar.classList.remove('scrolled');
+      navbar.classList.remove("scrolled");
     }
   });
 
   // Intersection Observer for animations
   const observerOptions = {
     threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
+    rootMargin: "0px 0px -50px 0px",
   };
 
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
+        entry.target.classList.add("fade-in-visible");
       }
     });
   }, observerOptions);
 
   // Observe service cards for animation
-  document.querySelectorAll('.service-card').forEach(card => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(30px)';
-    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  document.querySelectorAll(".service-card").forEach((card) => {
+    card.classList.add("fade-in-target");
     observer.observe(card);
   });
 
   // Dynamic Greeting
   const heroTitle = document.querySelector(".hero h1");
-
   if (heroTitle) {
     let hour = new Date().getHours();
     let greeting = "Welcome";
-
     if (hour < 12) greeting = "Good Morning";
     else if (hour < 18) greeting = "Good Afternoon";
     else greeting = "Good Evening";
-
     heroTitle.textContent = `${greeting}, Smart Local Services`;
   }
 });
@@ -56,20 +48,19 @@ const container = document.getElementById("services-container");
 if (container && typeof servicesData !== "undefined") {
   let cardsHTML = "";
 
-  // Load 12 services, but hide the ones after index 5 (so 6 are visible, 6 are hidden)
+  // Load 12 services, but hide the ones after index 5
   servicesData.slice(0, 12).forEach((service, index) => {
-    let displayStyle = index >= 6 ? 'style="display: none;"' : "";
+    let hiddenClass = index >= 6 ? "hidden" : "";
     cardsHTML += `
-        <div class="service-card" data-id="${service.id}" ${displayStyle}>
+        <div class="service-card ${hiddenClass}" data-id="${service.id}">
             <i class="fa-solid ${service.icon}"></i>
             <h3>${service.name}</h3>
             <p>${service.description || "Click to explore services"}</p>
-                </div>
-                `;
+        </div>
+        `;
   });
-  container.innerHTML += cardsHTML;
+  container.innerHTML = cardsHTML;
 
-  // Fix for Viva: Changed selector to .service-card to match our CSS styling properly
   document.querySelectorAll(".service-card").forEach((card) => {
     card.addEventListener("click", () => {
       const id = card.getAttribute("data-id");
@@ -79,108 +70,73 @@ if (container && typeof servicesData !== "undefined") {
     });
   });
 
-  // Viva Feature: View All Services Logic!
-  // This dynamically unhides the hidden cards.
   const viewAllBtn = document.getElementById("view-all-btn");
   if (viewAllBtn) {
     viewAllBtn.addEventListener("click", () => {
-      document.querySelectorAll(".service-card").forEach((card) => {
-        card.style.display = "block"; // Reset inline display format
+      document.querySelectorAll(".service-card.hidden").forEach((card) => {
+        card.classList.remove("hidden");
       });
-      viewAllBtn.style.display = "none"; // Hide button after clicking
+      viewAllBtn.classList.add("hidden");
     });
   }
 }
 
-//Location-Based Detection
-const locationText = document.getElementById("user-location"); //get html element where location wil be displayed
-
+// Location-Based Detection
+const locationText = document.getElementById("user-location");
 if (navigator.geolocation && locationText) {
-  //check if browser supports geolocation AND element exists
   navigator.geolocation.getCurrentPosition(
-    // gets user's current position (lat and long)
     async (position) => {
-      // success function (runs if user allows location access)
-      let lat = position.coords.latitude; // extract latitude from position object
-      let lon = position.coords.longitude; // extract longitude from positon object
-
+      let lat = position.coords.latitude;
+      let lon = position.coords.longitude;
       try {
-        // send request to openstreetmap api to convert lat/lon into place name
         let response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
         );
-
-        let data = await response.json(); // convert api response to json format
-
+        let data = await response.json();
         if (data && data.address) {
-          let place = `${data.address.city || data.address.town || data.address.village || "Your Area"}, ${data.address.state || ""}`; //try to get the best available place name
-
-          locationText.textContent = `📍 ${place}`; //display the detected place on the webpage
+          let place = `${data.address.city || data.address.town || data.address.village || "Your Area"}, ${data.address.state || ""}`;
+          locationText.textContent = `📍 ${place}`;
         } else {
           locationText.textContent = "📍 Location detected";
         }
       } catch (error) {
-        locationText.textContent = "📍Location unavailable"; //if api fails (network issue, etc.)
+        locationText.textContent = "📍 Location unavailable";
       }
     },
     () => {
-      locationText.textContent = "📍 Location access denied"; // error function (runs if user denies location access)
-    },
+      locationText.textContent = "📍 Location access denied";
+    }
   );
 }
 
 // Emergency Booking
 const emergencyBtn = document.getElementById("emergency-btn");
-
 if (emergencyBtn) {
   emergencyBtn.addEventListener("click", () => {
+    if (!localStorage.getItem("loggedInUser")) {
+      showToast("Please login first to book a service!", "warning");
+      setTimeout(() => (window.location.href = "login.html"), 1500);
+      return;
+    }
     sessionStorage.setItem("bookingRefresh", "true");
     localStorage.setItem("bookingType", "emergency");
-
-    // Viva Feature: Using our custom Toast instead of a boring alert() box!
-    showToast("🚨 Emergency service activated! Redirecting...");
-
-    // Wait for the toast to show before redirecting
-    setTimeout(() => {
-      window.location.href = "booking.html";
-    }, 2000);
+    showToast("🚨 Emergency service activated! Redirecting...", "info");
+    setTimeout(() => (window.location.href = "booking.html"), 2000);
   });
 }
 
-//CTA button
+// CTA button
 const ctaBtn = document.querySelector(".cta .btn");
-
 if (ctaBtn) {
-  ctaBtn.addEventListener("click", () => {
+  ctaBtn.addEventListener("click", (e) => {
+    if (!localStorage.getItem("loggedInUser")) {
+      e.preventDefault();
+      showToast("Please login first to book a service.", "warning");
+      setTimeout(() => (window.location.href = "login.html"), 1500);
+      return;
+    }
     sessionStorage.setItem("bookingRefresh", "true");
     localStorage.setItem("bookingType", "normal");
     window.location.href = "booking.html";
   });
-}
-
-// ==========================================
-// VIVA FEATURE: Custom Toast Notification
-// ==========================================
-// We created this to avoid browser native alerts which look unprofessional.
-function showToast(message) {
-  // 1. Create a div element for the toast
-  const toast = document.createElement("div");
-  toast.className = "toast";
-
-  // 2. Add an icon and the message
-  toast.innerHTML = `<i class="fa-solid fa-bell"></i> <span>${message}</span>`;
-
-  // 3. Append to the page body
-  document.body.appendChild(toast);
-
-  // 4. Trigger the CSS slide-in animation using a small delay
-  setTimeout(() => {
-    toast.classList.add("show");
-  }, 100);
-
-  // 5. Remove the toast after 3 seconds so it's clean
-  setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 400); // Wait for slide-out animation to finish
-  }, 4000);
 }

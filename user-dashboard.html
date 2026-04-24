@@ -1,213 +1,143 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Local Connect</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-
-<body>
-  <nav class="navbar">
-    <div class="container">
-      <div class="logo">Local Connect</div>
-
-      <div class="menu">
-        <a href="main.html">Home</a>
-        <a href="services.html">Services</a>
-        <a href="booking.html">Book Now</a>
-        <a href="user-dashboard.html">User</a>
-        <a href="provider-dashboard.html">Provider</a>
-        <a href="admin-dashboard.html">Admin</a>
-        <a href="Contact.html">Customer Support</a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="dashboard-container">
-    <!-- Premium Sidebar UI -->
-    <div class="sidebar">
-      <h3>User Panel</h3>
-      <a href="user-dashboard.html" class="active">My Dashboard</a>
-      <a href="user-profile.html">My Profile</a>
-      <a href="booking.html">Book Service</a>
-      <a href="services.html">All Services</a>
-      <a href="Contact.html">Support</a>
-      <a href="#" onclick="
-            logout();
-            return false;
-          " style="
-            margin-top: 20px;
-            color: var(--danger-color);
-            font-weight: bold;
-          ">Logout</a>
-    </div>
-
-    <!-- Main Workspace -->
-    <div class="dashboard-content">
-      <h1 style="margin-bottom: 30px; color: var(--text-dark)">
-        User Dashboard
-      </h1>
-
-      <!-- Notifications -->
-      <div class="card" id="notifications-section" style="
-            margin-bottom: 30px;
-            border-left: 4px solid var(--accent-color);
-            border-top: none;
-            text-align: left;
-            display: none;
-          ">
-        <h3 style="color: var(--text-dark); margin-bottom: 15px">
-          🔔 Recent Notifications
-        </h3>
-        <div id="notifications-list"></div>
-      </div>
-
-      <!-- Stats Grid leveraging CSS Grid -->
-      <div class="dashboard-cards">
-        <div class="card">
-          <h3>📊 Total Bookings</h3>
-          <p id="total-bookings">0</p>
-        </div>
-        <div class="card">
-          <h3>⏳ Pending</h3>
-          <p id="pending-requests">0</p>
-        </div>
-        <div class="card">
-          <h3>✅ Completed</h3>
-          <p id="completed-services">0</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Local Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo">Local Connect</div>
+        <div class="menu">
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Book Now</a>
+          <a href="user-dashboard.html">User</a>
+          <a href="provider-dashboard.html">Provider</a>
+          <a href="admin-dashboard.html">Admin</a>
+          <a href="Contact.html">Customer Support</a>
         </div>
       </div>
+    </nav>
 
-      <!-- Table Container -->
-      <div class="table-container" style="margin-bottom: 40px">
-        <h3 style="margin-bottom: 20px; color: var(--text-dark)">
-          My Recent Bookings
-        </h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Service</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Payment</th>
-              <th>Provider</th>
-              <th>Action / Feedback</th>
-            </tr>
-          </thead>
-          <tbody id="bookings-body">
-            <!-- Loaded dynamically by user-dashboard.js -->
-          </tbody>
-        </table>
+    <div class="dashboard-container">
+      <div class="sidebar">
+        <h3>User Panel</h3>
+        <a href="user-dashboard.html" class="active">My Dashboard</a>
+        <a href="user-profile.html">My Profile</a>
+        <a href="booking.html">Book Service</a>
+        <a href="services.html">All Services</a>
+        <a href="Contact.html">Support</a>
+        <a href="#" onclick="logout(); return false;" class="logout-link">Logout</a>
       </div>
 
-      <!-- High UI Feedback Form -->
-      <div class="card" id="feedback-section" style="
-            display: none;
-            max-width: 600px;
-            border-top: 4px solid var(--primary-color);
-            text-align: left;
-          ">
-        <h3 style="color: var(--text-dark); margin-bottom: 10px">
-          Give Feedback
-        </h3>
-        <p id="service-name" style="
-              color: var(--primary-color);
-              font-weight: 600;
-              margin-bottom: 20px;
-            "></p>
+      <div class="dashboard-content">
+        <h1 class="dashboard-title">User Dashboard</h1>
 
-        <form id="feedback-form" style="display: flex; flex-direction: column; gap: 15px">
-          <input type="hidden" id="service-id" name="service-id" />
+        <!-- Notifications -->
+        <div class="card notification-card hidden" id="notifications-section">
+          <h3>🔔 Recent Notifications</h3>
+          <div id="notifications-list"></div>
+        </div>
 
-          <div>
-            <label style="font-weight: 500; color: var(--text-dark)">Rating:</label>
-            <select name="rating" required style="
-                  width: 100%;
-                  padding: 12px;
-                  border: 1px solid #cbd5e1;
-                  border-radius: 6px;
-                  margin-top: 5px;
-                  outline: none;
-                ">
-              <option value="⭐ 1">⭐ 1 - Poor</option>
-              <option value="⭐⭐ 2">⭐⭐ 2 - Fair</option>
-              <option value="⭐⭐⭐ 3">⭐⭐⭐ 3 - Good</option>
-              <option value="⭐⭐⭐⭐ 4">⭐⭐⭐⭐ 4 - Very Good</option>
-              <option value="⭐⭐⭐⭐⭐ 5" selected>
-                ⭐⭐⭐⭐⭐ 5 - Excellent
-              </option>
-            </select>
+        <!-- Stats Grid -->
+        <div class="dashboard-cards">
+          <div class="card">
+            <h3>📊 Total Bookings</h3>
+            <p id="total-bookings">0</p>
           </div>
-
-          <div>
-            <label style="font-weight: 500; color: var(--text-dark)">Comment:</label>
-            <textarea name="Comment" placeholder="Write Your Feedback" required style="
-                  width: 100%;
-                  padding: 12px;
-                  border: 1px solid #cbd5e1;
-                  border-radius: 6px;
-                  margin-top: 5px;
-                  min-height: 100px;
-                  font-family: inherit;
-                  outline: none;
-                "></textarea>
+          <div class="card">
+            <h3>⏳ Pending</h3>
+            <p id="pending-requests">0</p>
           </div>
+          <div class="card">
+            <h3>✅ Completed</h3>
+            <p id="completed-services">0</p>
+          </div>
+        </div>
 
-          <button type="submit" class="btn" style="width: 100%; padding: 14px">
-            Submit Feedback
-          </button>
-        </form>
+        <!-- Table Container -->
+        <div class="table-container">
+          <h3 class="table-title">My Recent Bookings</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Provider</th>
+                <th>Action / Feedback</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Feedback Form -->
+        <div class="card feedback-card hidden" id="feedback-section">
+          <h3>Give Feedback</h3>
+          <p id="service-name" class="feedback-service-name"></p>
+          <form id="feedback-form" class="dashboard-form">
+            <input type="hidden" id="service-id" name="service-id" />
+            <div>
+              <label>Rating:</label>
+              <select name="rating" required>
+                <option value="⭐ 1">⭐ 1 - Poor</option>
+                <option value="⭐⭐ 2">⭐⭐ 2 - Fair</option>
+                <option value="⭐⭐⭐ 3">⭐⭐⭐ 3 - Good</option>
+                <option value="⭐⭐⭐⭐ 4">⭐⭐⭐⭐ 4 - Very Good</option>
+                <option value="⭐⭐⭐⭐⭐ 5" selected>⭐⭐⭐⭐⭐ 5 - Excellent</option>
+              </select>
+            </div>
+            <div>
+              <label>Comment:</label>
+              <textarea name="Comment" placeholder="Write Your Feedback" required></textarea>
+            </div>
+            <button type="submit" class="btn">Submit Feedback</button>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
 
-  <footer class="footer">
-    <div class="footer-container">
-      <!-- Logo & About -->
-      <div class="footer-section">
-        <h2 class="footer-logo">Local Connect</h2>
-        <p>
-          Your trusted platform to book local services like electricians,
-          plumbers, cleaners and more.
-        </p>
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-section">
+          <h2 class="footer-logo">Local Connect</h2>
+          <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Booking</a>
+          <a href="user-dashboard.html#feedback-section">Feedback</a>
+        </div>
+        <div class="footer-section">
+          <h3>User</h3>
+          <a href="login.html">Login</a>
+          <a href="signup.html">Signup</a>
+          <a href="user-dashboard.html">Dashboard</a>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Email: support@localconnect.com</p>
+          <p>Phone: +91 8982427031</p>
+          <p>Location: India</p>
+        </div>
       </div>
-
-      <!-- Quick Links -->
-      <div class="footer-section">
-        <h3>Quick Links</h3>
-        <a href="main.html">Home</a>
-        <a href="services.html">Services</a>
-        <a href="booking.html">Booking</a>
-        <a href="user-dashboard.html#feedback-section">Feedback</a>
-        <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
+      <div class="footer-bottom">
+        <p>© 2026 Local Connect | All Rights Reserved</p>
       </div>
+    </footer>
 
-      <!-- For Users -->
-      <div class="footer-section">
-        <h3>User</h3>
-        <a href="login.html">Login</a>
-        <a href="signup.html">Signup</a>
-        <a href="user-dashboard.html">Dashboard</a>
-      </div>
-
-      <!-- Contact -->
-      <div class="footer-section">
-        <h3>Contact</h3>
-        <p>Email: support@localconnect.com</p>
-        <p>Phone: +91 8982427031</p>
-        <p>Location: India</p>
-      </div>
-    </div>
-
-    <!-- Bottom Bar -->
-    <div class="footer-bottom">
-      <p>© 2026 Local Connect | All Rights Reserved</p>
-    </div>
-  </footer>
-
-  <script src="./js/user-dashboard.js"></script>
-</body>
-
+    <script src="./js/utils.js"></script>
+    <script src="./js/data.js"></script>
+    <script src="./js/user-dashboard.js"></script>
+    <script src="./js/navbar.js"></script>
+  </body>
 </html>

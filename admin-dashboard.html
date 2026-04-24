@@ -1,229 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard- Local Connect</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-
-<body>
-  <nav class="navbar">
-    <div class="container">
-      <div class="logo">Local Connect</div>
-
-      <div class="menu">
-        <a href="main.html">Home</a>
-        <a href="services.html">Services</a>
-        <a href="booking.html">Book Now</a>
-        <a href="user-dashboard.html">User</a>
-        <a href="provider-dashboard.html">Provider</a>
-        <a href="admin-dashboard.html">Admin</a>
-        <a href="Contact.html">Customer Support</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Local Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo">Local Connect</div>
+        <div class="menu">
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Book Now</a>
+          <a href="user-dashboard.html">User</a>
+          <a href="provider-dashboard.html">Provider</a>
+          <a href="admin-dashboard.html">Admin</a>
+          <a href="Contact.html">Customer Support</a>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <div class="dashboard-container">
-    <!-- Premium Sidebar UI -->
-    <div class="sidebar">
-      <h3 style="color: var(--primary-color)">Admin Panel</h3>
-      <a href="admin-dashboard.html" class="active">Overview</a>
-      <a href="services.html">Services Catalog</a>
-      <a href="Contact.html">Support Log</a>
-      <a href="#" onclick="
-            logout();
-            return false;
-          " style="
-            margin-top: 20px;
-            color: var(--danger-color);
-            font-weight: bold;
-          ">Logout</a>
-    </div>
-
-    <!-- Main Workspace -->
-    <div class="dashboard-content">
-      <h1 style="margin-bottom: 30px; color: var(--text-dark)">
-        Admin Dashboard
-      </h1>
-
-      <!-- Welcome Banner -->
-      <div class="card" style="
-            margin-bottom: 30px;
-            border-left: 4px solid var(--accent-color);
-            border-top: none;
-            text-align: left;
-          ">
-        <h3 style="color: var(--text-dark); margin-bottom: 5px">
-          🌍 Global Command Center
-        </h3>
-        <p style="color: var(--text-muted)">
-          Monitor and manage users, providers, and all platform bookings in
-          real-time.
-        </p>
+    <div class="dashboard-container">
+      <div class="sidebar">
+        <h3 class="admin-panel-title">Admin Panel</h3>
+        <a href="admin-dashboard.html" class="active">Overview</a>
+        <a href="services.html">Services Catalog</a>
+        <a href="Contact.html">Support Log</a>
+        <a href="#" onclick="logout(); return false;" class="logout-link">Logout</a>
       </div>
 
-      <!-- Overview Stats -->
-      <div class="dashboard-cards" style="margin-bottom: 40px">
-        <div class="card">
-          <h3>👥 Total Users</h3>
-          <p id="stat-users">0</p>
+      <div class="dashboard-content">
+        <h1 class="dashboard-title">Admin Dashboard</h1>
+
+        <!-- Welcome Banner -->
+        <div class="card notification-card">
+          <h3>🌍 Global Command Center</h3>
+          <p class="text-muted">Monitor and manage users, providers, and all platform bookings in real-time.</p>
         </div>
-        <div class="card">
-          <h3>👷 Total Providers</h3>
-          <p id="stat-providers">0</p>
-        </div>
-        <div class="card">
-          <h3>📅 Total Bookings</h3>
-          <p id="stat-bookings">0</p>
-        </div>
-        <div class="card" style="border-top-color: var(--danger-color)">
-          <h3 style="color: var(--danger-color)">🚨 Emergencies</h3>
+
+        <!-- Overview Stats -->
+        <div class="dashboard-cards">
+          <div class="card">
+            <h3>👥 Total Users</h3>
+            <p id="stat-users">0</p>
+          </div>
+          <div class="card">
+            <h3>👷 Total Providers</h3>
+            <p id="stat-providers">0</p>
+          </div>
+          <div class="card">
+            <h3>📅 Total Bookings</h3>
+            <p id="stat-bookings">0</p>
+          </div>
+        <div class="card card-danger">
+          <h3 class="text-danger">🚨 Emergencies</h3>
           <p id="stat-emergencies">0</p>
         </div>
-      </div>
+        </div>
 
-      <!-- Manage Users -->
-      <h2 style="font-size: 22px; margin-bottom: 15px; color: var(--text-dark)">
-        Manage Users
-      </h2>
-      <div class="table-container" style="margin-bottom: 40px" id="users">
-        <table>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>City</th>
-          </tr>
-          <tbody id="users-body">
-            <!-- Loaded by admin-dashboard.js -->
-          </tbody>
-        </table>
-      </div>
+        <!-- Manage Users -->
+        <h2 class="section-header">Manage Users</h2>
+        <div class="table-container" id="users">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>City</th>
+              </tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </div>
 
-      <!-- Manage Providers -->
-      <h2 style="font-size: 22px; margin-bottom: 15px; color: var(--text-dark)">
-        Manage Service Providers
-      </h2>
-      <div class="table-container" style="margin-bottom: 40px" id="providers">
-        <table>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>City</th>
-          </tr>
-          <tbody id="providers-body">
-            <!-- Loaded by admin-dashboard.js -->
-          </tbody>
-        </table>
-      </div>
+        <!-- Manage Providers -->
+        <h2 class="section-header">Manage Service Providers</h2>
+        <div class="table-container" id="providers">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>City</th>
+              </tr>
+            </thead>
+            <tbody id="providers-body"></tbody>
+          </table>
+        </div>
 
-      <!-- Feedback Monitoring -->
-      <h2 style="font-size: 22px; margin-bottom: 15px; color: var(--text-dark)">
-        📊 Customer Feedback & Ratings
-      </h2>
-      <div class="table-container" style="margin-bottom: 40px">
-        <table>
-          <tr>
-            <th>Service</th>
-            <th>Provider</th>
-            <th>Customer</th>
-            <th>Rating</th>
-            <th>Feedback</th>
-            <th>Date</th>
-          </tr>
-          <tbody id="feedback-body">
-            <!-- Loaded by admin-dashboard.js -->
-          </tbody>
-        </table>
-      </div>
+        <!-- Feedback Monitoring -->
+        <h2 class="section-header">📊 Customer Feedback & Ratings</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Provider</th>
+                <th>Customer</th>
+                <th>Rating</th>
+                <th>Feedback</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="feedback-body"></tbody>
+          </table>
+        </div>
 
-      <!-- Booking Management -->
-      <h2 style="font-size: 22px; margin-bottom: 15px; color: var(--text-dark)">
-        All Global Bookings
-      </h2>
-      <div class="table-container" style="margin-bottom: 40px" id="bookings">
-        <table>
-          <tr>
-            <th>User</th>
-            <th>Service</th>
-            <th>Provider</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Type</th>
-            <th>Payment</th>
-          </tr>
-          <tbody id="bookings-body">
-            <!-- Loaded by admin-dashboard.js -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Feedback Section -->
-      <h2 style="font-size: 22px; margin-bottom: 15px; color: var(--text-dark)">
-        Global Feedback & Ratings
-      </h2>
-      <div class="table-container" style="margin-bottom: 40px" id="feedback">
-        <table>
-          <tr>
-            <th>Service</th>
-            <th>Provider</th>
-            <th>Rating</th>
-            <th>Comment</th>
-          </tr>
-          <tbody id="feedback-body">
-            <!-- Loaded by admin-dashboard.js -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <div class="footer-container">
-      <!-- Logo & About -->
-      <div class="footer-section">
-        <h2 class="footer-logo">Local Connect</h2>
-        <p>
-          Your trusted platform to book local services like electricians,
-          plumbers, cleaners and more.
-        </p>
-      </div>
-
-      <!-- Quick Links -->
-      <div class="footer-section">
-        <h3>Quick Links</h3>
-        <a href="main.html">Home</a>
-        <a href="services.html">Services</a>
-        <a href="booking.html">Booking</a>
-        <a href="user-dashboard.html#feedback-section">Feedback</a>
-        <!-- Updated: Link to feedback section in user dashboard instead of missing feedback.html -->
-      </div>
-
-      <!-- For Users -->
-      <div class="footer-section">
-        <h3>User</h3>
-        <a href="login.html">Login</a>
-        <a href="signup.html">Signup</a>
-        <a href="user-dashboard.html">Dashboard</a>
-      </div>
-
-      <!-- Contact -->
-      <div class="footer-section">
-        <h3>Contact</h3>
-        <p>Email: support@localconnect.com</p>
-        <p>Phone: +91 8982427031</p>
-        <p>Location: India</p>
+        <!-- Booking Management -->
+        <h2 class="section-header">All Global Bookings</h2>
+        <div class="table-container" id="bookings">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Service</th>
+                <th>Provider</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Payment</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-body"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Bottom Bar -->
-    <div class="footer-bottom">
-      <p>© 2026 Local Connect | All Rights Reserved</p>
-    </div>
-  </footer>
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-section">
+          <h2 class="footer-logo">Local Connect</h2>
+          <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <a href="main.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Booking</a>
+          <a href="user-dashboard.html#feedback-section">Feedback</a>
+        </div>
+        <div class="footer-section">
+          <h3>User</h3>
+          <a href="login.html">Login</a>
+          <a href="signup.html">Signup</a>
+          <a href="user-dashboard.html">Dashboard</a>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Email: support@localconnect.com</p>
+          <p>Phone: +91 8982427031</p>
+          <p>Location: India</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Local Connect | All Rights Reserved</p>
+      </div>
+    </footer>
 
-  <script src="./js/admin-dashboard.js"></script>
-</body>
-
+    <script src="./js/utils.js"></script>
+    <script src="./js/data.js"></script>
+    <script src="./js/admin-dashboard.js"></script>
+    <script src="./js/navbar.js"></script>
+  </body>
 </html>

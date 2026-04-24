@@ -39,7 +39,7 @@ function renderCategories() {
     html += `
         <div class="service-card" data-id="${service.id}">
             <i class="fa-solid ${service.icon}"></i>
-            <h3>${service.name}</h3>
+            <h3 class="bold">${service.name}</h3>
             <p>${service.description}</p>
         </div>
         `;
@@ -67,9 +67,10 @@ function renderSubServices(service) {
   service.subServices.forEach((sub) => {
     html += `
         <div class="service-card" data-service='${JSON.stringify(sub)}'>
+            <span class="price-tag">₹${sub.price}</span>
             <i class="fa-solid ${service.icon}"></i>
-            <h3>${sub.name}</h3>
-            <p>Starting from ₹${sub.price}</p>
+            <h3 class="bold">${sub.name}</h3>
+            <p>Reliable and professional ${sub.name.toLowerCase()} service at your doorstep.</p>
             <button class="btn book-btn">Book Now</button>
         </div>
         `;
@@ -80,6 +81,12 @@ function renderSubServices(service) {
   // Book button click
   document.querySelectorAll(".book-btn").forEach((btn, index) => {
     btn.addEventListener("click", () => {
+      if (!localStorage.getItem("loggedInUser")) {
+        showToast("Please login first to book a service.", "error");
+        setTimeout(() => window.location.href = "login.html", 1500);
+        return;
+      }
+
       const selected = service.subServices[index];
 
       sessionStorage.setItem("serviceRefresh", "true");
@@ -105,7 +112,7 @@ if (selectedCategory) {
 }
 
 // ==========================
-// RENDER REVIEWS FUNCTION (Transparency for Users)
+// RENDER REVIEWS FUNCTION
 // ==========================
 function renderReviews() {
   const reviewsContainer = document.getElementById("reviews-container");
@@ -115,17 +122,21 @@ function renderReviews() {
   reviewsContainer.innerHTML = "";
   if (reviews.length === 0) {
     reviewsContainer.innerHTML =
-      "<p style='color: var(--text-muted); text-align: center;'>No reviews yet. Be the first to book and share your experience!</p>";
+      "<p class='text-muted text-center'>No reviews yet. Be the first to book and share your experience!</p>";
     return;
   }
 
   reviews.forEach((review) => {
     reviewsContainer.innerHTML += `
-            <div class="review-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: var(--shadow-md); max-width: 300px;">
-                <h4>${review.service}</h4>
-                <p style="color: var(--accent-color); font-weight: bold;">${review.feedback.rating}</p>
-                <p style="font-style: italic;">"${review.feedback.comment}"</p>
-                <p style="color: var(--text-muted); font-size: 12px;">- ${review.customerName || review.userName}, ${new Date(review.date).toLocaleDateString()}</p>
+            <div class="review-card">
+                <div class="rating">
+                    ${'⭐'.repeat(parseInt(review.feedback.rating) || 5)}
+                </div>
+                <h4 class="bold">${review.service}</h4>
+                <p class="italic">"${review.feedback.comment}"</p>
+                <span class="author">
+                    ${review.customerName || review.userName} • ${new Date(review.date).toLocaleDateString()}
+                </span>
             </div>
         `;
   });
@@ -145,7 +156,7 @@ function filterServices() {
 
   cards.forEach((card) => {
     let text = card.innerText.toLowerCase();
-    let price = parseInt(card.innerText.match(/₹(\d+)/)?.[1] || 0); // Extract price from card text
+    let price = parseInt(card.innerText.match(/₹(\d+)/)?.[1] || 0); 
     let showCard = true;
 
     // Search filter
@@ -161,12 +172,12 @@ function filterServices() {
       else if (priceValue === "high" && price <= 600) showCard = false;
     }
 
-    card.style.display = showCard ? "" : "none";
+    card.classList.toggle("hidden", !showCard);
     if (showCard) found = true;
   });
 
   if (noResult) {
-    noResult.style.display = found ? "none" : "block";
+    noResult.classList.toggle("hidden", found);
   }
 }
 
