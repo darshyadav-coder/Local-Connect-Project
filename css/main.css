@@ -134,6 +134,12 @@
   border-radius: 10px;
 }
 
+.view-all-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
 /* ===== FEATURES SECTION ===== */
 .features {
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
@@ -236,6 +242,7 @@
 .service-card:hover {
   transform: translateY(-12px) scale(1.02);
   box-shadow: var(--shadow-xl), var(--shadow-glow);
+  border-color: var(--primary-color);
 }
 
 .service-card i {

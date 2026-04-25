@@ -40,20 +40,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     currentUser = user;
-
-    // Load security question
+    
+    // Check user profile first, then fall back to registration data
     const userProfiles = JSON.parse(localStorage.getItem("userProfiles")) || {};
     const profile = userProfiles[email] || {};
+    
+    const question = profile.securityQuestion || user.securityQuestion || "What is your favorite color?";
+    const answer = (profile.securityAnswer || user.securityAnswer || "blue").toLowerCase();
+    
+    // Store the answer temporarily in currentUser for verification (or fetch again later)
+    currentUser.expectedAnswer = answer;
 
-    if (!profile.securityQuestion) {
-      // Set a default security question for demo
-      profile.securityQuestion = "What is your favorite color?";
-      profile.securityAnswer = "blue"; // Default answer
-      userProfiles[email] = profile;
-      localStorage.setItem("userProfiles", JSON.stringify(userProfiles));
-    }
-
-    document.getElementById("security-question-text").textContent = profile.securityQuestion;
+    document.getElementById("security-question-text").textContent = question;
     document.getElementById("reset-form").classList.add("hidden");
     document.getElementById("security-question").classList.remove("hidden");
 
@@ -64,10 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleSecurityAnswer() {
     const answer = document.getElementById("answer").value.trim().toLowerCase();
 
-    const userProfiles = JSON.parse(localStorage.getItem("userProfiles")) || {};
-    const profile = userProfiles[currentUser.email] || {};
-
-    if (answer === (profile.securityAnswer || "blue").toLowerCase()) {
+    if (answer === currentUser.expectedAnswer) {
       document.getElementById("security-question").classList.add("hidden");
       document.getElementById("new-password").classList.remove("hidden");
     } else {

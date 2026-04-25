@@ -27,12 +27,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("password").value.trim();
       const location = document.getElementById("location").value.trim();
       const role = document.getElementById("role").value;
+      const securityQuestion = document.getElementById("security-question").value;
+      const securityAnswer = document.getElementById("security-answer").value.trim();
 
       // Reset error
       errorMsg.textContent = "";
 
       // 2. Viva Check: Form Validation
-      if (!fullname || !email || !password || !location || !role) {
+      if (!fullname || !email || !password || !location || !role || !securityQuestion || !securityAnswer) {
         errorMsg.textContent = "Please fill in all fields.";
         return;
       }
@@ -49,6 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
         password,
         location,
         role,
+        securityQuestion,
+        securityAnswer,
       };
 
       // 4. Viva Feature: Using Frontend LocalStorage!

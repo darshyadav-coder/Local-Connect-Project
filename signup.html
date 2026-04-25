@@ -46,6 +46,17 @@
               <option value="provider">Service Provider</option>
             </select>
 
+            <div class="security-setup">
+              <select id="security-question" name="securityQuestion" required>
+                <option value="">Select Security Question</option>
+                <option value="What is your favorite color?">What is your favorite color?</option>
+                <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                <option value="Which city were you born in?">Which city were you born in?</option>
+                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+              </select>
+              <input type="text" id="security-answer" name="securityAnswer" placeholder="Your Secret Answer" required />
+            </div>
+
             <p id="error-msg" class="error-message"></p>
 
             <button type="submit" id="signupBtn" class="btn w-100">Create Account</button>

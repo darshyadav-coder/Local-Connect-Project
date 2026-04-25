@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Booking - Local Connect</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="css/booking.css" />
     <script src="./js/utils.js"></script>
@@ -33,12 +36,30 @@
 
         <div class="booking-type-selector">
           <div class="toggle-slider" id="toggle-slider"></div>
-          <button id="normal-booking-btn" class="booking-type-btn active">Normal</button>
-          <button id="emergency-booking-btn" class="booking-type-btn">Emergency</button>
+          <button id="normal-booking-btn" class="booking-type-btn active">
+            Normal
+          </button>
+          <button id="emergency-booking-btn" class="booking-type-btn">
+            Emergency
+          </button>
+        </div>
+
+        <!-- No Service Warning -->
+        <div id="no-service-warning" class="no-service-alert hidden">
+          <div class="alert-content">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span
+              >No service selected. Please pick a professional service from
+              below to continue.</span
+            >
+          </div>
         </div>
 
         <!-- Selected Service Display -->
-        <div id="selected-service-display" class="selected-service-banner hidden">
+        <div
+          id="selected-service-display"
+          class="selected-service-banner hidden"
+        >
           <div class="banner-content">
             <div>
               <p class="banner-label">Selected Service</p>
@@ -47,15 +68,32 @@
                 <span id="service-name">Loading...</span>
               </p>
             </div>
-            <button type="button" id="change-service-btn" class="btn btn-sm">✚ Change Service</button>
+            <button type="button" id="change-service-btn" class="btn btn-sm">
+              ✚ Change Service
+            </button>
           </div>
         </div>
 
-        <!-- Service Selection Section -->
-        <div id="service-selection" class="selection-container hidden">
-          <h3 class="selection-header">Select a Service</h3>
-          <p class="selection-subtitle">Choose from our wide range of professional services</p>
-          <div class="service-grid" id="service-grid"></div>
+        <!-- Inline Service Selector (Shown when no service is selected) -->
+        <div
+          id="inline-service-selector"
+          class="inline-selector-container hidden"
+        >
+          <label>What service do you need?</label>
+          <div class="search-wrapper">
+            <i class="fa-solid fa-search search-icon"></i>
+            <input
+              type="text"
+              id="service-search-input"
+              placeholder="Search for a service (e.g. plumber, ac repair...)"
+              autocomplete="off"
+            />
+            <div id="search-results-list" class="search-results hidden"></div>
+          </div>
+          <p class="search-hint">
+            Can't find what you need? Visit our
+            <a href="services.html">Services Page</a>
+          </p>
         </div>
 
         <form id="booking-form">
@@ -64,7 +102,12 @@
           <span class="error hidden" id="name-error"></span>
 
           <label for="phone-input">Phone Number</label>
-          <input id="phone-input" type="text" placeholder="Phone Number" required />
+          <input
+            id="phone-input"
+            type="text"
+            placeholder="Phone Number"
+            required
+          />
           <span class="error hidden" id="phone-error"></span>
 
           <label for="booking-date">Booking Date</label>
@@ -72,13 +115,20 @@
           <span class="error hidden" id="date-error"></span>
 
           <div id="emergency-notice" class="emergency-notice hidden">
-            ⚠️ Emergency booking will be prioritized and may incur additional charges.
+            ⚠️ Emergency booking will be prioritized and may incur additional
+            charges.
           </div>
 
-          <p class="price-summary">Total Price: <span id="price-display">₹0</span></p>
-          <p id="extra-charge" class="emergency-charge-label hidden">⚡ Emergency Charges: +₹200</p>
+          <p class="price-summary">
+            Total Price: <span id="price-display">₹0</span>
+          </p>
+          <p id="extra-charge" class="emergency-charge-label hidden">
+            ⚡ Emergency Charges: +₹200
+          </p>
 
-          <button type="submit" class="btn w-100 btn-lg">Confirm Booking</button>
+          <button type="submit" class="btn w-100 btn-lg">
+            Confirm Booking
+          </button>
         </form>
 
         <!-- Checkout UI -->
@@ -106,9 +156,14 @@
           <div id="payment-status-message" class="hidden"></div>
 
           <button id="pay-now-btn" class="btn btn-success-payment w-100 btn-lg">
-            <i class="fa-solid fa-lock"></i> <span id="pay-now-text">Pay Now</span>
+            <i class="fa-solid fa-lock"></i>
+            <span id="pay-now-text">Pay Now</span>
           </button>
-          <button id="cancel-checkout-btn" type="button" class="btn btn-muted-outline w-100 mt-2">
+          <button
+            id="cancel-checkout-btn"
+            type="button"
+            class="btn btn-muted-outline w-100 mt-2"
+          >
             Cancel Order
           </button>
         </div>
@@ -119,7 +174,10 @@
       <div class="footer-container">
         <div class="footer-section">
           <h2 class="footer-logo">Local Connect</h2>
-          <p>Your trusted platform to book local services like electricians, plumbers, cleaners and more.</p>
+          <p>
+            Your trusted platform to book local services like electricians,
+            plumbers, cleaners and more.
+          </p>
         </div>
         <div class="footer-section">
           <h3>Quick Links</h3>

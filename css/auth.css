@@ -1,64 +1,95 @@
-/* ===== AUTH PAGES (Login/Signup) ===== */
+/* ===== AUTH PAGES (Login/Signup/Forgot) ===== */
 .auth-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 60px 20px;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+  padding: 80px 20px;
+  background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent),
+              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent);
+  background-color: #f8fafc;
 }
 
 .login-container,
 .signup-container {
   width: 100%;
   max-width: 450px;
-  background: var(--surface-color);
-  padding: 50px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-lg);
+  background: #ffffff;
+  padding: 50px 40px;
+  border-radius: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
   text-align: center;
+  border: 1px solid #f1f5f9;
+  position: relative;
+}
+
+/* Auth Top Icon Styling */
+.auth-icon-top {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin: -85px auto 25px;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 }
 
 .login-container h1,
 .signup-container h1 {
-  margin-bottom: 10px;
-  font-size: 28px;
+  margin-bottom: 8px;
+  font-size: 26px;
+  font-weight: 800;
   color: var(--text-dark);
+  letter-spacing: -0.5px;
 }
 
 .subtitle {
   color: var(--text-muted);
   margin-bottom: 30px;
   font-size: 15px;
+  line-height: 1.5;
 }
 
-#loginForm,
-#signupForm {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+/* General Form Group Styles */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
 }
 
-#loginForm input,
-#loginForm select,
-#signupForm input,
-#signupForm select {
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+select {
   width: 100%;
-  padding: 14px;
+  padding: 14px 18px;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 15px;
   outline: none;
-  transition: var(--transition);
-  background: #f8fafc;
+  transition: all 0.3s ease;
+  background: #fcfdfe;
+  font-family: inherit;
+  color: var(--text-dark);
 }
 
-#loginForm input:focus,
-#loginForm select:focus,
-#signupForm input:focus,
-#signupForm select:focus {
+input:focus,
+select:focus {
   border-color: var(--primary-color);
   background: white;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
 }
 
 /* Password Toggle Container */
@@ -69,22 +100,25 @@
 
 .toggle-password-btn {
   position: absolute;
-  right: 15px;
-  top: 18px;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--primary-color);
   cursor: pointer;
   padding: 0;
+  font-size: 13px;
+  text-transform: uppercase;
 }
 
 /* Error Message */
 .error-message {
   color: var(--danger-color);
-  font-size: 14px;
-  text-align: left;
-  margin: 0;
+  font-size: 13px;
+  margin-top: 5px;
+  font-weight: 500;
 }
 
 .auth-links {
@@ -95,7 +129,8 @@
 .auth-link-primary {
   color: var(--primary-color);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .auth-link-primary:hover {
@@ -103,15 +138,21 @@
 }
 
 .auth-footer {
-  margin-top: 20px;
+  margin-top: 25px;
   color: var(--text-muted);
   font-size: 14px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .auth-footer a {
   color: var(--primary-color);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
 }
 
 /* Signup Specific */
@@ -124,9 +165,27 @@
   gap: 15px;
 }
 
+/* Transitions for multi-step reset */
+.hidden {
+  display: none !important;
+}
+
+#reset-form, #security-question, #new-password {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 600px) {
   .input-row {
     flex-direction: column;
     gap: 15px;
+  }
+  
+  .login-container, .signup-container {
+    padding: 40px 25px;
   }
 }

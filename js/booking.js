@@ -1,22 +1,23 @@
 // ==========================
-// ELEMENTS
+// SHARED STATE
 // ==========================
+let basePrice = 0;
+let selectedService = null;
+let bookingType = "normal";
+
+// ELEMENTS
 const normalBtn = document.getElementById("normal-booking-btn");
 const emergencyBtn = document.getElementById("emergency-booking-btn");
 const notice = document.getElementById("emergency-notice");
 const form = document.getElementById("booking-form");
-
 const nameInput = document.getElementById("name-input");
 const phoneInput = document.getElementById("phone-input");
 const dateInput = document.getElementById("booking-date");
-
 const nameError = document.getElementById("name-error");
 const phoneError = document.getElementById("phone-error");
 const dateError = document.getElementById("date-error");
-
 const priceDisplay = document.getElementById("price-display");
 const extraChargeText = document.getElementById("extra-charge");
-const selectedServiceText = document.getElementById("selected-service");
 
 // ==========================
 // REAL-TIME VALIDATION
@@ -53,135 +54,170 @@ dateInput.addEventListener("input", () => {
 });
 
 // ==========================
-// GET SELECTED SERVICE
+// UI UPDATE FUNCTIONS
 // ==========================
-let selectedService = JSON.parse(localStorage.getItem("selectedService"));
-sessionStorage.removeItem("serviceRefresh");
 
-let basePrice = 0;
-
-if (selectedService) {
-  const serviceDisplay = document.getElementById("selected-service-display");
-  const serviceName = document.getElementById("service-name");
-  const serviceIcon = document.getElementById("service-icon");
-
-  const parentService = servicesData.find((s) =>
-    s.subServices.some((sub) => sub.id === selectedService.id)
-  );
-
-  serviceName.textContent = selectedService.name;
-  if (parentService) {
-    serviceIcon.className = `fa-solid ${parentService.icon}`;
+function updatePrice() {
+  let total = basePrice;
+  if (bookingType === "emergency") {
+    total += 200;
+    notice.classList.remove("hidden");
+    extraChargeText.classList.remove("hidden");
+  } else {
+    notice.classList.add("hidden");
+    extraChargeText.classList.add("hidden");
   }
+  priceDisplay.innerText = "₹" + total;
+}
 
-  serviceDisplay.classList.remove("hidden");
-  document.getElementById("service-selection").classList.add("hidden");
+function updateServiceDisplay() {
+  const serviceDisplay = document.getElementById("selected-service-display");
+  const inlineSelector = document.getElementById("inline-service-selector");
+  const noServiceWarning = document.getElementById("no-service-warning");
+  const bookingForm = document.getElementById("booking-form");
 
-  basePrice = selectedService.price;
+  // Only show form if a sub-service with price is selected
+  if (selectedService && selectedService.price > 0) {
+    const serviceName = document.getElementById("service-name");
+    const serviceIcon = document.getElementById("service-icon");
 
-  const changeBtn = document.getElementById("change-service-btn");
-  changeBtn.addEventListener("click", () => {
-    selectedService = null;
-    document.getElementById("selected-service-display").classList.add("hidden");
-    document.getElementById("service-selection").classList.remove("hidden");
-    loadServiceSelection();
+    const parentService = servicesData.find((s) =>
+      s.subServices.some((sub) => sub.id === selectedService.id)
+    );
+
+    serviceName.textContent = selectedService.name;
+    if (parentService) {
+      serviceIcon.className = `fa-solid ${parentService.icon}`;
+    }
+
+    serviceDisplay.classList.remove("hidden");
+    inlineSelector.classList.add("hidden");
+    noServiceWarning.classList.add("hidden");
+    bookingForm.classList.remove("hidden");
+    basePrice = selectedService.price;
+  } else {
+    serviceDisplay.classList.add("hidden");
+    inlineSelector.classList.remove("hidden");
+    noServiceWarning.classList.remove("hidden");
+    bookingForm.classList.add("hidden");
+    
+    setupInlineServiceSearch();
     basePrice = 0;
-    updatePrice();
-  });
-} else {
-  document.getElementById("selected-service-display").classList.add("hidden");
-  document.getElementById("service-selection").classList.remove("hidden");
-  loadServiceSelection();
+  }
+  updatePrice();
 }
+
+let searchInitialized = false;
+function setupInlineServiceSearch() {
+  if (searchInitialized) return;
+  searchInitialized = true;
+
+  const searchInput = document.getElementById("service-search-input");
+  const resultsList = document.getElementById("search-results-list");
+
+  if (!searchInput || !resultsList) return;
+
+  // Flatten all sub-services for easy searching
+  const allSubServices = [];
+  servicesData.forEach(category => {
+    category.subServices.forEach(sub => {
+      allSubServices.push({
+        ...sub,
+        categoryName: category.name,
+        categoryIcon: category.icon
+      });
+    });
+  });
+
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase().trim();
+    if (query.length < 2) {
+      resultsList.classList.add("hidden");
+      return;
+    }
+
+    const filtered = allSubServices.filter(s => 
+      s.name.toLowerCase().includes(query) || 
+      s.categoryName.toLowerCase().includes(query)
+    );
+
+    if (filtered.length > 0) {
+      resultsList.innerHTML = filtered.map(s => `
+        <div class="search-item" data-id="${s.id}">
+          <div class="search-item-info">
+            <i class="fa-solid ${s.categoryIcon}"></i>
+            <div>
+              <div class="search-item-name">${s.name}</div>
+              <div class="search-item-category">in ${s.categoryName}</div>
+            </div>
+          </div>
+          <span class="search-item-price">₹${s.price}</span>
+        </div>
+      `).join("");
+      resultsList.classList.remove("hidden");
+
+      // Add click listeners to items
+      resultsList.querySelectorAll(".search-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const serviceId = item.getAttribute("data-id");
+          const selected = allSubServices.find(s => s.id === serviceId);
+          if (selected) {
+            selectedService = selected;
+            localStorage.setItem("selectedService", JSON.stringify(selectedService));
+            updateServiceDisplay();
+            searchInput.value = "";
+            resultsList.classList.add("hidden");
+          }
+        });
+      });
+    } else {
+      resultsList.innerHTML = '<div class="search-item"><span class="text-muted">No services found matching "' + query + '"</span></div>';
+      resultsList.classList.remove("hidden");
+    }
+  });
+
+  // Close results when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-wrapper")) {
+      resultsList.classList.add("hidden");
+    }
+  });
+
+  // Focus effect
+  searchInput.addEventListener("focus", () => {
+    if (searchInput.value.trim().length >= 2) {
+      resultsList.classList.remove("hidden");
+    }
+  });
+}
+
+const changeBtn = document.getElementById("change-service-btn");
+changeBtn.addEventListener("click", () => {
+  selectedService = null;
+  localStorage.removeItem("selectedService");
+  updateServiceDisplay();
+});
+
+
 
 // ==========================
-// SERVICE SELECTION FUNCTION
+// INITIALIZATION
 // ==========================
-function loadServiceSelection() {
-  const serviceGrid = document.getElementById("service-grid");
-  serviceGrid.innerHTML = "";
-
-  servicesData.forEach((service) => {
-    const serviceCard = document.createElement("div");
-    serviceCard.className = "service-card-selection";
-    serviceCard.innerHTML = `
-            <i class="fa-solid ${service.icon}"></i>
-            <h4>${service.name}</h4>
-            <p>${service.description}</p>
-        `;
-
-    serviceCard.addEventListener("click", () => {
-      selectedService = {
-        id: service.id,
-        name: service.name,
-        price: 0,
-      };
-      showSubServiceSelection(service);
-    });
-
-    serviceGrid.appendChild(serviceCard);
-  });
-}
-
-function showSubServiceSelection(service) {
-  const serviceGrid = document.getElementById("service-grid");
-  serviceGrid.innerHTML = `
-        <h4 class="selection-title">
-            <i class="fa-solid ${service.icon}"></i>
-            ${service.name} Services
-        </h4>
-    `;
-
-  service.subServices.forEach((sub) => {
-    const subServiceCard = document.createElement("div");
-    subServiceCard.className = "service-card-selection sub-service-card";
-    subServiceCard.innerHTML = `
-            <i class="fa-solid ${service.icon}"></i>
-            <h5>${sub.name}</h5>
-            <p class="small">Starting from</p>
-            <p class="price-tag-sub">₹${sub.price}</p>
-        `;
-
-    subServiceCard.addEventListener("click", () => {
-      selectedService = sub;
-
-      const serviceDisplay = document.getElementById("selected-service-display");
-      const serviceName = document.getElementById("service-name");
-      const serviceIcon = document.getElementById("service-icon");
-
-      serviceName.textContent = selectedService.name;
-      serviceIcon.className = `fa-solid ${service.icon}`;
-      serviceDisplay.classList.remove("hidden");
-
-      document.getElementById("service-selection").classList.add("hidden");
-      basePrice = selectedService.price;
-      updatePrice();
-    });
-
-    serviceGrid.appendChild(subServiceCard);
-  });
-
-  const backButton = document.createElement("button");
-  backButton.className = "btn btn-muted btn-back";
-  backButton.type = "button";
-  backButton.textContent = "← Back to Categories";
-
-  backButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    loadServiceSelection();
-  });
-
-  serviceGrid.appendChild(backButton);
-}
-
-let bookingType = localStorage.getItem("bookingType");
+const serviceRefresh = sessionStorage.getItem("serviceRefresh");
 const bookingRefresh = sessionStorage.getItem("bookingRefresh");
 
+// Clear stale selection
+if (!serviceRefresh && !bookingRefresh) {
+  localStorage.removeItem("selectedService");
+}
+selectedService = JSON.parse(localStorage.getItem("selectedService"));
+sessionStorage.removeItem("serviceRefresh");
+
+bookingType = localStorage.getItem("bookingType") || "normal";
 if (!bookingRefresh) {
   localStorage.removeItem("bookingType");
   bookingType = "normal";
 }
-
 sessionStorage.removeItem("bookingRefresh");
 
 if (bookingType === "emergency") {
@@ -194,7 +230,8 @@ if (bookingType === "emergency") {
   document.getElementById("toggle-slider").classList.remove("move");
 }
 
-updatePrice();
+// Start the UI
+updateServiceDisplay();
 
 // ==========================
 // UPDATE PRICE
