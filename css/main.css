@@ -1,47 +1,39 @@
 /* ===== MAIN.HTML STYLES ===== */
+body {
+  padding-top: 0 !important;
+}
 
 /* ===== HERO SECTION ===== */
+/* ===== HERO SECTION ===== */
 .hero {
-  padding: 140px 0 120px;
+  padding: 160px 0 120px;
   text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #db2777 100%);
+  background-size: 200% 200%;
+  animation: meshGradient 15s ease infinite;
   position: relative;
   overflow: hidden;
   color: white;
 }
 
+@keyframes meshGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* Dark mode hero adjustments */
 [data-theme="dark"] .hero {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  color: var(--text-dark);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white;
 }
 
-[data-theme="dark"] .hero h1 {
-  background: linear-gradient(135deg, var(--text-dark) 0%, var(--text-muted) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-[data-theme="dark"] .hero p {
-  color: var(--text-muted);
-}
-
-[data-theme="dark"] #user-location {
-  background: rgba(30, 41, 59, 0.8);
-  color: var(--text-dark);
-  border: 1px solid var(--border-color);
-}
-
-.hero::before {
+.hero::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.05"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.05"/></pattern></defs><rect width="1000" height="1000" fill="url(%23grain)"/></svg>');
-  opacity: 0.1;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .hero .container {
@@ -50,86 +42,63 @@
 }
 
 .hero h1 {
-  font-size: 56px;
+  font-size: 64px;
   font-weight: 800;
   margin-bottom: 24px;
   line-height: 1.1;
-  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+  letter-spacing: -2px;
+  background: linear-gradient(to bottom, #ffffff, rgba(255, 255, 255, 0.8));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: fadeInUp 1s ease-out;
+  animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .hero p {
-  font-size: 20px;
+  font-size: 22px;
   margin-bottom: 16px;
   opacity: 0.9;
   font-weight: 400;
-  animation: fadeInUp 1s ease-out 0.2s both;
-}
-
-.hero p:last-of-type {
-  font-size: 18px;
-  margin-bottom: 40px;
-  opacity: 0.8;
-  animation: fadeInUp 1s ease-out 0.4s both;
+  animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both;
 }
 
 #user-location {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  padding: 12px 24px;
-  border-radius: 30px;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  padding: 12px 28px;
+  border-radius: 40px;
   font-size: 16px;
   color: white;
   font-weight: 600;
   box-shadow: var(--shadow-lg);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 40px;
-  animation: fadeInUp 1s ease-out 0.6s both;
+  margin: 30px 0 50px;
+  animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s both;
 }
 
 .hero .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 12px 16px;
-  padding: 16px 32px;
-  min-width: 220px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 30px;
+  margin: 0 15px 20px;
+  padding: 18px 40px;
+  min-width: 240px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 40px;
   box-shadow: var(--shadow-xl);
   transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-  animation: fadeInUp 1s ease-out 0.8s both;
-  vertical-align: middle;
-  text-decoration: none;
+  animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s both;
 }
 
-.hero .btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+.hero #emergency-btn {
+  background: white !important;
+  color: var(--danger-color) !important;
 }
 
-.hero .btn:hover::before {
-  left: 100%;
-}
-
-.hero .btn:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: var(--shadow-glow);
+.hero #emergency-btn:hover {
+  background: var(--text-light) !important;
+  transform: translateY(-5px) scale(1.05);
 }
 
 /* ===== SERVICES SECTION ===== */

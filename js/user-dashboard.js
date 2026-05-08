@@ -1,11 +1,14 @@
 // Viva: Pure Frontend Logic for User Dashboard Operations
 window.logout = async function () {
   try {
-    await logoutUser();
+    if (typeof logoutUser === "function") {
+      await logoutUser();
+    }
   } catch (error) {
     console.error("Logout error:", error);
   }
   localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("authToken");
   window.location.href = "login.html";
 };
 

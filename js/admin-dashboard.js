@@ -1,11 +1,14 @@
 // admin-dashboard.js - Pure Frontend Dashboard Logic
 window.logout = async function () {
   try {
-    await logoutUser();
+    if (typeof logoutUser === "function") {
+      await logoutUser();
+    }
   } catch (error) {
     console.error("Logout error:", error);
   }
   localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("authToken");
   window.location.href = "login.html";
 };
 

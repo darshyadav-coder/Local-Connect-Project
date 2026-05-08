@@ -1,5 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const token = getAuthToken();
+  const getAuthTokenSafe = typeof getAuthToken === "function" ? getAuthToken : () => localStorage.getItem("authToken");
+  const token = getAuthTokenSafe();
+
+  // Upgrade Logo Design
+  const logoDiv = document.querySelector(".logo");
+  if (logoDiv && !logoDiv.querySelector(".logo-icon")) {
+    const logoText = logoDiv.textContent;
+    logoDiv.innerHTML = `
+      <div class="logo-wrapper">
+        <div class="logo-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <span class="logo-text">${logoText}</span>
+      </div>
+    `;
+    
+    logoDiv.querySelector(".logo-wrapper").addEventListener("click", () => {
+      window.location.href = "main.html";
+    });
+  }
+
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
   const menu = document.querySelector(".menu");
   if (!menu) return;
@@ -24,11 +44,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Initial state: hide all dashboards if not already hidden
+  if (userLink) userLink.classList.add("hidden");
+  if (providerLink) providerLink.classList.add("hidden");
+  if (adminLink) adminLink.classList.add("hidden");
+
   if (!token || !user) {
-    // Not logged in: hide all dashboards
-    if (userLink) userLink.classList.add("hidden");
-    if (providerLink) providerLink.classList.add("hidden");
-    if (adminLink) adminLink.classList.add("hidden");
+    // Not logged in: dashboards stay hidden
+    if (loginLink) {
+      loginLink.textContent = "Login";
+      loginLink.href = "login.html";
+    }
   } else {
     // Logged in: change Login to Logout
     if (loginLink) {
@@ -37,25 +63,25 @@ document.addEventListener("DOMContentLoaded", () => {
       loginLink.addEventListener("click", async (e) => {
         e.preventDefault();
         try {
-          await logoutUser();
+          if (typeof logoutUser === "function") {
+            await logoutUser();
+          }
         } catch (error) {
           console.error("Logout error:", error);
         }
         localStorage.removeItem("loggedInUser");
+        localStorage.removeItem("authToken");
         window.location.href = "main.html"; // Redirect to home page on logout
       });
     }
 
-    // Show only the relevant dashboard based on role
+    // Show ONLY the relevant dashboard based on role
     if (user.role === "user") {
-      if (providerLink) providerLink.classList.add("hidden");
-      if (adminLink) adminLink.classList.add("hidden");
+      if (userLink) userLink.classList.remove("hidden");
     } else if (user.role === "provider") {
-      if (userLink) userLink.classList.add("hidden");
-      if (adminLink) adminLink.classList.add("hidden");
+      if (providerLink) providerLink.classList.remove("hidden");
     } else if (user.role === "admin") {
-      if (userLink) userLink.classList.add("hidden");
-      if (providerLink) providerLink.classList.add("hidden");
+      if (adminLink) adminLink.classList.remove("hidden");
     }
   }
 
@@ -69,11 +95,15 @@ document.addEventListener("DOMContentLoaded", () => {
     themeToggle.setAttribute('aria-label', 'Toggle dark mode');
     themeToggle.title = 'Toggle dark mode';
 
-    // Insert before the menu
-    const menu = navbar.querySelector('.menu');
-    if (menu) {
-      navbar.insertBefore(themeToggle, menu);
+    // Create actions container
+    let navActions = navbar.querySelector('.nav-actions');
+    if (!navActions) {
+      navActions = document.createElement('div');
+      navActions.className = 'nav-actions';
+      navbar.appendChild(navActions);
     }
+
+    navActions.appendChild(themeToggle);
 
     // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';

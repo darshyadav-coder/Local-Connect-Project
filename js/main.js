@@ -25,10 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }, observerOptions);
 
-  // Observe service cards for animation
-  document.querySelectorAll(".service-card").forEach((card) => {
-    card.classList.add("fade-in-target");
-    observer.observe(card);
+  // Observe all fade-in targets for scroll animation
+  document.querySelectorAll(".fade-in-target").forEach((el) => {
+    observer.observe(el);
   });
 
   // Dynamic Greeting
@@ -52,7 +51,7 @@ if (container && typeof servicesData !== "undefined") {
   servicesData.slice(0, 12).forEach((service, index) => {
     let hiddenClass = index >= 6 ? "hidden" : "";
     cardsHTML += `
-        <div class="service-card ${hiddenClass}" data-id="${service.id}">
+        <div class="service-card ${hiddenClass} fade-in-target" data-id="${service.id}">
             <i class="fa-solid ${service.icon}"></i>
             <h3>${service.name}</h3>
             <p>${service.description || "Click to explore services"}</p>

@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const { validateBooking } = require('../utils/validators');
+const { sendEmail, emailTemplates } = require('../utils/emailService');
 
 // @desc    Create a new booking
 // @route   POST /api/bookings
@@ -39,6 +40,14 @@ const createBooking = async (req, res) => {
     });
 
     const createdBooking = await booking.save();
+    
+    // Send Confirmation Email
+    await sendEmail(
+      userEmail,
+      'Booking Confirmation - Local Connect',
+      emailTemplates.bookingConfirmation(createdBooking)
+    );
+
     res.status(201).json({
       message: 'Booking created successfully',
       booking: createdBooking,
@@ -177,6 +186,13 @@ const assignProvider = async (req, res) => {
       message: 'Provider assigned successfully',
       booking,
     });
+
+    // Send Assignment Email
+    await sendEmail(
+      booking.userEmail,
+      'Service Provider Assigned - Local Connect',
+      emailTemplates.providerAssigned(booking)
+    );
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -236,6 +252,13 @@ const cancelBooking = async (req, res) => {
       message: 'Booking cancelled successfully',
       booking,
     });
+
+    // Send Cancellation Email
+    await sendEmail(
+      booking.userEmail,
+      'Booking Cancellation - Local Connect',
+      emailTemplates.bookingCancelled(booking)
+    );
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -2,6 +2,7 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const { validateRegister, isValidEmail, isValidPassword } = require('../utils/validators');
 const crypto = require('crypto');
+const { sendEmail, emailTemplates } = require('../utils/emailService');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -38,6 +39,13 @@ const registerUser = async (req, res) => {
       location: user.location,
       token: generateToken(user._id),
     });
+
+    // Send Welcome Email
+    await sendEmail(
+      user.email,
+      'Welcome to Local Connect!',
+      emailTemplates.welcome(user)
+    );
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -143,6 +151,13 @@ const verifySecurityAnswer = async (req, res) => {
       message: 'Password reset successful',
       token: generateToken(user._id),
     });
+
+    // Send Password Change Confirmation
+    await sendEmail(
+      user.email,
+      'Your Password has been Changed - Local Connect',
+      emailTemplates.passwordChanged(user)
+    );
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

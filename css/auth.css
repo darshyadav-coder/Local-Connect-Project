@@ -57,19 +57,19 @@
 }
 
 .auth-wrapper::before {
-  width: 320px;
-  height: 320px;
-  top: -120px;
+  width: 500px;
+  height: 500px;
+  top: -200px;
   right: -100px;
-  background: rgba(37, 99, 235, 0.18);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, transparent 70%);
 }
 
 .auth-wrapper::after {
-  width: 260px;
-  height: 260px;
-  bottom: -100px;
+  width: 400px;
+  height: 400px;
+  bottom: -150px;
   left: -100px;
-  background: rgba(16, 185, 129, 0.12);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
 }
 
 .login-container,
@@ -77,27 +77,15 @@
   width: 100%;
   max-width: 430px;
   background: var(--auth-card);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
   padding: 52px 40px;
-  border-radius: 30px;
+  border-radius: 32px;
   box-shadow: var(--auth-shadow);
   text-align: center;
   border: 1px solid var(--auth-border);
   position: relative;
   z-index: 1;
-}
-
-.login-container::before,
-.signup-container::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.08));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
 }
 
 .login-container h1,
