@@ -30,32 +30,52 @@ sessionStorage.removeItem("categoryRefresh");
 // ==========================
 
 // 👉 Show Categories
-function renderCategories() {
+async function renderCategories() {
   title.innerText = "All Services";
+  container.innerHTML = "<p id='loader'>Loading Categories...</p>";
 
-  let html = "";
+  try {
+    // Try to get categories from API
+    const categories = await getServiceCategories();
+    
+    let html = "";
+    const list = (categories && categories.length > 0) ? categories : servicesData;
 
-  servicesData.forEach((service) => {
-    html += `
-        <div class="service-card" data-id="${service.id}">
-            <i class="fa-solid ${service.icon}"></i>
-            <h3 class="bold">${service.name}</h3>
-            <p>${service.description}</p>
-        </div>
-        `;
-  });
-
-  container.innerHTML = html;
-
-  // Click → go to sub-services
-  document.querySelectorAll(".service-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const id = card.getAttribute("data-id");
-      sessionStorage.setItem("categoryRefresh", "true");
-      localStorage.setItem("category", id);
-      window.location.reload();
+    list.forEach((service) => {
+      html += `
+          <div class="service-card" data-id="${service.id || service._id}">
+              <i class="fa-solid ${service.icon}"></i>
+              <h3 class="bold">${service.name}</h3>
+              <p>${service.description}</p>
+          </div>
+          `;
     });
-  });
+
+    container.innerHTML = html;
+
+    // Click → go to sub-services
+    document.querySelectorAll(".service-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const id = card.getAttribute("data-id");
+        sessionStorage.setItem("categoryRefresh", "true");
+        localStorage.setItem("category", id);
+        window.location.reload();
+      });
+    });
+  } catch (error) {
+    console.error("Categories error:", error);
+    // Fallback to static data
+    container.innerHTML = "";
+    servicesData.forEach((service) => {
+      container.innerHTML += `
+          <div class="service-card" data-id="${service.id}">
+              <i class="fa-solid ${service.icon}"></i>
+              <h3 class="bold">${service.name}</h3>
+              <p>${service.description}</p>
+          </div>
+          `;
+    });
+  }
 }
 
 // 👉 Show Sub-Services
@@ -99,51 +119,67 @@ function renderSubServices(service) {
 // ==========================
 // MAIN LOGIC
 // ==========================
-if (selectedCategory) {
-  const service = servicesData.find((s) => s.id === selectedCategory);
+async function init() {
+  if (selectedCategory) {
+    // If it's a MongoDB ID, we might need to fetch it
+    let service = servicesData.find((s) => s.id === selectedCategory);
+    
+    if (!service) {
+       try {
+         service = await getService(selectedCategory);
+       } catch (e) {}
+    }
 
-  if (service) {
-    renderSubServices(service);
+    if (service) {
+      renderSubServices(service);
+    } else {
+      await renderCategories();
+    }
   } else {
-    renderCategories();
+    await renderCategories();
   }
-} else {
-  renderCategories();
+  
+  await renderReviews();
 }
+
+init();
 
 // ==========================
 // RENDER REVIEWS FUNCTION
 // ==========================
-function renderReviews() {
+async function renderReviews() {
   const reviewsContainer = document.getElementById("reviews-container");
-  const allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-  const reviews = allBookings.filter((b) => b.feedback).slice(-6); // Show last 6 reviews
+  
+  try {
+    const feedback = await getAllFeedback();
+    const reviews = feedback.slice(-6); // Show last 6 reviews
 
-  reviewsContainer.innerHTML = "";
-  if (reviews.length === 0) {
-    reviewsContainer.innerHTML =
-      "<p class='text-muted text-center'>No reviews yet. Be the first to book and share your experience!</p>";
-    return;
+    reviewsContainer.innerHTML = "";
+    if (reviews.length === 0) {
+      reviewsContainer.innerHTML =
+        "<p class='text-muted text-center'>No reviews yet. Be the first to book and share your experience!</p>";
+      return;
+    }
+
+    reviews.forEach((review) => {
+      reviewsContainer.innerHTML += `
+              <div class="review-card">
+                  <div class="rating">
+                      ${'⭐'.repeat(parseInt(review.rating) || 5)}
+                  </div>
+                  <h4 class="bold">${review.service}</h4>
+                  <p class="italic">"${review.comment}"</p>
+                  <span class="author">
+                      ${review.userName || 'Anonymous'} • ${new Date(review.createdAt || Date.now()).toLocaleDateString()}
+                  </span>
+              </div>
+          `;
+    });
+  } catch (error) {
+    console.error("Reviews error:", error);
+    reviewsContainer.innerHTML = "<p class='text-muted text-center text-danger'>Failed to load reviews.</p>";
   }
-
-  reviews.forEach((review) => {
-    reviewsContainer.innerHTML += `
-            <div class="review-card">
-                <div class="rating">
-                    ${'⭐'.repeat(parseInt(review.feedback.rating) || 5)}
-                </div>
-                <h4 class="bold">${review.service}</h4>
-                <p class="italic">"${review.feedback.comment}"</p>
-                <span class="author">
-                    ${review.customerName || review.userName} • ${new Date(review.date).toLocaleDateString()}
-                </span>
-            </div>
-        `;
-  });
 }
-
-// Call renderReviews after rendering services
-renderReviews();
 
 // ==========================
 // SEARCH AND FILTER FUNCTION

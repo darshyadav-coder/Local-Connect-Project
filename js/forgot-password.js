@@ -27,50 +27,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function handleEmailSubmit() {
+  async function handleEmailSubmit() {
     const email = document.getElementById("email").value.trim().toLowerCase();
 
-    // Check if user exists
-    const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
-    const user = registeredUsers.find((u) => u.email.toLowerCase() === email);
-
-    if (!user) {
-      showToast("No account found with this email address.", "error");
-      return;
-    }
-
-    currentUser = user;
-    
-    // Check user profile first, then fall back to registration data
-    const userProfiles = JSON.parse(localStorage.getItem("userProfiles")) || {};
-    const profile = userProfiles[email] || {};
-    
-    const question = profile.securityQuestion || user.securityQuestion || "What is your favorite color?";
-    const answer = (profile.securityAnswer || user.securityAnswer || "blue").toLowerCase();
-    
-    // Store the answer temporarily in currentUser for verification (or fetch again later)
-    currentUser.expectedAnswer = answer;
-
-    document.getElementById("security-question-text").textContent = question;
-    document.getElementById("reset-form").classList.add("hidden");
-    document.getElementById("security-question").classList.remove("hidden");
-
-    // Simulate email notification
-    simulateEmailNotification(email, "password_reset");
-  }
-
-  function handleSecurityAnswer() {
-    const answer = document.getElementById("answer").value.trim().toLowerCase();
-
-    if (answer === currentUser.expectedAnswer) {
-      document.getElementById("security-question").classList.add("hidden");
-      document.getElementById("new-password").classList.remove("hidden");
-    } else {
-      showToast("Incorrect answer. Please try again.", "error");
+    try {
+      const data = await forgotPassword(email);
+      
+      currentUser = { email: data.email };
+      
+      document.getElementById("security-question-text").textContent = data.securityQuestion;
+      document.getElementById("reset-form").classList.add("hidden");
+      document.getElementById("security-question").classList.remove("hidden");
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      showToast(error.message || "Failed to find account.", "error");
     }
   }
 
-  function handlePasswordReset() {
+  async function handleSecurityAnswer() {
+    const answer = document.getElementById("answer").value.trim();
+    
+    // In this simplified flow, we'll wait for the next step to send everything
+    // or we can verify now. The backend has verifySecurityAnswer(email, answer, newPassword)
+    // so we'll just move to the next screen and send all 3 at once.
+    
+    document.getElementById("security-question").classList.add("hidden");
+    document.getElementById("new-password").classList.remove("hidden");
+  }
+
+  async function handlePasswordReset() {
+    const answer = document.getElementById("answer").value.trim();
     const newPassword = document.getElementById("new-password-input").value;
     const confirmPassword = document.getElementById("confirm-password-input").value;
 
@@ -84,21 +70,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Update password
-    const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
-    const userIndex = registeredUsers.findIndex((u) => u.email === currentUser.email);
-
-    if (userIndex > -1) {
-      registeredUsers[userIndex].password = newPassword;
-      localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
-
-      // Simulate email notification
-      simulateEmailNotification(currentUser.email, "password_changed");
+    try {
+      await resetPassword(currentUser.email, answer, newPassword);
 
       showToast("✅ Password reset successfully! Redirecting to login...", "success");
       setTimeout(() => {
         window.location.href = "login.html";
       }, 2000);
+    } catch (error) {
+      console.error("Reset error:", error);
+      showToast("❌ Failed to reset password: " + error.message, "error");
     }
   }
 });

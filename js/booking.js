@@ -35,7 +35,8 @@ nameInput.addEventListener("input", () => {
 phoneInput.addEventListener("input", () => {
   const phone = phoneInput.value.trim();
   if (!/^[6-9]\d{9}$/.test(phone)) {
-    phoneError.textContent = "Enter valid 10-digit phone number starting with 6-9";
+    phoneError.textContent =
+      "Enter valid 10-digit phone number starting with 6-9";
     phoneError.classList.remove("hidden");
   } else {
     phoneError.classList.add("hidden");
@@ -82,7 +83,7 @@ function updateServiceDisplay() {
     const serviceIcon = document.getElementById("service-icon");
 
     const parentService = servicesData.find((s) =>
-      s.subServices.some((sub) => sub.id === selectedService.id)
+      s.subServices.some((sub) => sub.id === selectedService.id),
     );
 
     serviceName.textContent = selectedService.name;
@@ -100,7 +101,7 @@ function updateServiceDisplay() {
     inlineSelector.classList.remove("hidden");
     noServiceWarning.classList.remove("hidden");
     bookingForm.classList.add("hidden");
-    
+
     setupInlineServiceSearch();
     basePrice = 0;
   }
@@ -119,12 +120,12 @@ function setupInlineServiceSearch() {
 
   // Flatten all sub-services for easy searching
   const allSubServices = [];
-  servicesData.forEach(category => {
-    category.subServices.forEach(sub => {
+  servicesData.forEach((category) => {
+    category.subServices.forEach((sub) => {
       allSubServices.push({
         ...sub,
         categoryName: category.name,
-        categoryIcon: category.icon
+        categoryIcon: category.icon,
       });
     });
   });
@@ -136,13 +137,16 @@ function setupInlineServiceSearch() {
       return;
     }
 
-    const filtered = allSubServices.filter(s => 
-      s.name.toLowerCase().includes(query) || 
-      s.categoryName.toLowerCase().includes(query)
+    const filtered = allSubServices.filter(
+      (s) =>
+        s.name.toLowerCase().includes(query) ||
+        s.categoryName.toLowerCase().includes(query),
     );
 
     if (filtered.length > 0) {
-      resultsList.innerHTML = filtered.map(s => `
+      resultsList.innerHTML = filtered
+        .map(
+          (s) => `
         <div class="search-item" data-id="${s.id}">
           <div class="search-item-info">
             <i class="fa-solid ${s.categoryIcon}"></i>
@@ -153,17 +157,22 @@ function setupInlineServiceSearch() {
           </div>
           <span class="search-item-price">₹${s.price}</span>
         </div>
-      `).join("");
+      `,
+        )
+        .join("");
       resultsList.classList.remove("hidden");
 
       // Add click listeners to items
-      resultsList.querySelectorAll(".search-item").forEach(item => {
+      resultsList.querySelectorAll(".search-item").forEach((item) => {
         item.addEventListener("click", () => {
           const serviceId = item.getAttribute("data-id");
-          const selected = allSubServices.find(s => s.id === serviceId);
+          const selected = allSubServices.find((s) => s.id === serviceId);
           if (selected) {
             selectedService = selected;
-            localStorage.setItem("selectedService", JSON.stringify(selectedService));
+            localStorage.setItem(
+              "selectedService",
+              JSON.stringify(selectedService),
+            );
             updateServiceDisplay();
             searchInput.value = "";
             resultsList.classList.add("hidden");
@@ -171,7 +180,10 @@ function setupInlineServiceSearch() {
         });
       });
     } else {
-      resultsList.innerHTML = '<div class="search-item"><span class="text-muted">No services found matching "' + query + '"</span></div>';
+      resultsList.innerHTML =
+        '<div class="search-item"><span class="text-muted">No services found matching "' +
+        query +
+        '"</span></div>';
       resultsList.classList.remove("hidden");
     }
   });
@@ -198,8 +210,6 @@ changeBtn.addEventListener("click", () => {
   updateServiceDisplay();
 });
 
-
-
 // ==========================
 // INITIALIZATION
 // ==========================
@@ -210,7 +220,16 @@ const bookingRefresh = sessionStorage.getItem("bookingRefresh");
 if (!serviceRefresh && !bookingRefresh) {
   localStorage.removeItem("selectedService");
 }
-selectedService = JSON.parse(localStorage.getItem("selectedService"));
+try {
+  const storedService = localStorage.getItem("selectedService");
+  selectedService =
+    storedService && storedService !== "undefined"
+      ? JSON.parse(storedService)
+      : null;
+} catch (e) {
+  console.error("Error parsing selectedService:", e);
+  selectedService = null;
+}
 sessionStorage.removeItem("serviceRefresh");
 
 bookingType = localStorage.getItem("bookingType") || "normal";
@@ -317,7 +336,7 @@ form.addEventListener("submit", (e) => {
   let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   if (!loggedInUser) {
     showToast("You must log in first to make a booking!", "error");
-    setTimeout(() => window.location.href = "login.html", 1500);
+    setTimeout(() => (window.location.href = "login.html"), 1500);
     return;
   }
 
@@ -339,11 +358,15 @@ form.addEventListener("submit", (e) => {
   form.classList.add("hidden");
   document.getElementById("checkout-section").classList.remove("hidden");
 
-  document.getElementById("summary-service").textContent = currentBookingData.service;
-  document.getElementById("summary-customer").textContent = currentBookingData.customerName;
+  document.getElementById("summary-service").textContent =
+    currentBookingData.service;
+  document.getElementById("summary-customer").textContent =
+    currentBookingData.customerName;
   document.getElementById("summary-date").textContent = currentBookingData.date;
-  document.getElementById("summary-price").textContent = currentBookingData.price;
-  document.getElementById("pay-now-text").textContent = `Pay ${currentBookingData.price}`;
+  document.getElementById("summary-price").textContent =
+    currentBookingData.price;
+  document.getElementById("pay-now-text").textContent =
+    `Pay ${currentBookingData.price}`;
 });
 
 // ==========================
@@ -368,10 +391,13 @@ payNowBtn.addEventListener("click", async () => {
   paymentMessage.classList.add("hidden");
 
   try {
-    const orderResponse = await window.PaymentService.createOrder(currentBookingData);
+    const orderResponse =
+      await window.PaymentService.createOrder(currentBookingData);
 
     if (!orderResponse.success) {
-      throw new Error(orderResponse.message || "Failed to create order on server");
+      throw new Error(
+        orderResponse.message || "Failed to create order on server",
+      );
     }
 
     document.getElementById("pay-now-text").textContent = "Awaiting Payment...";
@@ -385,7 +411,8 @@ payNowBtn.addEventListener("click", async () => {
       name: "Local Connect",
       description: "Payment for " + currentBookingData.service,
       handler: async function (response) {
-        document.getElementById("pay-now-text").textContent = "Verifying Payment...";
+        document.getElementById("pay-now-text").textContent =
+          "Verifying Payment...";
 
         try {
           const verifyResponse = await window.PaymentService.verifyPayment({
@@ -398,13 +425,13 @@ payNowBtn.addEventListener("click", async () => {
           if (verifyResponse.success) {
             paymentMessage.classList.remove("hidden");
             paymentMessage.className = "payment-status-success";
-            paymentMessage.textContent = "Payment Verified! Generating booking receipt...";
+            paymentMessage.textContent =
+              "Payment Verified! Generating booking receipt...";
             payNowBtn.classList.remove("btn-loading");
             payNowBtn.classList.add("btn-success-payment");
             document.getElementById("pay-now-text").textContent = "Success ✓";
 
-            let booking = {
-              id: "BK-" + Date.now(),
+            let bookingPayload = {
               userEmail: currentBookingData.userEmail,
               userName: currentBookingData.userName,
               customerName: currentBookingData.customerName,
@@ -413,24 +440,35 @@ payNowBtn.addEventListener("click", async () => {
               price: currentBookingData.price,
               type: currentBookingData.type,
               date: currentBookingData.date,
-              status: "Pending",
-              provider: "Unassigned",
-              feedback: null,
               paymentId: verifyResponse.paymentId || response.razorpay_payment_id,
               paymentStatus: "Paid",
             };
-            let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-            allBookings.push(booking);
-            localStorage.setItem("allBookings", JSON.stringify(allBookings));
 
-            simulateNotification(currentBookingData.userEmail, "booking_confirmed", {
-                service: currentBookingData.service,
-                date: currentBookingData.date,
-              });
+            // Call API to create booking
+            createBooking(bookingPayload)
+            .then(data => {
+              simulateNotification(
+                currentBookingData.userEmail,
+                "booking_confirmed",
+                {
+                  service: currentBookingData.service,
+                  date: currentBookingData.date,
+                },
+              );
 
-            setTimeout(() => {
-              window.location.href = "user-dashboard.html";
-            }, 1500);
+              setTimeout(() => {
+                window.location.href = "user-dashboard.html";
+              }, 1500);
+            })
+            .catch(err => {
+              console.error("Failed to save booking to backend:", err);
+              showToast("❌ Failed to save booking: " + err.message, "error");
+              
+              payNowBtn.disabled = false;
+              cancelCheckoutBtn.disabled = false;
+              payNowBtn.classList.remove("btn-loading");
+              document.getElementById("pay-now-text").textContent = "Retry Saving";
+            });
           } else {
             throw new Error("Payment Verification Failed on server API.");
           }
@@ -461,7 +499,8 @@ payNowBtn.addEventListener("click", async () => {
       if (options.key === "rzp_test_dummykey123") {
         setTimeout(() => {
           options.handler({
-            razorpay_payment_id: "pay_sim_" + Math.random().toString(36).substr(2, 9),
+            razorpay_payment_id:
+              "pay_sim_" + Math.random().toString(36).substr(2, 9),
             razorpay_order_id: "order_sim",
             razorpay_signature: "sim_signature_123",
           });
@@ -470,7 +509,9 @@ payNowBtn.addEventListener("click", async () => {
         rzp1.open();
       }
     } catch (err) {
-      handlePaymentFailure("Gateway initialization failed: Backend Dev missing API key.");
+      handlePaymentFailure(
+        "Gateway initialization failed: Backend Dev missing API key.",
+      );
     }
   } catch (error) {
     handlePaymentFailure(error.message);

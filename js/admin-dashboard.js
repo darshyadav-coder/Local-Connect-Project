@@ -1,5 +1,10 @@
 // admin-dashboard.js - Pure Frontend Dashboard Logic
-window.logout = function () {
+window.logout = async function () {
+  try {
+    await logoutUser();
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
   localStorage.removeItem("loggedInUser");
   window.location.href = "login.html";
 };
@@ -18,46 +23,40 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAdminDashboard();
 });
 
-function renderAdminDashboard() {
-  // Merge dummy accounts with any new real accounts that were created
-  const dummyUsers = [
-    {
-      email: "user@gmail.com",
-      role: "user",
-      fullname: "Test User",
-      location: "Global",
-    },
-    {
-      email: "provider@gmail.com",
-      role: "provider",
-      fullname: "Test Provider",
-      location: "Global",
-    },
-  ];
-  const registeredUsers =
-    JSON.parse(localStorage.getItem("registeredUsers")) || [];
-  const allUsers = [...dummyUsers, ...registeredUsers];
+async function renderAdminDashboard() {
+  try {
+    // Show loading states if possible
+    document.getElementById("stat-users").textContent = "...";
+    document.getElementById("stat-providers").textContent = "...";
+    document.getElementById("stat-bookings").textContent = "...";
+    document.getElementById("stat-emergencies").textContent = "...";
 
-  // Fetch all bookings
-  const allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
+    // Fetch data from backend
+    const [stats, allUsers, allBookings] = await Promise.all([
+      getDashboardStats(),
+      getAllUsers(),
+      getAllBookings()
+    ]);
 
-  // Filter Stats
-  const totalUsers = allUsers.filter((u) => u.role === "user");
-  const totalProviders = allUsers.filter((u) => u.role === "provider");
-  const emergencyRequests = allBookings.filter((b) => b.type === "emergency");
+    const users = allUsers.filter(u => u.role === "user");
+    const providers = allUsers.filter(u => u.role === "provider");
+    const emergencyRequests = allBookings.filter(b => b.type === "emergency");
 
-  // Populate Top Screen Counters
-  document.getElementById("stat-users").textContent = totalUsers.length;
-  document.getElementById("stat-providers").textContent = totalProviders.length;
-  document.getElementById("stat-bookings").textContent = allBookings.length;
-  document.getElementById("stat-emergencies").textContent =
-    emergencyRequests.length;
+    // Populate Top Screen Counters
+    document.getElementById("stat-users").textContent = users.length;
+    document.getElementById("stat-providers").textContent = providers.length;
+    document.getElementById("stat-bookings").textContent = allBookings.length;
+    document.getElementById("stat-emergencies").textContent = emergencyRequests.length;
 
-  // Render Tables
-  renderUsers(totalUsers, "users-body");
-  renderUsers(totalProviders, "providers-body");
-  renderGlobalBookings(allBookings);
-  renderFeedback(allBookings);
+    // Render Tables
+    renderUsers(users, "users-body");
+    renderUsers(providers, "providers-body");
+    renderGlobalBookings(allBookings);
+    renderFeedback(allBookings);
+  } catch (error) {
+    console.error("Admin dashboard error:", error);
+    showToast("Failed to load dashboard data: " + error.message, "error");
+  }
 }
 
 function renderUsers(list, tableBodyId) {

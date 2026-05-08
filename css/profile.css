@@ -5,6 +5,12 @@
   --header-grad: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
 }
 
+/* Dark mode profile variables */
+[data-theme="dark"] {
+  --profile-bg: var(--bg-color);
+  --card-bg: var(--surface-color);
+}
+
 .profile-section {
   padding: 60px 0;
   background-color: var(--profile-bg);
@@ -27,7 +33,7 @@
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 }
 
 .profile-header {
@@ -84,10 +90,10 @@
 .profile-form textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   font-size: 0.95rem;
-  background: #fcfdfe;
+  background: var(--surface-color);
   transition: all 0.3s ease;
   font-family: inherit;
   color: var(--text-dark);
@@ -122,7 +128,7 @@
   grid-column: 1 / -1;
   margin-top: 15px;
   padding-top: 20px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   gap: 10px;

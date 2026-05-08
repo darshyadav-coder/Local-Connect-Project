@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!loggedInUser || loggedInUser.role !== "provider") {
     showToast(
       "You must log in as a Service Provider to view this dashboard.",
-      "error"
+      "error",
     );
     setTimeout(() => (window.location.href = "login.html"), 1500);
     return;
@@ -28,20 +28,20 @@ function renderProviderDashboard() {
 
   // Filter categories dynamically (simulating SQL queries)
   const pendingEmergency = allBookings.filter(
-    (b) => b.status === "Pending" && b.type === "emergency"
+    (b) => b.status === "Pending" && b.type === "emergency",
   );
   const pendingNormal = allBookings.filter(
-    (b) => b.status === "Pending" && b.type === "normal"
+    (b) => b.status === "Pending" && b.type === "normal",
   );
 
   // We bind the provider's name securely to the booking so they only see their own accepted jobs
   const providerIdentifier =
     loggedInUser.fullname || loggedInUser.email.split("@")[0];
   const myAccepted = allBookings.filter(
-    (b) => b.status === "Accepted" && b.provider === providerIdentifier
+    (b) => b.status === "Accepted" && b.provider === providerIdentifier,
   );
   const myCompleted = allBookings.filter(
-    (b) => b.status === "Completed" && b.provider === providerIdentifier
+    (b) => b.status === "Completed" && b.provider === providerIdentifier,
   );
 
   // Render HTML Views
@@ -63,7 +63,7 @@ function renderFeedback(completedBookings) {
     feedbackBody.innerHTML = createEmptyStateRow(
       "No Completed Services",
       "Complete some bookings to receive feedback and build your trust score.",
-      5
+      5,
     );
     trustScoreEl.textContent = "No data";
     return;
@@ -145,7 +145,7 @@ function renderIncoming(requests) {
   if (requests.length === 0) {
     tbody.innerHTML = createEmptyStateRow(
       "No Incoming Requests",
-      "All caught up! Check back later for new service requests."
+      "All caught up! Check back later for new service requests.",
     );
     return;
   }
@@ -223,11 +223,15 @@ window.acceptBooking = function (id) {
         localStorage.setItem("allBookings", JSON.stringify(allBookings));
 
         // Send notification
-        simulateNotification(allBookings[index].userEmail, "provider_assigned", {
-          provider: allBookings[index].provider,
-          service: allBookings[index].service,
-          date: allBookings[index].date,
-        });
+        simulateNotification(
+          allBookings[index].userEmail,
+          "provider_assigned",
+          {
+            provider: allBookings[index].provider,
+            service: allBookings[index].service,
+            date: allBookings[index].date,
+          },
+        );
 
         showToast("✅ Booking accepted successfully!", "success");
 
@@ -236,7 +240,7 @@ window.acceptBooking = function (id) {
       },
       null,
       "Accept",
-      "Cancel"
+      "Cancel",
     );
   }
 };
@@ -260,7 +264,7 @@ window.rejectBooking = function (id) {
       },
       null,
       "Yes, Decline",
-      "Keep It"
+      "Keep It",
     );
   }
 };
@@ -280,16 +284,20 @@ window.completeBooking = function (id) {
         localStorage.setItem("allBookings", JSON.stringify(allBookings));
 
         // Send notification
-        simulateNotification(allBookings[index].userEmail, "booking_completed", {
-          service: allBookings[index].service,
-        });
+        simulateNotification(
+          allBookings[index].userEmail,
+          "booking_completed",
+          {
+            service: allBookings[index].service,
+          },
+        );
 
         showToast("✅ Booking marked as completed!", "success");
         setTimeout(() => renderProviderDashboard(), 800);
       },
       null,
       "Mark Complete",
-      "Not Yet"
+      "Not Yet",
     );
   }
 };
@@ -340,7 +348,7 @@ function renderAvailabilityCalendar() {
     `;
 
     daySlot.addEventListener("click", () =>
-      toggleDayAvailability(loggedInUser.email, dateStr)
+      toggleDayAvailability(loggedInUser.email, dateStr),
     );
 
     calendarContainer.appendChild(daySlot);
@@ -355,8 +363,7 @@ function renderAvailabilityCalendar() {
 
       const availability =
         JSON.parse(localStorage.getItem("providerAvailability")) || {};
-      availability[loggedInUser.email] =
-        availability[loggedInUser.email] || {};
+      availability[loggedInUser.email] = availability[loggedInUser.email] || {};
 
       for (let i = 0; i < 7; i++) {
         const date = new Date(today);
@@ -367,13 +374,13 @@ function renderAvailabilityCalendar() {
 
       localStorage.setItem(
         "providerAvailability",
-        JSON.stringify(availability)
+        JSON.stringify(availability),
       );
       renderAvailabilityCalendar();
 
       showToast(
         `${newAvailability ? "Available" : "Unavailable"} for the next 7 days!`,
-        "info"
+        "info",
       );
     });
   }

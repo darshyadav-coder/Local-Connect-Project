@@ -1,71 +1,128 @@
 /* ===== AUTH PAGES (Login/Signup/Forgot) ===== */
+:root {
+  --auth-bg: #eff6ff;
+  --auth-card: rgba(255, 255, 255, 0.95);
+  --auth-border: rgba(96, 165, 250, 0.18);
+  --auth-shadow: 0 32px 60px rgba(15, 23, 42, 0.08);
+  --auth-primary: #2563eb;
+  --auth-secondary: #06b6d4;
+  --auth-text: #0f172a;
+  --auth-muted: #64748b;
+  --auth-danger: #dc2626;
+  --auth-button-text: #ffffff;
+}
+
+/* Dark mode auth variables */
+[data-theme="dark"] {
+  --auth-bg: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  --auth-card: rgba(30, 41, 59, 0.95);
+  --auth-border: rgba(59, 130, 246, 0.25);
+  --auth-shadow: 0 32px 60px rgba(0, 0, 0, 0.3);
+  --auth-text: #f1f5f9;
+  --auth-muted: #cbd5e1;
+  --auth-button-text: #ffffff;
+}
+
 .auth-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 80px 20px;
-  background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent),
-              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent);
-  background-color: #f8fafc;
+  padding: 60px 20px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eff6ff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark mode auth wrapper */
+[data-theme="dark"] .auth-wrapper {
+  background: var(--auth-bg);
+}
+
+[data-theme="dark"] .auth-wrapper::before {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="dark"] .auth-wrapper::after {
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.auth-wrapper::before,
+.auth-wrapper::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+}
+
+.auth-wrapper::before {
+  width: 320px;
+  height: 320px;
+  top: -120px;
+  right: -100px;
+  background: rgba(37, 99, 235, 0.18);
+}
+
+.auth-wrapper::after {
+  width: 260px;
+  height: 260px;
+  bottom: -100px;
+  left: -100px;
+  background: rgba(16, 185, 129, 0.12);
 }
 
 .login-container,
 .signup-container {
   width: 100%;
-  max-width: 450px;
-  background: #ffffff;
-  padding: 50px 40px;
-  border-radius: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  max-width: 430px;
+  background: var(--auth-card);
+  padding: 52px 40px;
+  border-radius: 30px;
+  box-shadow: var(--auth-shadow);
   text-align: center;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--auth-border);
   position: relative;
+  z-index: 1;
 }
 
-/* Auth Top Icon Styling */
-.auth-icon-top {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  color: white;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  margin: -85px auto 25px;
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+.login-container::before,
+.signup-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.08));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
 }
 
 .login-container h1,
 .signup-container h1 {
-  margin-bottom: 8px;
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--text-dark);
-  letter-spacing: -0.5px;
+  margin-bottom: 10px;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--auth-text);
+  letter-spacing: -0.6px;
 }
 
 .subtitle {
-  color: var(--text-muted);
-  margin-bottom: 30px;
-  font-size: 15px;
-  line-height: 1.5;
+  color: var(--auth-muted);
+  margin-bottom: 28px;
+  font-size: 0.96rem;
+  line-height: 1.7;
+  max-width: 330px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* General Form Group Styles */
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--text-dark);
-  font-size: 0.9rem;
+.login-container form,
+.signup-container form {
+  display: grid;
+  gap: 18px;
 }
 
 input[type="text"],
@@ -74,25 +131,32 @@ input[type="password"],
 input[type="tel"],
 select {
   width: 100%;
-  padding: 14px 18px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--auth-border);
+  border-radius: 16px;
   font-size: 15px;
   outline: none;
-  transition: all 0.3s ease;
-  background: #fcfdfe;
+  transition: all 0.25s ease;
+  background: var(--auth-card);
   font-family: inherit;
-  color: var(--text-dark);
+  color: var(--auth-text);
+}
+
+/* Dark mode input placeholders */
+[data-theme="dark"] input[type="text"]::placeholder,
+[data-theme="dark"] input[type="email"]::placeholder,
+[data-theme="dark"] input[type="password"]::placeholder,
+[data-theme="dark"] select::placeholder {
+  color: var(--auth-muted);
 }
 
 input:focus,
 select:focus {
-  border-color: var(--primary-color);
-  background: white;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  border-color: var(--auth-primary);
+  background: var(--auth-card);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
 }
 
-/* Password Toggle Container */
 .password-group {
   position: relative;
   width: 100%;
@@ -100,72 +164,98 @@ select:focus {
 
 .toggle-password-btn {
   position: absolute;
-  right: 18px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: rgba(37, 99, 235, 0.08);
   border: none;
+  border-radius: 999px;
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--auth-primary);
   cursor: pointer;
-  padding: 0;
-  font-size: 13px;
+  padding: 8px 12px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
-/* Error Message */
+.toggle-password-btn:hover {
+  background: rgba(37, 99, 235, 0.14);
+}
+
+.btn.w-100 {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--auth-primary), var(--auth-secondary));
+  color: var(--auth-button-text);
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
+}
+
+.btn.w-100:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(37, 99, 235, 0.22);
+}
+
 .error-message {
-  color: var(--danger-color);
-  font-size: 13px;
-  margin-top: 5px;
-  font-weight: 500;
+  color: var(--auth-danger);
+  font-size: 0.92rem;
+  margin-top: 4px;
+  font-weight: 600;
+  min-height: 20px;
 }
 
 .auth-links {
   text-align: center;
-  margin: 15px 0;
+  margin: 10px 0 5px;
 }
 
 .auth-link-primary {
-  color: var(--primary-color);
+  color: var(--auth-primary);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 0.955rem;
 }
 
 .auth-link-primary:hover {
-  text-decoration: underline;
+  color: var(--auth-secondary);
 }
 
 .auth-footer {
-  margin-top: 25px;
-  color: var(--text-muted);
-  font-size: 14px;
-  padding-top: 20px;
-  border-top: 1px solid #f1f5f9;
+  margin-top: 28px;
+  color: var(--auth-muted);
+  font-size: 0.95rem;
+  padding-top: 22px;
+  border-top: 1px solid var(--auth-border);
 }
 
 .auth-footer a {
-  color: var(--primary-color);
+  color: var(--auth-primary);
   font-weight: 700;
   text-decoration: none;
 }
 
 .auth-footer a:hover {
-  text-decoration: underline;
+  color: var(--auth-secondary);
 }
 
-/* Signup Specific */
 .signup-container {
-  max-width: 600px;
+  max-width: 590px;
 }
 
 .input-row {
   display: flex;
-  gap: 15px;
+  gap: 16px;
 }
 
-/* Transitions for multi-step reset */
+.input-row > * {
+  flex: 1;
+}
+
 .hidden {
   display: none !important;
 }
@@ -179,13 +269,22 @@ select:focus {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 600px) {
-  .input-row {
-    flex-direction: column;
-    gap: 15px;
+@media (max-width: 650px) {
+  .auth-wrapper {
+    padding: 40px 16px;
   }
-  
-  .login-container, .signup-container {
-    padding: 40px 25px;
+
+  .login-container,
+  .signup-container {
+    padding: 36px 24px;
+    max-width: 100%;
+  }
+
+  .subtitle {
+    font-size: 0.93rem;
+  }
+
+  .toggle-password-btn {
+    right: 14px;
   }
 }

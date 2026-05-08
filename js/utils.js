@@ -125,35 +125,77 @@ function createEmptyStateRow(title, description, colSpan = 6) {
 }
 
 // ============================================
-// DATA FORMATTING HELPERS
+// DATA SANITIZATION HELPERS
 // ============================================
 
 /**
- * Format date to readable format
- * @param {string|Date} date - Date to format
- * @returns {string} - Formatted date
+ * Sanitize input to prevent XSS attacks by escaping HTML characters
+ * @param {string} input - Input string to sanitize
+ * @returns {string} - Sanitized string safe for HTML display
  */
-function formatDate(date) {
-  if (!date) return 'N/A';
-  try {
-    return new Date(date).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  } catch {
-    return 'Invalid date';
-  }
+function sanitizeInput(input) {
+  if (input == null) return '';
+  return String(input)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
 }
 
+// ============================================
+// NOTIFICATION SYSTEM
+// ============================================
+
 /**
- * Truncate text to specified length
- * @param {string} text - Text to truncate
- * @param {number} length - Max length
- * @returns {string} - Truncated text
+ * Simulate sending a notification to a user
+ * @param {string} email - User email to send notification to
+ * @param {string} type - Notification type
+ * @param {object} data - Additional data for the notification
  */
-function truncateText(text, length = 50) {
-  if (!text) return '';
-  text = text.toString();
-  return text.length > length ? text.substring(0, length) + '...' : text;
+function simulateNotification(email, type, data = {}) {
+  const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+  let message = "";
+  let subject = "";
+
+  switch (type) {
+    case "booking_requested":
+      subject = "Booking Request Received";
+      message = `Your booking request for ${data.service} on ${data.date} has been received. A provider will confirm your service soon.`;
+      break;
+    case "booking_confirmed":
+      subject = "Booking Confirmed";
+      message = `Your booking for ${data.service} on ${data.date} has been confirmed. A provider will be assigned soon.`;
+      break;
+    case "booking_completed":
+      subject = "Service Completed";
+      message = `Your ${data.service} service has been completed. Please provide feedback in your dashboard.`;
+      break;
+    case "booking_cancelled":
+      subject = "Booking Cancelled";
+      message = `Your booking for ${data.service} has been cancelled.`;
+      break;
+    case "booking_rescheduled":
+      subject = "Booking Rescheduled";
+      message = `Your booking for ${data.service} has been rescheduled to ${data.newDate}.`;
+      break;
+    case "provider_assigned":
+      subject = "Provider Assigned";
+      message = `${data.provider} has been assigned to your ${data.service} booking on ${data.date}.`;
+      break;
+  }
+
+  notifications.push({
+    id: Date.now().toString(),
+    email: email,
+    type: type,
+    subject: subject,
+    message: message,
+    timestamp: new Date().toISOString(),
+    read: false,
+    data: data,
+  });
+
+  localStorage.setItem("notifications", JSON.stringify(notifications));
 }

@@ -1,16 +1,12 @@
 /**
  * =========================================================================
- * VIVA DOCUMENTATION: USER REGISTRATION (SIGNUP)
+ * USER REGISTRATION (SIGNUP) - BACKEND INTEGRATION
  * =========================================================================
- * This file captures user input and stores it persistently in the browser.
- * 
- * Flow:
- * 1. Validates user input (empty fields, password length).
- * 2. Fetches existing users from LocalStorage to prevent duplicate emails.
- * 3. Simulates network loading using setTimeout().
- * 4. Pushes the new user object to LocalStorage under "registeredUsers".
+ * This script handles user registration with backend API
+ * - Input validation
+ * - Backend registration
+ * - JWT token management
  */
-// signup.js - Frontend Only Authentication Logic (No Backend Needed)
 
 document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signupForm");
@@ -18,10 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupBtn = document.getElementById("signupBtn");
 
   if (signupForm) {
-    signupForm.addEventListener("submit", function (e) {
+    signupForm.addEventListener("submit", async function (e) {
       e.preventDefault();
 
-      // 1. Gather form data
+      // Gather form data
       const fullname = document.getElementById("fullname").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
@@ -33,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Reset error
       errorMsg.textContent = "";
 
-      // 2. Viva Check: Form Validation
+      // Validation
       if (!fullname || !email || !password || !location || !role || !securityQuestion || !securityAnswer) {
         errorMsg.textContent = "Please fill in all fields.";
         return;
@@ -44,51 +40,53 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // 3. Create the User Object
-      const newUser = {
-        fullname,
-        email,
-        password,
-        location,
-        role,
-        securityQuestion,
-        securityAnswer,
-      };
-
-      // 4. Viva Feature: Using Frontend LocalStorage!
-      // We fetch existing users first so we don't overwrite them. (No backend needed!)
-      let existingUsers =
-        JSON.parse(localStorage.getItem("registeredUsers")) || [];
-
-      // Prevent duplicate emails
-      const userExists = existingUsers.some((u) => u.email === email);
-      if (userExists) {
-        errorMsg.textContent = "Error: Email is already registered!";
+      if (!email.includes("@")) {
+        errorMsg.textContent = "Please enter a valid email.";
         return;
       }
 
-      // Update UI to show progress
+      // Update UI
       signupBtn.textContent = "Creating Account...";
       signupBtn.disabled = true;
 
-      // Simulate a fake "Network Request" for realism in your viva presentation
-      setTimeout(() => {
-        // Add our new user and save back to local storage
-        existingUsers.push(newUser);
-        localStorage.setItem("registeredUsers", JSON.stringify(existingUsers));
+      try {
+        // Call backend API
+        const response = await registerUser({
+          fullname,
+          email,
+          password,
+          location,
+          role,
+          securityQuestion,
+          securityAnswer,
+        });
 
-        // Show our custom Toast Notification if it exists (imported from main.js)
+        // Store token
+        setAuthToken(response.token);
+        localStorage.setItem("loggedInUser", JSON.stringify(response));
+
+        // Show success message
         if (typeof showToast === "function") {
-          showToast("Account created successfully! Redirecting...");
+          showToast("Account created successfully! Redirecting...", "success");
         } else {
           alert("Account created successfully! Redirecting...");
         }
 
-        // Redirect to login page after 2 seconds
+        // Redirect to dashboard or login
         setTimeout(() => {
-          window.location.href = "login.html";
-        }, 2000);
-      }, 1000); // 1 sec fake delay
+          if (response.role === "user") {
+            window.location.href = "user-dashboard.html";
+          } else if (response.role === "provider") {
+            window.location.href = "provider-dashboard.html";
+          } else {
+            window.location.href = "admin-dashboard.html";
+          }
+        }, 1500);
+      } catch (error) {
+        errorMsg.textContent = error.message || "Error creating account. Please try again.";
+        signupBtn.textContent = "Sign Up";
+        signupBtn.disabled = false;
+      }
     });
   }
 });

@@ -1,10 +1,15 @@
 // user-profile.js
-window.logout = function () {
+window.logout = async function () {
+  try {
+    await logoutUser();
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
   localStorage.removeItem("loggedInUser");
   window.location.href = "login.html";
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Authentication Check
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
 
@@ -15,51 +20,43 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Load user profile data
-  loadUserProfile(loggedInUser);
+  try {
+    const profile = await getUserProfile();
+    loadUserProfile(profile || loggedInUser);
+  } catch (error) {
+    console.error("Profile load error:", error);
+    loadUserProfile(loggedInUser);
+  }
 
   // Handle form submission
   const profileForm = document.getElementById("profile-form");
-  profileForm.addEventListener("submit", (e) => {
+  profileForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    updateUserProfile(loggedInUser);
+    await updateProfileLogic(loggedInUser);
   });
 });
 
-function loadUserProfile(user) {
+function loadUserProfile(profile) {
   document.getElementById("profile-name").textContent =
-    user.fullname || user.email.split("@")[0];
-  document.getElementById("profile-email").textContent = user.email;
+    profile.fullname || profile.name || profile.email.split("@")[0];
+  document.getElementById("profile-email").textContent = profile.email;
 
-  // Load additional profile data from localStorage
-  const userProfiles = JSON.parse(localStorage.getItem("userProfiles")) || {};
-  const profile = userProfiles[user.email] || {};
-
-  document.getElementById("fullname").value =
-    profile.fullname || user.fullname || "";
+  document.getElementById("fullname").value = profile.fullname || profile.name || "";
   document.getElementById("phone").value = profile.phone || "";
   document.getElementById("address").value = profile.address || "";
 
-  // Load security info from registeredUsers if not in profile
-  const registeredUsers =
-    JSON.parse(localStorage.getItem("registeredUsers")) || [];
-  const userRecord = registeredUsers.find((u) => u.email === user.email) || {};
-
-  document.getElementById("security-question").value =
-    profile.securityQuestion ||
-    userRecord.securityQuestion ||
-    "What is your favorite color?";
-  document.getElementById("security-answer").value =
-    profile.securityAnswer || userRecord.securityAnswer || "";
+  if (profile.securityQuestion) {
+    document.getElementById("security-question").value = profile.securityQuestion;
+  }
+  document.getElementById("security-answer").value = profile.securityAnswer || "";
 }
 
-function updateUserProfile(user) {
+async function updateProfileLogic(user) {
   const fullname = document.getElementById("fullname").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const address = document.getElementById("address").value.trim();
   const securityQuestion = document.getElementById("security-question").value;
-  const securityAnswer = document
-    .getElementById("security-answer")
-    .value.trim();
+  const securityAnswer = document.getElementById("security-answer").value.trim();
   const currentPassword = document.getElementById("current-password").value;
   const newPassword = document.getElementById("new-password").value;
   const confirmPassword = document.getElementById("confirm-password").value;
@@ -75,62 +72,45 @@ function updateUserProfile(user) {
     return;
   }
 
-  // Password change validation
   if (newPassword) {
     if (!currentPassword) {
       alert("Please enter your current password to change it.");
       return;
     }
-
-    // In a real app, you'd verify the current password against a hashed version
-    // For demo purposes, we'll just check if it matches the stored password
-    const registeredUsers =
-      JSON.parse(localStorage.getItem("registeredUsers")) || [];
-    const userRecord = registeredUsers.find((u) => u.email === user.email);
-
-    if (userRecord && userRecord.password !== currentPassword) {
-      alert("Current password is incorrect.");
-      return;
-    }
-
     if (newPassword !== confirmPassword) {
       alert("New passwords don't match.");
       return;
     }
-
     if (newPassword.length < 6) {
       alert("New password must be at least 6 characters long.");
       return;
     }
   }
 
-  // Update user profile data
-  const userProfiles = JSON.parse(localStorage.getItem("userProfiles")) || {};
-  userProfiles[user.email] = {
-    fullname: fullname,
-    phone: phone,
-    address: address,
-    securityQuestion: securityQuestion,
-    securityAnswer: securityAnswer,
-    updatedAt: new Date().toISOString(),
-  };
-  localStorage.setItem("userProfiles", JSON.stringify(userProfiles));
+  try {
+    const updateData = {
+      name: fullname,
+      phone: phone,
+      address: address,
+      securityQuestion: securityQuestion,
+      securityAnswer: securityAnswer
+    };
 
-  // Update password if provided
-  if (newPassword) {
-    const registeredUsers =
-      JSON.parse(localStorage.getItem("registeredUsers")) || [];
-    const userIndex = registeredUsers.findIndex((u) => u.email === user.email);
-    if (userIndex > -1) {
-      registeredUsers[userIndex].password = newPassword;
-      localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
+    if (newPassword) {
+      updateData.currentPassword = currentPassword;
+      updateData.newPassword = newPassword;
     }
+
+    await updateUserProfile(updateData);
+
+    // Update logged in user session
+    const updatedUser = { ...user, fullname: fullname };
+    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+
+    alert("✅ Profile updated successfully!");
+    window.location.reload();
+  } catch (error) {
+    console.error("Profile update error:", error);
+    alert("❌ Failed to update profile: " + error.message);
   }
-
-  // Update logged in user session
-  const updatedUser = { ...user, fullname: fullname };
-  localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-
-  alert("✅ Profile updated successfully!");
-  window.location.reload();
 }

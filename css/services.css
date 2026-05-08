@@ -16,6 +16,12 @@
   backdrop-filter: blur(10px);
 }
 
+/* Dark mode services intro */
+[data-theme="dark"] .services-intro {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(52, 211, 153, 0.08) 100%);
+  border: 1px solid var(--border-color);
+}
+
 .services-intro h2 {
   font-size: 42px;
   font-weight: 800;
@@ -83,7 +89,7 @@
 .search-input {
   width: 100%;
   padding: 18px 20px 18px 55px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   border-radius: 30px;
   font-size: 16px;
   transition: var(--transition);
@@ -104,7 +110,7 @@
 .filter-select {
   width: 100%;
   padding: 16px 25px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   border-radius: 30px;
   font-size: 15px;
   font-weight: 600;
@@ -126,6 +132,11 @@
   box-shadow: var(--shadow-lg);
 }
 
+/* Dark mode filter select */
+[data-theme="dark"] .filter-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+}
+
 /* Enhanced Service Card for Services Page */
 .service-grid {
   display: grid;
@@ -142,21 +153,39 @@
   padding: 40px 30px;
   background: var(--surface-color);
   border-radius: var(--border-radius-lg);
+  border: 2px solid var(--border-color);
   transition: var(--transition);
   position: relative;
   z-index: 1;
+  cursor: pointer;
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+}
+
+/* Dark mode service card */
+[data-theme="dark"] .service-card:hover {
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .service-card .price-tag {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.12);
   color: var(--accent-color);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 700;
+}
+
+/* Dark mode price tag */
+[data-theme="dark"] .service-card .price-tag {
+  background: rgba(52, 211, 153, 0.15);
 }
 
 .service-card .book-btn {
@@ -170,23 +199,29 @@
 
 /* Reviews Section */
 .reviews-section {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--surface-color);
   backdrop-filter: blur(10px);
   padding: 60px 40px;
   border-radius: var(--border-radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-color);
   margin-top: 80px;
+}
+
+/* Dark mode reviews section */
+[data-theme="dark"] .reviews-section {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
 }
 
 .review-card {
   flex: 1;
   min-width: 280px;
   max-width: 350px;
-  background: white;
+  background: var(--surface-color);
   padding: 30px;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-md);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-color);
   transition: var(--transition);
 }
 
@@ -218,7 +253,7 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-dark);
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-color);
   padding-top: 15px;
   display: block;
 }

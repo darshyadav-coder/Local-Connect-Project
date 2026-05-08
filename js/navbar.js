@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const token = getAuthToken();
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
   const menu = document.querySelector(".menu");
   if (!menu) return;
@@ -11,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (bookNowLink) {
     bookNowLink.addEventListener("click", (e) => {
-      if (!user) {
+      if (!token || !user) {
         e.preventDefault();
         if (typeof showToast === "function") {
           showToast("Please login first to access the booking page.", "error");
@@ -23,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (!user) {
+  if (!token || !user) {
     // Not logged in: hide all dashboards
     if (userLink) userLink.classList.add("hidden");
     if (providerLink) providerLink.classList.add("hidden");
@@ -33,8 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginLink) {
       loginLink.textContent = "Logout";
       loginLink.href = "#";
-      loginLink.addEventListener("click", (e) => {
+      loginLink.addEventListener("click", async (e) => {
         e.preventDefault();
+        try {
+          await logoutUser();
+        } catch (error) {
+          console.error("Logout error:", error);
+        }
         localStorage.removeItem("loggedInUser");
         window.location.href = "main.html"; // Redirect to home page on logout
       });
@@ -50,6 +56,54 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (user.role === "admin") {
       if (userLink) userLink.classList.add("hidden");
       if (providerLink) providerLink.classList.add("hidden");
+    }
+  }
+
+  // Add dark mode toggle
+  const navbar = document.querySelector('.navbar .container');
+  if (navbar) {
+    const themeToggle = document.createElement('button');
+    themeToggle.id = 'theme-toggle';
+    themeToggle.className = 'theme-toggle-btn';
+    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    themeToggle.setAttribute('aria-label', 'Toggle dark mode');
+    themeToggle.title = 'Toggle dark mode';
+
+    // Insert before the menu
+    const menu = navbar.querySelector('.menu');
+    if (menu) {
+      navbar.insertBefore(themeToggle, menu);
+    }
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    // Theme toggle functionality
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+
+      // Show toast notification
+      if (typeof showToast === 'function') {
+        showToast(`Switched to ${newTheme} mode`, 'info');
+      }
+    });
+
+    function updateThemeIcon(theme) {
+      const icon = themeToggle.querySelector('i');
+      if (theme === 'dark') {
+        icon.className = 'fas fa-sun';
+        themeToggle.setAttribute('aria-label', 'Switch to light mode');
+      } else {
+        icon.className = 'fas fa-moon';
+        themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+      }
     }
   }
 });
