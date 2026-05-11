@@ -68,7 +68,10 @@ const getMyBookings = async (req, res) => {
     }
 
     const bookings = await Booking.find({ userEmail }).sort({ createdAt: -1 });
-    res.json(bookings);
+    res.json({
+      count: bookings.length,
+      bookings
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -79,11 +82,12 @@ const getMyBookings = async (req, res) => {
 // @access  Public
 const getBookings = async (req, res) => {
   try {
-    const { status, service, sortBy } = req.query;
+    const { status, service, provider, sortBy } = req.query;
     let filter = {};
 
     if (status) filter.status = status;
     if (service) filter.service = service;
+    if (provider) filter.provider = provider;
 
     let query = Booking.find(filter);
 

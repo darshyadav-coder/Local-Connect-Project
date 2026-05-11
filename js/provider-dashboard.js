@@ -1,4 +1,4 @@
-// provider-dashboard.js - Pure Frontend logic
+// provider-dashboard.js - Backend Integrated
 window.logout = async function () {
   try {
     if (typeof logoutUser === "function") {
@@ -30,38 +30,44 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAvailabilityCalendar();
 });
 
-function renderProviderDashboard() {
+async function renderProviderDashboard() {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-  const allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
+  if (!loggedInUser) return;
 
-  // Filter categories dynamically (simulating SQL queries)
-  const pendingEmergency = allBookings.filter(
-    (b) => b.status === "Pending" && b.type === "emergency",
-  );
-  const pendingNormal = allBookings.filter(
-    (b) => b.status === "Pending" && b.type === "normal",
-  );
+  const providerIdentifier = loggedInUser.fullname || loggedInUser.email.split("@")[0];
 
-  // We bind the provider's name securely to the booking so they only see their own accepted jobs
-  const providerIdentifier =
-    loggedInUser.fullname || loggedInUser.email.split("@")[0];
-  const myAccepted = allBookings.filter(
-    (b) => b.status === "Accepted" && b.provider === providerIdentifier,
-  );
-  const myCompleted = allBookings.filter(
-    (b) => b.status === "Completed" && b.provider === providerIdentifier,
-  );
+  try {
+    // 1. Fetch Pending Bookings
+    const pendingRes = await getAllBookings({ status: "Pending" });
+    const pendingBookings = pendingRes.bookings || [];
+    
+    // 2. Fetch My Bookings (Accepted/Completed)
+    const myRes = await getAllBookings({ provider: providerIdentifier });
+    const myBookings = myRes.bookings || [];
 
-  // Render HTML Views
-  renderEmergency(pendingEmergency);
-  renderIncoming(pendingNormal);
-  renderAccepted(myAccepted);
-  renderFeedback(myCompleted); // Added: Render feedback section
+    // Filter categories dynamically
+    const pendingEmergency = pendingBookings.filter((b) => b.type === "emergency");
+    const pendingNormal = pendingBookings.filter((b) => b.type === "normal");
+
+    const myAccepted = myBookings.filter((b) => b.status === "Accepted");
+    const myCompleted = myBookings.filter((b) => b.status === "Completed");
+
+    // Render HTML Views
+    renderEmergency(pendingEmergency);
+    renderIncoming(pendingNormal);
+    renderAccepted(myAccepted);
+    renderFeedback(myCompleted);
+  } catch (err) {
+    console.error("Error loading provider dashboard:", err);
+    showToast("❌ Failed to load dashboard data.", "error");
+  }
 }
 
 function renderFeedback(completedBookings) {
   const feedbackBody = document.getElementById("feedback-body");
   const trustScoreEl = document.getElementById("trust-score");
+
+  if (!feedbackBody || !trustScoreEl) return;
 
   feedbackBody.innerHTML = "";
   let totalRatings = 0;
@@ -79,9 +85,12 @@ function renderFeedback(completedBookings) {
 
   completedBookings.forEach((booking) => {
     if (booking.feedback) {
-      const ratingStr = booking.feedback.rating.split(" ")[1] || "5";
-      const rating = parseInt(ratingStr);
-      totalRatings += rating;
+      // rating might be "5 Stars" or just "5"
+      const ratingVal = typeof booking.feedback.rating === 'string' 
+        ? (parseInt(booking.feedback.rating.split(" ")[1]) || parseInt(booking.feedback.rating) || 5)
+        : (booking.feedback.rating || 5);
+      
+      totalRatings += ratingVal;
       feedbackCount++;
 
       feedbackBody.innerHTML += `
@@ -119,6 +128,8 @@ function renderFeedback(completedBookings) {
 
 function renderEmergency(requests) {
   const container = document.getElementById("emergency-requests-container");
+  if (!container) return;
+  
   container.innerHTML = "";
   if (requests.length === 0) {
     container.innerHTML = `<p class="text-muted text-center">No emergency requests right now.</p>`;
@@ -149,6 +160,8 @@ function renderEmergency(requests) {
 
 function renderIncoming(requests) {
   const tbody = document.getElementById("incoming-requests-body");
+  if (!tbody) return;
+  
   tbody.innerHTML = "";
   if (requests.length === 0) {
     tbody.innerHTML = createEmptyStateRow(
@@ -182,6 +195,8 @@ function renderIncoming(requests) {
 
 function renderAccepted(requests) {
   const container = document.getElementById("accepted-bookings-container");
+  if (!container) return;
+  
   container.innerHTML = "";
   if (requests.length === 0) {
     container.innerHTML = `<p class="text-muted text-center">You haven't accepted any active bookings yet.</p>`;
@@ -208,106 +223,99 @@ function renderAccepted(requests) {
 }
 
 // ==========================
-// ACTIONS (Database Simulation)
+// ACTIONS
 // ==========================
 
 window.acceptBooking = function (id) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-  let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
+  const providerIdentifier = loggedInUser.fullname || loggedInUser.email.split("@")[0];
 
-  // Find the exact booking ID
-  const index = allBookings.findIndex((b) => b.id === id);
-  if (index > -1) {
-    const booking = allBookings[index];
+  showConfirmDialog(
+    "Accept Booking?",
+    `Are you sure you want to accept this booking?`,
+    async () => {
+      try {
+        // Fetch booking details first to get user email
+        const booking = await getBooking(id);
+        
+        // 1. Assign provider
+        await assignProvider(id, providerIdentifier);
+        // 2. Update status to Accepted
+        await updateBookingStatus(id, "Accepted");
 
-    showConfirmDialog(
-      "Accept Booking?",
-      `Accept ${booking.service} for ${booking.customerName}?`,
-      () => {
-        allBookings[index].status = "Accepted";
-        // Assign this exact provider to the booking so others can't see it!
-        allBookings[index].provider =
-          loggedInUser.fullname || loggedInUser.email.split("@")[0];
-        localStorage.setItem("allBookings", JSON.stringify(allBookings));
-
-        // Send notification
-        simulateNotification(
-          allBookings[index].userEmail,
-          "provider_assigned",
-          {
-            provider: allBookings[index].provider,
-            service: allBookings[index].service,
-            date: allBookings[index].date,
-          },
-        );
+        // 3. Create notification for the user
+        await createNotification({
+          email: booking.userEmail,
+          type: "provider_assigned",
+          subject: "Provider Assigned",
+          message: `${providerIdentifier} has been assigned to your ${booking.service} booking on ${booking.date}.`,
+          data: { bookingId: id, provider: providerIdentifier }
+        });
 
         showToast("✅ Booking accepted successfully!", "success");
-
-        // Re-render the view
         setTimeout(() => renderProviderDashboard(), 800);
-      },
-      null,
-      "Accept",
-      "Cancel",
-    );
-  }
+      } catch (err) {
+        console.error("Accept error:", err);
+        showToast("❌ Could not accept booking: " + err.message, "error");
+      }
+    },
+    null,
+    "Accept",
+    "Cancel",
+  );
 };
 
 window.rejectBooking = function (id) {
-  let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-  const index = allBookings.findIndex((b) => b.id === id);
-
-  if (index > -1) {
-    const booking = allBookings[index];
-
-    showConfirmDialog(
-      "Decline Booking?",
-      `Are you sure you want to decline ${booking.service} for ${booking.customerName}?`,
-      () => {
-        allBookings[index].status = "Rejected";
-        localStorage.setItem("allBookings", JSON.stringify(allBookings));
-
+  showConfirmDialog(
+    "Decline Booking?",
+    `Are you sure you want to decline this request?`,
+    async () => {
+      try {
+        await updateBookingStatus(id, "Rejected");
         showToast("✅ Booking declined.", "success");
         setTimeout(() => renderProviderDashboard(), 800);
-      },
-      null,
-      "Yes, Decline",
-      "Keep It",
-    );
-  }
+      } catch (err) {
+        console.error("Decline error:", err);
+        showToast("❌ Could not decline booking: " + err.message, "error");
+      }
+    },
+    null,
+    "Yes, Decline",
+    "Keep It",
+  );
 };
 
 window.completeBooking = function (id) {
-  let allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-  const index = allBookings.findIndex((b) => b.id === id);
+  showConfirmDialog(
+    "Mark as Completed?",
+    `Mark this service as completed?`,
+    async () => {
+      try {
+        // Fetch booking details first to get user email
+        const booking = await getBooking(id);
 
-  if (index > -1) {
-    const booking = allBookings[index];
+        await updateBookingStatus(id, "Completed");
 
-    showConfirmDialog(
-      "Mark as Completed?",
-      `Mark ${booking.service} as completed?`,
-      () => {
-        allBookings[index].status = "Completed";
-        localStorage.setItem("allBookings", JSON.stringify(allBookings));
-
-        // Send notification
-        simulateNotification(
-          allBookings[index].userEmail,
-          "booking_completed",
-          {
-            service: allBookings[index].service,
-          },
-        );
+        // Create notification for the user
+        await createNotification({
+          email: booking.userEmail,
+          type: "booking_completed",
+          subject: "Service Completed",
+          message: `Your ${booking.service} service has been completed. Please provide feedback in your dashboard.`,
+          data: { bookingId: id, service: booking.service }
+        });
 
         showToast("✅ Booking marked as completed!", "success");
         setTimeout(() => renderProviderDashboard(), 800);
-      },
-      null,
-      "Mark Complete",
-      "Not Yet",
-    );
-  }
+      } catch (err) {
+        console.error("Completion error:", err);
+        showToast("❌ Could not complete booking: " + err.message, "error");
+      }
+    },
+    null,
+    "Mark Complete",
+    "Not Yet",
+  );
 };
 
 // ==========================
@@ -316,6 +324,8 @@ window.completeBooking = function (id) {
 
 function renderAvailabilityCalendar() {
   const calendarContainer = document.getElementById("availability-calendar");
+  if (!calendarContainer) return;
+  
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const availability =
     JSON.parse(localStorage.getItem("providerAvailability")) || {};
@@ -403,36 +413,4 @@ function toggleDayAvailability(providerEmail, dateStr) {
   localStorage.setItem("providerAvailability", JSON.stringify(availability));
 
   renderAvailabilityCalendar();
-}
-
-// Simulate notifications
-function simulateNotification(email, type, data = {}) {
-  const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
-
-  let message = "";
-  let subject = "";
-
-  switch (type) {
-    case "provider_assigned":
-      subject = "Provider Assigned";
-      message = `${data.provider} has been assigned to your ${data.service} booking on ${data.date}.`;
-      break;
-    case "booking_completed":
-      subject = "Service Completed";
-      message = `Your ${data.service} service has been completed. Please provide feedback in your dashboard.`;
-      break;
-  }
-
-  notifications.push({
-    id: Date.now().toString(),
-    email: email,
-    type: type,
-    subject: subject,
-    message: message,
-    timestamp: new Date().toISOString(),
-    read: false,
-    data: data,
-  });
-
-  localStorage.setItem("notifications", JSON.stringify(notifications));
 }

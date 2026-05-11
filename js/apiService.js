@@ -9,7 +9,7 @@
  * - CORS support
  */
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = "http://localhost:5000/api";
 
 // ============================================
 // TOKEN MANAGEMENT
@@ -20,7 +20,7 @@ const API_BASE_URL = 'http://localhost:5000/api';
  */
 function setAuthToken(token) {
   if (token) {
-    localStorage.setItem('authToken', token);
+    localStorage.setItem("authToken", token);
   }
 }
 
@@ -28,14 +28,14 @@ function setAuthToken(token) {
  * Get JWT token from localStorage
  */
 function getAuthToken() {
-  return localStorage.getItem('authToken');
+  return localStorage.getItem("authToken");
 }
 
 /**
  * Clear JWT token
  */
 function clearAuthToken() {
-  localStorage.removeItem('authToken');
+  localStorage.removeItem("authToken");
 }
 
 /**
@@ -56,15 +56,15 @@ function isAuthenticated() {
  * @param {object} body - Request body for POST/PUT
  * @returns {Promise} Response data
  */
-async function apiCall(endpoint, method = 'GET', body = null) {
+async function apiCall(endpoint, method = "GET", body = null) {
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 
   // Add auth token if available
   const token = getAuthToken();
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const options = {
@@ -72,7 +72,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     headers,
   };
 
-  if (body && (method === 'POST' || method === 'PUT')) {
+  if (body && (method === "POST" || method === "PUT")) {
     options.body = JSON.stringify(body);
   }
 
@@ -83,8 +83,8 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     // Handle 401 - Unauthorized (token expired)
     if (response.status === 401) {
       clearAuthToken();
-      window.location.href = 'login.html';
-      throw new Error('Session expired. Please login again.');
+      window.location.href = "login.html";
+      throw new Error("Session expired. Please login again.");
     }
 
     if (!response.ok) {
@@ -93,7 +93,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 
     return data;
   } catch (error) {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     throw error;
   }
 }
@@ -106,14 +106,14 @@ async function apiCall(endpoint, method = 'GET', body = null) {
  * Register new user
  */
 async function registerUser(userData) {
-  return apiCall('/auth/register', 'POST', userData);
+  return apiCall("/auth/register", "POST", userData);
 }
 
 /**
  * Login user
  */
 async function loginUser(email, password) {
-  const response = await apiCall('/auth/login', 'POST', { email, password });
+  const response = await apiCall("/auth/login", "POST", { email, password });
   if (response.token) {
     setAuthToken(response.token);
   }
@@ -125,21 +125,21 @@ async function loginUser(email, password) {
  */
 async function logoutUser() {
   clearAuthToken();
-  return apiCall('/auth/logout', 'POST');
+  return apiCall("/auth/logout", "POST");
 }
 
 /**
  * Forgot password - get security question
  */
 async function forgotPassword(email) {
-  return apiCall('/auth/forgot-password', 'POST', { email });
+  return apiCall("/auth/forgot-password", "POST", { email });
 }
 
 /**
  * Verify security answer and reset password
  */
 async function resetPassword(email, securityAnswer, newPassword) {
-  const response = await apiCall('/auth/verify-answer', 'POST', {
+  const response = await apiCall("/auth/verify-answer", "POST", {
     email,
     securityAnswer,
     newPassword,
@@ -154,7 +154,7 @@ async function resetPassword(email, securityAnswer, newPassword) {
  * Get current user
  */
 async function getCurrentUser() {
-  return apiCall('/auth/me', 'GET');
+  return apiCall("/auth/me", "GET");
 }
 
 // ============================================
@@ -165,14 +165,14 @@ async function getCurrentUser() {
  * Create new booking
  */
 async function createBooking(bookingData) {
-  return apiCall('/bookings', 'POST', bookingData);
+  return apiCall("/bookings", "POST", bookingData);
 }
 
 /**
  * Get user's bookings
  */
 async function getMyBookings(email) {
-  return apiCall(`/bookings/mybookings?email=${email}`, 'GET');
+  return apiCall(`/bookings/mybookings?email=${email}`, "GET");
 }
 
 /**
@@ -180,49 +180,58 @@ async function getMyBookings(email) {
  */
 async function getAllBookings(filters = {}) {
   const params = new URLSearchParams(filters).toString();
-  return apiCall(`/bookings?${params}`, 'GET');
+  return apiCall(`/bookings?${params}`, "GET");
 }
 
 /**
  * Get single booking
  */
 async function getBooking(bookingId) {
-  return apiCall(`/bookings/${bookingId}`, 'GET');
+  return apiCall(`/bookings/${bookingId}`, "GET");
 }
 
 /**
  * Update booking status
  */
 async function updateBookingStatus(bookingId, status) {
-  return apiCall(`/bookings/${bookingId}/status`, 'PUT', { status });
+  return apiCall(`/bookings/${bookingId}/status`, "PUT", { status });
+}
+
+/**
+ * Update booking details
+ */
+async function updateBooking(bookingId, bookingData) {
+  return apiCall(`/bookings/${bookingId}`, "PUT", bookingData);
 }
 
 /**
  * Assign provider to booking
  */
 async function assignProvider(bookingId, providerName) {
-  return apiCall(`/bookings/${bookingId}/assign-provider`, 'PUT', { provider: providerName });
+  return apiCall(`/bookings/${bookingId}/assign-provider`, "PUT", {
+    provider: providerName,
+  });
 }
 
 /**
  * Add feedback to booking
  */
 async function addBookingFeedback(bookingId, feedback) {
-  return apiCall(`/bookings/${bookingId}/feedback`, 'PUT', { feedback });
+  return apiCall(`/bookings/${bookingId}/feedback`, "PUT", { feedback });
 }
 
 /**
  * Cancel booking
  */
 async function cancelBooking(bookingId) {
-  return apiCall(`/bookings/${bookingId}`, 'DELETE');
+  return apiCall(`/bookings/${bookingId}`, "DELETE");
 }
 
 /**
  * Get booking statistics
  */
 async function getBookingStats() {
-  return apiCall('/bookings/stats/overview', 'GET');
+  return apiCall("/bookings/stats/overview", "GET");
 }
 
 // ============================================
@@ -233,21 +242,21 @@ async function getBookingStats() {
  * Get user profile
  */
 async function getUserProfile(email) {
-  return apiCall(`/users/profile?email=${email}`, 'GET');
+  return apiCall(`/users/profile?email=${email}`, "GET");
 }
 
 /**
  * Update user profile
  */
 async function updateUserProfile(profileData) {
-  return apiCall('/users/profile', 'PUT', profileData);
+  return apiCall("/users/profile", "PUT", profileData);
 }
 
 /**
  * Change password
  */
 async function changePassword(email, oldPassword, newPassword) {
-  return apiCall('/users/change-password', 'PUT', {
+  return apiCall("/users/change-password", "PUT", {
     email,
     oldPassword,
     newPassword,
@@ -258,22 +267,22 @@ async function changePassword(email, oldPassword, newPassword) {
  * Get all users (admin)
  */
 async function getAllUsers(role = null) {
-  const params = role ? `?role=${role}` : '';
-  return apiCall(`/users${params}`, 'GET');
+  const params = role ? `?role=${role}` : "";
+  return apiCall(`/users${params}`, "GET");
 }
 
 /**
  * Delete user (admin)
  */
 async function deleteUser(userId) {
-  return apiCall(`/users/${userId}`, 'DELETE');
+  return apiCall(`/users/${userId}`, "DELETE");
 }
 
 /**
  * Update user role (admin)
  */
 async function updateUserRole(userId, role) {
-  return apiCall(`/users/${userId}/role`, 'PUT', { role });
+  return apiCall(`/users/${userId}/role`, "PUT", { role });
 }
 
 // ============================================
@@ -285,42 +294,42 @@ async function updateUserRole(userId, role) {
  */
 async function getServices(filters = {}) {
   const params = new URLSearchParams(filters).toString();
-  return apiCall(`/services?${params}`, 'GET');
+  return apiCall(`/services?${params}`, "GET");
 }
 
 /**
  * Get service categories
  */
 async function getServiceCategories() {
-  return apiCall('/services/categories/list', 'GET');
+  return apiCall("/services/categories/list", "GET");
 }
 
 /**
  * Get single service
  */
 async function getService(serviceId) {
-  return apiCall(`/services/${serviceId}`, 'GET');
+  return apiCall(`/services/${serviceId}`, "GET");
 }
 
 /**
  * Create service (admin)
  */
 async function createService(serviceData) {
-  return apiCall('/services', 'POST', serviceData);
+  return apiCall("/services", "POST", serviceData);
 }
 
 /**
  * Update service (admin)
  */
 async function updateService(serviceId, serviceData) {
-  return apiCall(`/services/${serviceId}`, 'PUT', serviceData);
+  return apiCall(`/services/${serviceId}`, "PUT", serviceData);
 }
 
 /**
  * Delete service (admin)
  */
 async function deleteService(serviceId) {
-  return apiCall(`/services/${serviceId}`, 'DELETE');
+  return apiCall(`/services/${serviceId}`, "DELETE");
 }
 
 // ============================================
@@ -332,42 +341,42 @@ async function deleteService(serviceId) {
  */
 async function getProviders(filters = {}) {
   const params = new URLSearchParams(filters).toString();
-  return apiCall(`/providers?${params}`, 'GET');
+  return apiCall(`/providers?${params}`, "GET");
 }
 
 /**
  * Create provider profile
  */
 async function createProvider(providerData) {
-  return apiCall('/providers', 'POST', providerData);
+  return apiCall("/providers", "POST", providerData);
 }
 
 /**
  * Get provider profile
  */
 async function getProvider(providerId) {
-  return apiCall(`/providers/${providerId}`, 'GET');
+  return apiCall(`/providers/${providerId}`, "GET");
 }
 
 /**
  * Update provider profile
  */
 async function updateProvider(providerId, providerData) {
-  return apiCall(`/providers/${providerId}`, 'PUT', providerData);
+  return apiCall(`/providers/${providerId}`, "PUT", providerData);
 }
 
 /**
  * Get provider bookings
  */
 async function getProviderBookings(providerId) {
-  return apiCall(`/providers/${providerId}/bookings`, 'GET');
+  return apiCall(`/providers/${providerId}/bookings`, "GET");
 }
 
 /**
  * Update provider statistics
  */
 async function updateProviderStats(providerId) {
-  return apiCall(`/providers/${providerId}/stats`, 'PUT');
+  return apiCall(`/providers/${providerId}/stats`, "PUT");
 }
 
 // ============================================
@@ -378,7 +387,7 @@ async function updateProviderStats(providerId) {
  * Submit feedback
  */
 async function submitFeedback(feedbackData) {
-  return apiCall('/feedback', 'POST', feedbackData);
+  return apiCall("/feedback", "POST", feedbackData);
 }
 
 /**
@@ -386,28 +395,28 @@ async function submitFeedback(feedbackData) {
  */
 async function getAllFeedback(filters = {}) {
   const params = new URLSearchParams(filters).toString();
-  return apiCall(`/feedback?${params}`, 'GET');
+  return apiCall(`/feedback?${params}`, "GET");
 }
 
 /**
  * Get provider feedback
  */
 async function getProviderFeedback(providerId) {
-  return apiCall(`/feedback/provider/${providerId}`, 'GET');
+  return apiCall(`/feedback/provider/${providerId}`, "GET");
 }
 
 /**
  * Update feedback
  */
 async function updateFeedback(feedbackId, feedbackData) {
-  return apiCall(`/feedback/${feedbackId}`, 'PUT', feedbackData);
+  return apiCall(`/feedback/${feedbackId}`, "PUT", feedbackData);
 }
 
 /**
  * Delete feedback
  */
 async function deleteFeedback(feedbackId) {
-  return apiCall(`/feedback/${feedbackId}`, 'DELETE');
+  return apiCall(`/feedback/${feedbackId}`, "DELETE");
 }
 
 // ============================================
@@ -418,7 +427,7 @@ async function deleteFeedback(feedbackId) {
  * Submit contact form
  */
 async function submitContact(contactData) {
-  return apiCall('/contact', 'POST', contactData);
+  return apiCall("/contact", "POST", contactData);
 }
 
 /**
@@ -426,28 +435,28 @@ async function submitContact(contactData) {
  */
 async function getAllContacts(filters = {}) {
   const params = new URLSearchParams(filters).toString();
-  return apiCall(`/contact?${params}`, 'GET');
+  return apiCall(`/contact?${params}`, "GET");
 }
 
 /**
  * Get single contact
  */
 async function getContact(contactId) {
-  return apiCall(`/contact/${contactId}`, 'GET');
+  return apiCall(`/contact/${contactId}`, "GET");
 }
 
 /**
  * Update contact
  */
 async function updateContact(contactId, contactData) {
-  return apiCall(`/contact/${contactId}`, 'PUT', contactData);
+  return apiCall(`/contact/${contactId}`, "PUT", contactData);
 }
 
 /**
  * Delete contact
  */
 async function deleteContact(contactId) {
-  return apiCall(`/contact/${contactId}`, 'DELETE');
+  return apiCall(`/contact/${contactId}`, "DELETE");
 }
 
 // ============================================
@@ -458,42 +467,74 @@ async function deleteContact(contactId) {
  * Get dashboard statistics
  */
 async function getDashboardStats() {
-  return apiCall('/admin/stats', 'GET');
+  return apiCall("/admin/stats", "GET");
 }
 
 /**
  * Get recent bookings
  */
 async function getRecentBookings(limit = 10) {
-  return apiCall(`/admin/recent-bookings?limit=${limit}`, 'GET');
+  return apiCall(`/admin/recent-bookings?limit=${limit}`, "GET");
 }
 
 /**
  * Get revenue analytics
  */
 async function getRevenueAnalytics() {
-  return apiCall('/admin/revenue', 'GET');
+  return apiCall("/admin/revenue", "GET");
 }
 
 /**
  * Get booking trends
  */
 async function getBookingTrends() {
-  return apiCall('/admin/trends', 'GET');
+  return apiCall("/admin/trends", "GET");
 }
 
 /**
  * Get service performance
  */
 async function getServicePerformance() {
-  return apiCall('/admin/service-performance', 'GET');
+  return apiCall("/admin/service-performance", "GET");
 }
 
 /**
  * Get health status
  */
 async function getSystemHealth() {
-  return apiCall('/admin/health', 'GET');
+  return apiCall("/admin/health", "GET");
+}
+
+// ============================================
+// NOTIFICATION ENDPOINTS
+// ============================================
+
+/**
+ * Get user notifications
+ */
+async function getUserNotifications(email) {
+  return apiCall(`/notifications?email=${email}`, "GET");
+}
+
+/**
+ * Create a notification
+ */
+async function createNotification(notificationData) {
+  return apiCall("/notifications", "POST", notificationData);
+}
+
+/**
+ * Mark notification as read
+ */
+async function markNotificationAsRead(notificationId) {
+  return apiCall(`/notifications/${notificationId}/read`, "PUT");
+}
+
+/**
+ * Delete a notification
+ */
+async function deleteNotification(notificationId) {
+  return apiCall(`/notifications/${notificationId}`, "DELETE");
 }
 
 // ============================================
@@ -504,7 +545,7 @@ async function getSystemHealth() {
  * Check server health
  */
 async function checkServerHealth() {
-  return apiCall('/health', 'GET');
+  return apiCall("/health", "GET");
 }
 
 // ============================================

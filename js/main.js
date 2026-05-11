@@ -50,11 +50,15 @@ if (container && typeof servicesData !== "undefined") {
   // Load 12 services, but hide the ones after index 5
   servicesData.slice(0, 12).forEach((service, index) => {
     let hiddenClass = index >= 6 ? "hidden" : "";
+    let isPopular = index % 3 === 0; // Simulate popular services
+    
     cardsHTML += `
         <div class="service-card ${hiddenClass} fade-in-target" data-id="${service.id}">
+            ${isPopular ? '<div class="popular-badge">Popular</div>' : ''}
             <i class="fa-solid ${service.icon}"></i>
             <h3>${service.name}</h3>
-            <p>${service.description || "Click to explore services"}</p>
+            <p>${service.description || "Trusted professional services for your home."}</p>
+            <span class="text-primary bold small">Explore More →</span>
         </div>
         `;
   });

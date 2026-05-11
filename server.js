@@ -29,6 +29,7 @@ const contactRoutes = require('./routes/contactRoutes');
 const providerRoutes = require('./routes/providerRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 // Mount routers
 app.use('/api/auth', authRoutes);
@@ -39,6 +40,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -532,8 +532,7 @@ function handlePaymentFailure(errorMessage) {
 // ==========================
 // NOTIFICATION SYSTEM
 // ==========================
-function simulateNotification(email, type, data = {}) {
-  const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+async function simulateNotification(email, type, data = {}) {
   let message = "";
   let subject = "";
 
@@ -556,16 +555,17 @@ function simulateNotification(email, type, data = {}) {
       break;
   }
 
-  notifications.push({
-    id: Date.now().toString(),
-    email: email,
-    type: type,
-    subject: subject,
-    message: message,
-    timestamp: new Date().toISOString(),
-    read: false,
-    data: data,
-  });
-
-  localStorage.setItem("notifications", JSON.stringify(notifications));
+  try {
+    await createNotification({
+      email: email,
+      type: type,
+      subject: subject,
+      message: message,
+      timestamp: new Date().toISOString(),
+      read: false,
+      data: data,
+    });
+  } catch (err) {
+    console.error("Failed to create notification:", err);
+  }
 }

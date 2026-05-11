@@ -21,6 +21,16 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists with that email' });
     }
 
+    // Restriction: Only ONE admin can exist in the system
+    if (role === 'admin') {
+      const adminExists = await User.findOne({ role: 'admin' });
+      if (adminExists) {
+        return res.status(400).json({ 
+          message: 'Security Alert: An administrative account already exists. For security reasons, only one Admin is allowed.' 
+        });
+      }
+    }
+
     const user = await User.create({
       fullname,
       email,

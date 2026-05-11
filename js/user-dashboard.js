@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 2. Data Retrieval (Fetching from Backend)
   getMyBookings(loggedInUser.email)
-    .then((userBookings) => {
+    .then((response) => {
+      const userBookings = response.bookings || [];
       // 3. Update Statistics UI
       document.getElementById("total-bookings").textContent =
         userBookings.length;
@@ -116,16 +117,22 @@ window.openFeedback = function (bookingId, serviceName) {
 };
 
 // Handle Feedback Submission
-// Call API to add feedback
-addBookingFeedback(bookingId, { rating, comment })
-  .then(() => {
-    alert("✅ Thank you for your feedback! It helps us improve.");
-    window.location.reload();
-  })
-  .catch((err) => {
-    console.error("Feedback error:", err);
-    alert("❌ Failed to submit feedback: " + err.message);
-  });
+document.getElementById("feedback-form")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const bookingId = document.getElementById("service-id").value;
+  const rating = e.target.rating.value;
+  const comment = e.target.Comment.value;
+
+  addBookingFeedback(bookingId, { rating, comment })
+    .then(() => {
+      showToast("✅ Thank you for your feedback!");
+      setTimeout(() => window.location.reload(), 1500);
+    })
+    .catch((err) => {
+      console.error("Feedback error:", err);
+      showToast("❌ Failed to submit feedback: " + err.message, "error");
+    });
+});
 
 // Handle Booking Cancellation
 window.cancelBooking = function (bookingId) {
@@ -210,32 +217,14 @@ window.rescheduleBooking = function (bookingId, currentDate) {
       showConfirmDialog(
         "Confirm Reschedule?",
         `Are you sure you want to reschedule to ${newDate}?`,
-        () => {
-          let allBookings =
-            JSON.parse(localStorage.getItem("allBookings")) || [];
-          const bIndex = allBookings.findIndex((b) => b.id === bookingId);
-
-          if (bIndex > -1) {
-            const booking = allBookings[bIndex];
-            const oldDate = booking.date;
-            allBookings[bIndex].date = newDate;
-            allBookings[bIndex].status = "Pending"; // Reset status when rescheduled
-            localStorage.setItem("allBookings", JSON.stringify(allBookings));
-
-            // Send reschedule notification
-            simulateNotification(booking.userEmail, "booking_rescheduled", {
-              service: booking.service,
-              newDate: newDate,
-              oldDate: oldDate,
-            });
-
+        async () => {
+          try {
+            await updateBooking(bookingId, { date: newDate, status: "Pending" });
             showToast("✅ Booking rescheduled successfully.", "success");
             setTimeout(() => window.location.reload(), 1500);
-          } else {
-            showToast(
-              "❌ Could not find booking. Please refresh and try again.",
-              "error",
-            );
+          } catch (err) {
+            console.error("Reschedule error:", err);
+            showToast("❌ Could not reschedule booking: " + err.message, "error");
           }
         },
         null,
@@ -246,29 +235,29 @@ window.rescheduleBooking = function (bookingId, currentDate) {
 };
 
 // Handle Booking Editing
-window.editBooking = function (bookingId) {
-  const allBookings = JSON.parse(localStorage.getItem("allBookings")) || [];
-  const booking = allBookings.find((b) => b.id === bookingId);
+window.editBooking = async function (bookingId) {
+  try {
+    const booking = await getBooking(bookingId);
 
-  if (!booking) {
-    showToast("❌ Booking not found.", "error");
-    return;
-  }
+    if (!booking) {
+      showToast("❌ Booking not found.", "error");
+      return;
+    }
 
-  // Create edit modal
-  const modal = document.createElement("div");
-  modal.className = "modal-overlay";
+    // Create edit modal
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay";
 
-  const dialogContent = document.createElement("div");
-  dialogContent.className = "modal-dialog";
+    const dialogContent = document.createElement("div");
+    dialogContent.className = "modal-dialog";
 
-  dialogContent.innerHTML = `
+    dialogContent.innerHTML = `
         <h2 class="text-primary">Edit Booking Details</h2>
         <p class="text-muted">Service: <strong>${booking.service}</strong></p>
 
         <div class="form-group">
             <label for="edit-name">Full Name *</label>
-            <input type="text" id="edit-name" class="search-input" value="${booking.name || ""}" required>
+            <input type="text" id="edit-name" class="search-input" value="${booking.customerName || booking.name || ""}" required>
             <div id="edit-name-error" class="error-text hidden"></div>
         </div>
 
@@ -296,209 +285,159 @@ window.editBooking = function (bookingId) {
         </div>
     `;
 
-  modal.appendChild(dialogContent);
-  document.body.appendChild(modal);
+    modal.appendChild(dialogContent);
+    document.body.appendChild(modal);
 
-  // Set up form validation
-  const nameInput = dialogContent.querySelector("#edit-name");
-  const phoneInput = dialogContent.querySelector("#edit-phone");
-  const dateInput = dialogContent.querySelector("#edit-date");
-  const addressInput = dialogContent.querySelector("#edit-address");
+    // Set up form validation
+    const nameInput = dialogContent.querySelector("#edit-name");
+    const phoneInput = dialogContent.querySelector("#edit-phone");
+    const dateInput = dialogContent.querySelector("#edit-date");
+    const addressInput = dialogContent.querySelector("#edit-address");
 
-  const nameError = dialogContent.querySelector("#edit-name-error");
-  const phoneError = dialogContent.querySelector("#edit-phone-error");
-  const dateError = dialogContent.querySelector("#edit-date-error");
-  const addressError = dialogContent.querySelector("#edit-address-error");
+    const nameError = dialogContent.querySelector("#edit-name-error");
+    const phoneError = dialogContent.querySelector("#edit-phone-error");
+    const dateError = dialogContent.querySelector("#edit-date-error");
+    const addressError = dialogContent.querySelector("#edit-address-error");
 
-  // Set min date to today
-  const today = new Date().toISOString().split("T")[0];
-  dateInput.min = today;
+    // Set min date to today
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.min = today;
 
-  // Add accessibility attributes
-  nameInput.setAttribute("aria-describedby", "edit-name-error");
-  phoneInput.setAttribute("aria-describedby", "edit-phone-error");
-  dateInput.setAttribute("aria-describedby", "edit-date-error");
-  addressInput.setAttribute("aria-describedby", "edit-address-error");
+    // Real-time validation
+    nameInput.addEventListener("input", () => {
+      if (nameInput.value.trim().length < 3) {
+        nameError.textContent = "Name must be at least 3 characters";
+        nameError.classList.remove("hidden");
+      } else {
+        nameError.classList.add("hidden");
+      }
+    });
 
-  // Real-time validation
-  nameInput.addEventListener("input", () => {
-    if (nameInput.value.trim().length < 3) {
-      nameError.textContent = "Name must be at least 3 characters";
-      nameError.classList.remove("hidden");
-      nameInput.setAttribute("aria-invalid", "true");
-    } else {
-      nameError.classList.add("hidden");
-      nameInput.setAttribute("aria-invalid", "false");
-    }
-  });
+    phoneInput.addEventListener("input", () => {
+      if (!/^[6-9]\d{9}$/.test(phoneInput.value.trim())) {
+        phoneError.textContent = "Enter valid 10-digit phone number starting with 6-9";
+        phoneError.classList.remove("hidden");
+      } else {
+        phoneError.classList.add("hidden");
+      }
+    });
 
-  phoneInput.addEventListener("input", () => {
-    if (!/^[6-9]\d{9}$/.test(phoneInput.value.trim())) {
-      phoneError.textContent =
-        "Enter valid 10-digit phone number starting with 6-9";
-      phoneError.classList.remove("hidden");
-      phoneInput.setAttribute("aria-invalid", "true");
-    } else {
-      phoneError.classList.add("hidden");
-      phoneInput.setAttribute("aria-invalid", "false");
-    }
-  });
+    dateInput.addEventListener("input", () => {
+      if (!dateInput.value || dateInput.value < today) {
+        dateError.textContent = "Select a valid future date";
+        dateError.classList.remove("hidden");
+      } else {
+        dateError.classList.add("hidden");
+      }
+    });
 
-  dateInput.addEventListener("input", () => {
-    if (!dateInput.value || dateInput.value < today) {
-      dateError.textContent = "Select a valid future date";
-      dateError.classList.remove("hidden");
-      dateInput.setAttribute("aria-invalid", "true");
-    } else {
-      dateError.classList.add("hidden");
-      dateInput.setAttribute("aria-invalid", "false");
-    }
-  });
+    addressInput.addEventListener("input", () => {
+      if (addressInput.value.trim().length < 10) {
+        addressError.textContent = "Address must be at least 10 characters";
+        addressError.classList.remove("hidden");
+      } else {
+        addressError.classList.add("hidden");
+      }
+    });
 
-  addressInput.addEventListener("input", () => {
-    if (addressInput.value.trim().length < 10) {
-      addressError.textContent = "Address must be at least 10 characters";
-      addressError.classList.remove("hidden");
-      addressInput.setAttribute("aria-invalid", "true");
-    } else {
-      addressError.classList.add("hidden");
-      addressInput.setAttribute("aria-invalid", "false");
-    }
-  });
+    // Event handlers
+    dialogContent.querySelector("#cancel-edit").addEventListener("click", () => {
+      modal.remove();
+    });
 
-  // Event handlers
-  dialogContent.querySelector("#cancel-edit").addEventListener("click", () => {
-    modal.remove();
-  });
+    dialogContent.querySelector("#save-edit").addEventListener("click", () => {
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const date = dateInput.value;
+      const address = addressInput.value.trim();
 
-  dialogContent.querySelector("#save-edit").addEventListener("click", () => {
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-    const date = dateInput.value;
-    const address = addressInput.value.trim();
+      let hasErrors = false;
+      if (name.length < 3) { nameError.classList.remove("hidden"); hasErrors = true; }
+      if (!/^[6-9]\d{9}$/.test(phone)) { phoneError.classList.remove("hidden"); hasErrors = true; }
+      if (!date || date < today) { dateError.classList.remove("hidden"); hasErrors = true; }
+      if (address.length < 10) { addressError.classList.remove("hidden"); hasErrors = true; }
 
-    // Validation
-    let hasErrors = false;
+      if (hasErrors) {
+        showToast("❌ Please fix the errors and try again.", "error");
+        return;
+      }
 
-    if (name.length < 3) {
-      nameError.textContent = "Name must be at least 3 characters";
-      nameError.classList.remove("hidden");
-      hasErrors = true;
-    }
+      modal.remove();
 
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-      phoneError.textContent =
-        "Enter valid 10-digit phone number starting with 6-9";
-      phoneError.classList.remove("hidden");
-      hasErrors = true;
-    }
-
-    if (!date || date < today) {
-      dateError.textContent = "Select a valid future date";
-      dateError.classList.remove("hidden");
-      hasErrors = true;
-    }
-
-    if (address.length < 10) {
-      addressError.textContent = "Address must be at least 10 characters";
-      addressError.classList.remove("hidden");
-      hasErrors = true;
-    }
-
-    if (hasErrors) {
-      showToast("❌ Please fix the errors and try again.", "error");
-      return;
-    }
-
-    modal.remove();
-
-    // Confirm action
-    showConfirmDialog(
-      "Confirm Changes?",
-      "Are you sure you want to update this booking?",
-      () => {
-        const allBookings =
-          JSON.parse(localStorage.getItem("allBookings")) || [];
-        const bIndex = allBookings.findIndex((b) => b.id === bookingId);
-
-        if (bIndex > -1) {
-          const oldBooking = { ...allBookings[bIndex] };
-          allBookings[bIndex].name = name;
-          allBookings[bIndex].phone = phone;
-          allBookings[bIndex].date = date;
-          allBookings[bIndex].address = address;
-          allBookings[bIndex].status = "Pending"; // Reset status when edited
-          localStorage.setItem("allBookings", JSON.stringify(allBookings));
-
-          // Send edit notification
-          simulateNotification(booking.userEmail, "booking_edited", {
-            service: booking.service,
-            changes: {
-              name: oldBooking.name !== name,
-              phone: oldBooking.phone !== phone,
-              date: oldBooking.date !== date,
-              address: oldBooking.address !== address,
-            },
-          });
-
-          showToast("✅ Booking updated successfully.", "success");
-          setTimeout(() => window.location.reload(), 1500);
-        } else {
-          showToast(
-            "❌ Could not update booking. Please refresh and try again.",
-            "error",
-          );
-        }
-      },
-      null,
-      "Yes, Update",
-      "Cancel",
-    );
-  });
+      showConfirmDialog(
+        "Confirm Changes?",
+        "Are you sure you want to update this booking?",
+        async () => {
+          try {
+            await updateBooking(bookingId, {
+              customerName: name,
+              phone: phone,
+              date: date,
+              address: address,
+              status: "Pending"
+            });
+            showToast("✅ Booking updated successfully.", "success");
+            setTimeout(() => window.location.reload(), 1500);
+          } catch (err) {
+            console.error("Update error:", err);
+            showToast("❌ Could not update booking: " + err.message, "error");
+          }
+        },
+        null,
+        "Yes, Update",
+        "Cancel",
+      );
+    });
+  } catch (err) {
+    showToast("❌ Error loading booking details.", "error");
+    console.error(err);
+  }
 };
 
-// Load and display notifications
-function loadNotifications(userEmail) {
-  const notifications = JSON.parse(localStorage.getItem("notifications")) || [];
-  const userNotifications = notifications
-    .filter((n) => n.email === userEmail)
-    .slice(-5); // Last 5 notifications
+// Load and display notifications from Backend
+async function loadNotifications(userEmail) {
+  try {
+    const response = await getUserNotifications(userEmail);
+    const userNotifications = response.notifications || [];
 
-  if (userNotifications.length > 0) {
-    const notificationsSection = document.getElementById(
-      "notifications-section",
-    );
-    const notificationsList = document.getElementById("notifications-list");
+    if (userNotifications.length > 0) {
+      const notificationsSection = document.getElementById("notifications-section");
+      const notificationsList = document.getElementById("notifications-list");
 
-    notificationsSection.classList.remove("hidden");
-    notificationsList.innerHTML = "";
+      notificationsSection.classList.remove("hidden");
+      notificationsList.innerHTML = "";
 
-    userNotifications.reverse().forEach((notification) => {
-      const notificationDiv = document.createElement("div");
-      notificationDiv.className = `notification ${notification.read ? "read" : "unread"}`;
+      userNotifications.slice(0, 5).forEach((notification) => {
+        const notificationDiv = document.createElement("div");
+        notificationDiv.className = `notification ${notification.read ? "read" : "unread"}`;
 
-      notificationDiv.innerHTML = `
-                <div class="notification-item">
-                    <div>
-                        <strong class="bold">${notification.subject}</strong>
-                        <p class="text-muted small">${notification.message}</p>
-                        <small class="text-muted small">${new Date(notification.timestamp).toLocaleString()}</small>
-                    </div>
-                    ${!notification.read ? '<span class="text-success bold">●</span>' : ""}
-                </div>
-            `;
+        notificationDiv.innerHTML = `
+                  <div class="notification-item">
+                      <div>
+                          <strong class="bold">${notification.subject || 'Notification'}</strong>
+                          <p class="text-muted small">${notification.message}</p>
+                          <small class="text-muted small">${new Date(notification.createdAt).toLocaleString()}</small>
+                      </div>
+                      ${!notification.read ? '<span class="text-success bold">●</span>' : ""}
+                  </div>
+              `;
 
-      notificationsList.appendChild(notificationDiv);
+        notificationsList.appendChild(notificationDiv);
 
-      // Mark as read when clicked
-      notificationDiv.addEventListener("click", () => {
-        if (!notification.read) {
-          notification.read = true;
-          localStorage.setItem("notifications", JSON.stringify(notifications));
-          notificationDiv.classList.add("read");
-          notificationDiv.querySelector(".text-success")?.remove();
-        }
+        notificationDiv.addEventListener("click", async () => {
+          if (!notification.read) {
+            try {
+              await markNotificationAsRead(notification._id);
+              notificationDiv.classList.add("read");
+              notificationDiv.querySelector(".text-success")?.remove();
+            } catch (err) {
+              console.error("Error marking notification as read:", err);
+            }
+          }
+        });
       });
-    });
+    }
+  } catch (err) {
+    console.error("Error loading notifications:", err);
   }
 }
