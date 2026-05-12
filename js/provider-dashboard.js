@@ -95,8 +95,9 @@ function renderFeedback(completedBookings) {
 
       feedbackBody.innerHTML += `
                 <tr>
-                    <td>${booking.service}</td>
+                    <td><strong class="bold">${booking.service}</strong></td>
                     <td>${booking.customerName}</td>
+                    <td><span class="status-badge status-completed">Completed ✅</span></td>
                     <td>${booking.feedback.rating}</td>
                     <td class="italic">${booking.feedback.comment}</td>
                     <td>${new Date(booking.date).toLocaleDateString()}</td>
@@ -105,8 +106,9 @@ function renderFeedback(completedBookings) {
     } else {
       feedbackBody.innerHTML += `
                 <tr>
-                    <td>${booking.service}</td>
+                    <td><strong class="bold">${booking.service}</strong></td>
                     <td>${booking.customerName}</td>
+                    <td><span class="status-badge status-completed">Completed ✅</span></td>
                     <td class="text-muted">No rating</td>
                     <td class="text-muted">No feedback yet</td>
                     <td>${new Date(booking.date).toLocaleDateString()}</td>
@@ -150,8 +152,8 @@ function renderEmergency(requests) {
                 <p><strong class="bold">Payment:</strong> ${paymentInfo}</p>
                 <p class="text-danger bold">🚨 Time: Immediate Action Required!</p>
                 <div class="modal-btn-group mt-2">
-                    <button class="btn btn-danger btn-flex" onclick="acceptBooking('${req.id}')">Accept</button>
-                    <button class="btn btn-muted btn-flex" onclick="rejectBooking('${req.id}')">Decline</button>
+                    <button class="btn btn-danger btn-flex" onclick="acceptBooking('${req._id || req.id}')">Accept</button>
+                    <button class="btn btn-muted btn-flex" onclick="rejectBooking('${req._id || req.id}')">Decline</button>
                 </div>
             </div>
         `;
@@ -185,8 +187,8 @@ function renderIncoming(requests) {
                 <td>Normal</td>
                 <td>${paymentInfo}</td>
                 <td>
-                    <button class="btn btn-sm" onclick="acceptBooking('${req.id}')">Accept</button>
-                    <button class="btn btn-sm btn-muted" onclick="rejectBooking('${req.id}')">Decline</button>
+                    <button class="btn btn-sm" onclick="acceptBooking('${req._id || req.id}')">Accept</button>
+                    <button class="btn btn-sm btn-muted" onclick="rejectBooking('${req._id || req.id}')">Decline</button>
                 </td>
             </tr>
         `;
@@ -204,10 +206,14 @@ function renderAccepted(requests) {
   }
 
   requests.forEach((req) => {
-    let paymentInfo =
-      req.paymentStatus === "Paid"
-        ? `<span class="text-success bold">Paid ✓</span>`
-        : `<span class="text-danger bold">Unpaid</span>`;
+    let paymentInfo = "";
+    if (req.paymentStatus === "Paid") {
+      paymentInfo = `<span class="text-success bold">Paid ✓</span>`;
+    } else if (req.paymentMethod === "Cash") {
+      paymentInfo = `<span class="text-warning bold">Cash on Service</span> <span class="text-danger small">(To be collected)</span>`;
+    } else {
+      paymentInfo = `<span class="text-danger bold">Unpaid (Online)</span>`;
+    }
 
     container.innerHTML += `
             <div class="card text-left">
@@ -216,9 +222,13 @@ function renderAccepted(requests) {
                 <p><strong class="bold">Service:</strong> ${req.service} (Scheduled: ${req.date})</p>
                 <p><strong class="bold">Payment:</strong> ${paymentInfo}</p>
                 <p class="text-primary bold mt-2">Status: In Progress 🛠️</p>
-                <button class="btn w-100 mt-3" onclick="completeBooking('${req.id}')">Mark as Completed ✅</button>
+                <div class="modal-btn-group mt-3">
+                  <button class="btn btn-flex" onclick="completeBooking('${req._id || req.id}')">Mark as Completed ✅</button>
+                  ${req.paymentMethod === "Cash" && req.paymentStatus !== "Paid" ? `<button class="btn btn-success-outline btn-flex" onclick="confirmCashPayment('${req._id || req.id}')">Confirm Cash Received 💵</button>` : ""}
+                </div>
             </div>
         `;
+
   });
 }
 
@@ -291,17 +301,24 @@ window.completeBooking = function (id) {
     `Mark this service as completed?`,
     async () => {
       try {
-        // Fetch booking details first to get user email
         const booking = await getBooking(id);
+        
+        const updateData = { status: "Completed" };
+        
+        // If it's cash and not paid yet, maybe it's paid now? 
+        // For simplicity, let's assume completion means cash was collected if it was a cash booking
+        if (booking.paymentMethod === "Cash" && booking.paymentStatus !== "Paid") {
+          updateData.paymentStatus = "Paid";
+          updateData.paymentId = "cash_" + Date.now();
+        }
 
-        await updateBookingStatus(id, "Completed");
+        await updateBooking(id, updateData);
 
-        // Create notification for the user
         await createNotification({
           email: booking.userEmail,
           type: "booking_completed",
           subject: "Service Completed",
-          message: `Your ${booking.service} service has been completed. Please provide feedback in your dashboard.`,
+          message: `Your ${booking.service} service has been completed. ${updateData.paymentStatus === "Paid" ? "Payment received via Cash." : "Please pay online in your dashboard."}`,
           data: { bookingId: id, service: booking.service }
         });
 
@@ -311,12 +328,30 @@ window.completeBooking = function (id) {
         console.error("Completion error:", err);
         showToast("❌ Could not complete booking: " + err.message, "error");
       }
-    },
-    null,
-    "Mark Complete",
-    "Not Yet",
+    }
   );
 };
+
+window.confirmCashPayment = function (id) {
+  showConfirmDialog(
+    "Confirm Cash Payment?",
+    "Have you collected the cash payment from the customer?",
+    async () => {
+      try {
+        await updateBooking(id, { 
+          paymentStatus: "Paid", 
+          paymentId: "cash_" + Date.now() 
+        });
+        showToast("✅ Payment confirmed!", "success");
+        setTimeout(() => renderProviderDashboard(), 800);
+      } catch (err) {
+        console.error("Cash payment confirmation error:", err);
+        showToast("❌ Could not confirm payment: " + err.message, "error");
+      }
+    }
+  );
+};
+
 
 // ==========================
 // AVAILABILITY CALENDAR

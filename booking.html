@@ -156,6 +156,41 @@
 
           <div id="payment-status-message" class="hidden"></div>
 
+          <div class="payment-method-selector">
+            <p class="selector-label">Select Payment Method</p>
+            <div class="method-options">
+              <label class="method-card active" data-method="Online" data-timing="Upfront">
+                <input type="radio" name="payment-option" value="online-now" checked>
+                <div class="method-icon"><i class="fa-solid fa-credit-card"></i></div>
+                <div class="method-info">
+                  <span class="method-name">Pay Now (Online)</span>
+                  <span class="method-desc">Secure online payment via Razorpay</span>
+                </div>
+                <div class="check-mark"><i class="fa-solid fa-circle-check"></i></div>
+              </label>
+
+              <label class="method-card" data-method="Online" data-timing="After Service">
+                <input type="radio" name="payment-option" value="online-later">
+                <div class="method-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div class="method-info">
+                  <span class="method-name">Pay After Service (Online)</span>
+                  <span class="method-desc">Pay online once the job is completed</span>
+                </div>
+                <div class="check-mark"><i class="fa-solid fa-circle-check"></i></div>
+              </label>
+
+              <label class="method-card" data-method="Cash" data-timing="After Service">
+                <input type="radio" name="payment-option" value="cash">
+                <div class="method-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                <div class="method-info">
+                  <span class="method-name">Cash on Service</span>
+                  <span class="method-desc">Pay cash directly to the professional</span>
+                </div>
+                <div class="check-mark"><i class="fa-solid fa-circle-check"></i></div>
+              </label>
+            </div>
+          </div>
+
           <button id="pay-now-btn" class="btn btn-success-payment w-100 btn-lg">
             <i class="fa-solid fa-lock"></i>
             <span id="pay-now-text">Pay Now</span>

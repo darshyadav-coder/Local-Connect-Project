@@ -23,6 +23,8 @@ const createBooking = async (req, res) => {
       date,
       paymentId,
       paymentStatus,
+      paymentMethod,
+      paymentTiming,
     } = req.body;
 
     const booking = new Booking({
@@ -36,17 +38,23 @@ const createBooking = async (req, res) => {
       date,
       paymentId,
       paymentStatus: paymentStatus || 'Pending',
+      paymentMethod: paymentMethod || 'Online',
+      paymentTiming: paymentTiming || 'Upfront',
       status: 'Pending',
     });
 
     const createdBooking = await booking.save();
     
-    // Send Confirmation Email
-    await sendEmail(
-      userEmail,
-      'Booking Confirmation - Local Connect',
-      emailTemplates.bookingConfirmation(createdBooking)
-    );
+    // Send Confirmation Email (Safe)
+    try {
+      await sendEmail(
+        userEmail,
+        'Booking Confirmation - Local Connect',
+        emailTemplates.bookingConfirmation(createdBooking)
+      );
+    } catch (emailErr) {
+      console.error('Email sending failed:', emailErr.message);
+    }
 
     res.status(201).json({
       message: 'Booking created successfully',
@@ -139,7 +147,7 @@ const updateBookingStatus = async (req, res) => {
       return res.status(400).json({ message: 'Status is required' });
     }
 
-    const validStatuses = ['Pending', 'Confirmed', 'In Progress', 'Completed', 'Cancelled'];
+    const validStatuses = ['Pending', 'Accepted', 'Confirmed', 'In Progress', 'Completed', 'Cancelled', 'Rejected'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ 
         message: `Status must be one of: ${validStatuses.join(', ')}` 
@@ -191,12 +199,40 @@ const assignProvider = async (req, res) => {
       booking,
     });
 
-    // Send Assignment Email
-    await sendEmail(
-      booking.userEmail,
-      'Service Provider Assigned - Local Connect',
-      emailTemplates.providerAssigned(booking)
+    // Send Assignment Email (Safe)
+    try {
+      await sendEmail(
+        booking.userEmail,
+        'Service Provider Assigned - Local Connect',
+        emailTemplates.providerAssigned(booking)
+      );
+    } catch (emailErr) {
+      console.error('Email sending failed:', emailErr.message);
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update booking details
+// @route   PUT /api/bookings/:id
+// @access  Public
+const updateBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
     );
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.json({
+      message: 'Booking updated successfully',
+      booking,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -257,12 +293,16 @@ const cancelBooking = async (req, res) => {
       booking,
     });
 
-    // Send Cancellation Email
-    await sendEmail(
-      booking.userEmail,
-      'Booking Cancellation - Local Connect',
-      emailTemplates.bookingCancelled(booking)
-    );
+    // Send Cancellation Email (Safe)
+    try {
+      await sendEmail(
+        booking.userEmail,
+        'Booking Cancellation - Local Connect',
+        emailTemplates.bookingCancelled(booking)
+      );
+    } catch (emailErr) {
+      console.error('Email sending failed:', emailErr.message);
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -305,4 +345,5 @@ module.exports = {
   addFeedback,
   cancelBooking,
   getBookingStats,
+  updateBooking,
 };

@@ -44,8 +44,9 @@ const bookingSchema = mongoose.Schema({
     default: 'Unassigned',
   },
   feedback: {
-    type: String,
-    default: null,
+    rating: { type: String },
+    comment: { type: String },
+    createdAt: { type: Date, default: Date.now }
   },
   paymentId: {
     type: String,
@@ -53,6 +54,16 @@ const bookingSchema = mongoose.Schema({
   paymentStatus: {
     type: String,
     default: 'Pending',
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['Online', 'Cash'],
+    default: 'Online',
+  },
+  paymentTiming: {
+    type: String,
+    enum: ['Upfront', 'After Service'],
+    default: 'Upfront',
   },
 }, {
   timestamps: true,

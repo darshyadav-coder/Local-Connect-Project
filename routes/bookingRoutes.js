@@ -10,12 +10,13 @@ const {
   addFeedback,
   cancelBooking,
   getBookingStats,
+  updateBooking,
 } = require('../controllers/bookingController');
 
 router.route('/').post(createBooking).get(getBookings);
 router.route('/mybookings').get(getMyBookings);
 router.route('/stats/overview').get(getBookingStats);
-router.route('/:id').get(getBookingById).delete(cancelBooking);
+router.route('/:id').get(getBookingById).put(updateBooking).delete(cancelBooking);
 router.route('/:id/status').put(updateBookingStatus);
 router.route('/:id/assign-provider').put(assignProvider);
 router.route('/:id/feedback').put(addFeedback);

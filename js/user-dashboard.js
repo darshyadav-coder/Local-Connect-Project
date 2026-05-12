@@ -51,34 +51,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Styling status creatively based on our CSS classes
         let statusClass = "status-pending";
-        let statusText = booking.status;
-        if (booking.status === "Accepted") {
+        let statusText = booking.status || "Pending";
+
+        if (booking.status === "Completed") {
+          statusClass = "status-completed";
+          statusText = "Completed ✅";
+        } else if (booking.status === "Accepted") {
           statusClass = "status-accepted";
-          statusText = "Provider Confirmed";
-        }
-        if (booking.status === "Completed") statusClass = "status-completed";
-        if (booking.status === "Cancelled" || booking.status === "Rejected")
+          statusText = "In Progress 🛠️";
+        } else if (booking.status === "Cancelled" || booking.status === "Rejected") {
           statusClass = "status-cancelled";
+        }
 
         // Payment logic
-        let paymentInfo =
-          booking.paymentStatus === "Paid"
-            ? `<span class="text-success bold">Paid ✓<br><small class="text-muted small">${booking.paymentId || ""}</small></span>`
-            : `<span class="text-danger bold">Unpaid</span>`;
+        let paymentInfo = "";
+        if (booking.paymentStatus === "Paid") {
+          paymentInfo = `<span class="text-success bold">Paid ✓<br><small class="text-muted small">${booking.paymentId || ""}</small></span>`;
+        } else if (booking.status === "Completed" && booking.paymentMethod === "Online") {
+          paymentInfo = `<div class="payment-action">
+              <span class="text-danger bold">Unpaid</span><br>
+              <button class="btn btn-sm btn-success mt-1" onclick="payNowAfterService('${booking._id || booking.id}')">Pay Now</button>
+            </div>`;
+        } else if (booking.paymentMethod === "Cash") {
+          paymentInfo = `<span class="text-warning bold">Cash Payment</span><br><small class="text-muted small">${booking.paymentStatus === "Paid" ? "Collected" : "To be paid"}</small>`;
+        } else {
+          paymentInfo = `<span class="text-danger bold">Unpaid</span>`;
+        }
 
         // Action / Feedback Logic
         let feedbackHtml = `<td>-</td>`;
         if (booking.status === "Pending") {
           feedbackHtml = `<td>
-                <button class="btn btn-sm btn-primary" onclick="editBooking('${booking.id}')" title="Edit booking details">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="cancelBooking('${booking.id}')">Cancel</button>
-                <button class="btn btn-sm" onclick="rescheduleBooking('${booking.id}', '${booking.date}')">Reschedule</button>
+                <button class="btn btn-sm btn-primary" onclick="handleEditBooking('${booking._id || booking.id}')" title="Edit booking details">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="handleCancelBooking('${booking._id || booking.id}')">Cancel</button>
+                <button class="btn btn-sm" onclick="handleRescheduleBooking('${booking._id || booking.id}', '${booking.date}')">Reschedule</button>
             </td>`;
         } else if (booking.status === "Completed") {
           if (booking.feedback) {
-            feedbackHtml = `<td><span class="text-success bold">✓ Feedback Given</span></td>`;
+            feedbackHtml = `<td>
+              <div class="rating-info">
+                <span class="text-success">${booking.feedback.rating}</span><br>
+                <small class="text-muted">${booking.feedback.comment}</small>
+              </div>
+            </td>`;
           } else {
-            feedbackHtml = `<td><button class="btn btn-sm" onclick="openFeedback('${booking.id}', '${booking.service}')">Give Feedback</button></td>`;
+            feedbackHtml = `<td>
+              <button class="btn btn-sm btn-success" onclick="openFeedback('${booking._id || booking.id}', '${booking.service}')">
+                Rate & Finish ⭐
+              </button>
+            </td>`;
           }
         }
 
@@ -89,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <small>${booking.type === "emergency" ? '<span class="text-danger bold">🚨 Emergency</span>' : "Normal"}</small>
             </td>
             <td>${booking.date}</td>
-            <td><span class="${statusClass}">${statusText}</span></td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
             <td>${paymentInfo}</td>
             <td>${booking.provider !== "Unassigned" ? booking.provider : "Waiting..."}</td>
             ${feedbackHtml}
@@ -134,13 +155,14 @@ document.getElementById("feedback-form")?.addEventListener("submit", (e) => {
     });
 });
 
-// Handle Booking Cancellation
-window.cancelBooking = function (bookingId) {
+// Handle Booking Cancellation (Renamed to avoid conflict with API)
+window.handleCancelBooking = function (bookingId) {
   showConfirmDialog(
     "Cancel Booking?",
     "Are you sure you want to cancel this booking?",
     async () => {
       try {
+        // This now correctly calls the API function from apiService.js
         await cancelBooking(bookingId);
 
         showToast("✅ Booking cancelled successfully.");
@@ -153,8 +175,10 @@ window.cancelBooking = function (bookingId) {
   );
 };
 
-// Handle Booking Rescheduling
-window.rescheduleBooking = function (bookingId, currentDate) {
+
+// Handle Booking Rescheduling (Renamed to avoid conflict with API)
+window.handleRescheduleBooking = function (bookingId, currentDate) {
+
   // Create a custom input dialog instead of prompt()
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
@@ -234,8 +258,9 @@ window.rescheduleBooking = function (bookingId, currentDate) {
     });
 };
 
-// Handle Booking Editing
-window.editBooking = async function (bookingId) {
+// Handle Booking Editing (Renamed to avoid conflict with API)
+window.handleEditBooking = async function (bookingId) {
+
   try {
     const booking = await getBooking(bookingId);
 
@@ -441,3 +466,58 @@ async function loadNotifications(userEmail) {
     console.error("Error loading notifications:", err);
   }
 }
+
+// Handle Post-Service Payment
+window.payNowAfterService = async function (bookingId) {
+  try {
+    const booking = await getBooking(bookingId);
+    if (!booking) throw new Error("Booking not found");
+
+    const numericPrice = parseInt(booking.price.replace("₹", ""));
+
+    showToast("Opening Payment Gateway...");
+
+    // Use simulated Razorpay
+    var options = {
+      key: "rzp_test_dummykey123",
+      amount: numericPrice * 100,
+      currency: "INR",
+      name: "Local Connect",
+      description: "Payment for " + booking.service,
+      handler: async function (response) {
+        try {
+          showToast("Verifying Payment...");
+          // Simulate verification and update
+          await updateBooking(bookingId, {
+            paymentStatus: "Paid",
+            paymentId: response.razorpay_payment_id || "pay_after_" + Math.random().toString(36).substr(2, 9)
+          });
+
+          showToast("✅ Payment Successful!");
+          setTimeout(() => window.location.reload(), 1500);
+        } catch (err) {
+          showToast("❌ Payment Update Failed", "error");
+        }
+      },
+      prefill: {
+        name: booking.customerName,
+        email: booking.userEmail,
+      },
+      theme: { color: "#2563eb" },
+    };
+
+    if (options.key === "rzp_test_dummykey123") {
+      setTimeout(() => {
+        options.handler({
+          razorpay_payment_id: "pay_sim_" + Math.random().toString(36).substr(2, 9),
+        });
+      }, 2000);
+    } else {
+      var rzp1 = new Razorpay(options);
+      rzp1.open();
+    }
+  } catch (err) {
+    console.error("Payment error:", err);
+    showToast("❌ Could not initiate payment: " + err.message, "error");
+  }
+};

@@ -155,41 +155,36 @@ table td {
   color: var(--text-dark);
 }
 
-/* Status Colors */
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
 .status-pending {
   color: #f59e0b;
-  font-weight: 600;
   background: rgba(245, 158, 11, 0.15);
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
 }
 
 .status-completed {
-  color: var(--accent-color);
-  font-weight: 600;
+  color: #10b981;
   background: rgba(16, 185, 129, 0.15);
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
 }
 
 .status-accepted {
-  color: var(--primary-color);
-  font-weight: 600;
+  color: #2563eb;
   background: rgba(37, 99, 235, 0.15);
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
 }
 
 .status-cancelled {
-  color: var(--danger-color);
-  font-weight: 600;
+  color: #ef4444;
   background: rgba(239, 68, 68, 0.15);
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
 }
 
 /* Form in Dashboard */

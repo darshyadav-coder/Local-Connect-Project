@@ -365,9 +365,46 @@ form.addEventListener("submit", (e) => {
   document.getElementById("summary-date").textContent = currentBookingData.date;
   document.getElementById("summary-price").textContent =
     currentBookingData.price;
+  
+  // Reset payment selection to default (Online Now)
+  const defaultMethod = document.querySelector('.method-card[data-method="Online"][data-timing="Upfront"]');
+  if (defaultMethod) {
+    document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
+    defaultMethod.classList.add('active');
+    defaultMethod.querySelector('input').checked = true;
+    updatePayButtonText("Online", "Upfront");
+  }
+
   document.getElementById("pay-now-text").textContent =
     `Pay ${currentBookingData.price}`;
 });
+
+// ==========================
+// PAYMENT METHOD SELECTION
+// ==========================
+document.querySelectorAll(".method-card").forEach((card) => {
+  card.addEventListener("click", function () {
+    document.querySelectorAll(".method-card").forEach((c) => c.classList.remove("active"));
+    this.classList.add("active");
+    this.querySelector("input").checked = true;
+
+    const method = this.getAttribute("data-method");
+    const timing = this.getAttribute("data-timing");
+    updatePayButtonText(method, timing);
+  });
+});
+
+function updatePayButtonText(method, timing) {
+  const btnText = document.getElementById("pay-now-text");
+  if (timing === "Upfront") {
+    btnText.textContent = `Pay ${currentBookingData ? currentBookingData.price : ""} Now`;
+  } else if (method === "Cash") {
+    btnText.textContent = "Confirm with Cash";
+  } else {
+    btnText.textContent = "Confirm & Pay Later";
+  }
+}
+
 
 // ==========================
 // CHECKOUT / PAYMENT HANDLING
@@ -384,139 +421,132 @@ cancelCheckoutBtn.addEventListener("click", () => {
 });
 
 payNowBtn.addEventListener("click", async () => {
+  const selectedOption = document.querySelector('input[name="payment-option"]:checked');
+  const method = selectedOption.parentElement.getAttribute("data-method");
+  const timing = selectedOption.parentElement.getAttribute("data-timing");
+
   payNowBtn.disabled = true;
   cancelCheckoutBtn.disabled = true;
   payNowBtn.classList.add("btn-loading");
-  document.getElementById("pay-now-text").textContent = "Creating Order...";
   paymentMessage.classList.add("hidden");
 
-  try {
-    const orderResponse =
-      await window.PaymentService.createOrder(currentBookingData);
-
-    if (!orderResponse.success) {
-      throw new Error(
-        orderResponse.message || "Failed to create order on server",
-      );
-    }
-
-    document.getElementById("pay-now-text").textContent = "Awaiting Payment...";
-
-    let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-
-    var options = {
-      key: "rzp_test_dummykey123",
-      amount: currentBookingData.numericPrice * 100,
-      currency: "INR",
-      name: "Local Connect",
-      description: "Payment for " + currentBookingData.service,
-      handler: async function (response) {
-        document.getElementById("pay-now-text").textContent =
-          "Verifying Payment...";
-
-        try {
-          const verifyResponse = await window.PaymentService.verifyPayment({
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_signature: response.razorpay_signature,
-            bookingContext: currentBookingData,
-          });
-
-          if (verifyResponse.success) {
-            paymentMessage.classList.remove("hidden");
-            paymentMessage.className = "payment-status-success";
-            paymentMessage.textContent =
-              "Payment Verified! Generating booking receipt...";
-            payNowBtn.classList.remove("btn-loading");
-            payNowBtn.classList.add("btn-success-payment");
-            document.getElementById("pay-now-text").textContent = "Success ✓";
-
-            let bookingPayload = {
-              userEmail: currentBookingData.userEmail,
-              userName: currentBookingData.userName,
-              customerName: currentBookingData.customerName,
-              phone: currentBookingData.phone,
-              service: currentBookingData.service,
-              price: currentBookingData.price,
-              type: currentBookingData.type,
-              date: currentBookingData.date,
-              paymentId: verifyResponse.paymentId || response.razorpay_payment_id,
-              paymentStatus: "Paid",
-            };
-
-            // Call API to create booking
-            createBooking(bookingPayload)
-            .then(data => {
-              simulateNotification(
-                currentBookingData.userEmail,
-                "booking_confirmed",
-                {
-                  service: currentBookingData.service,
-                  date: currentBookingData.date,
-                },
-              );
-
-              setTimeout(() => {
-                window.location.href = "user-dashboard.html";
-              }, 1500);
-            })
-            .catch(err => {
-              console.error("Failed to save booking to backend:", err);
-              showToast("❌ Failed to save booking: " + err.message, "error");
-              
-              payNowBtn.disabled = false;
-              cancelCheckoutBtn.disabled = false;
-              payNowBtn.classList.remove("btn-loading");
-              document.getElementById("pay-now-text").textContent = "Retry Saving";
-            });
-          } else {
-            throw new Error("Payment Verification Failed on server API.");
-          }
-        } catch (err) {
-          handlePaymentFailure(err.message);
-        }
-      },
-      prefill: {
-        name: currentBookingData.customerName,
-        contact: currentBookingData.phone,
-        email: loggedInUser.email,
-      },
-      theme: { color: "#2563eb" },
-      modal: {
-        ondismiss: function () {
-          handlePaymentFailure("Payment modal closed. Transaction cancelled.");
-        },
-      },
-    };
-
-    var rzp1 = new Razorpay(options);
-    rzp1.on("payment.failed", function (response) {
-      handlePaymentFailure(response.error.description);
-    });
-
+  // Flow A: Pay Now (Online Upfront)
+  if (method === "Online" && timing === "Upfront") {
+    document.getElementById("pay-now-text").textContent = "Creating Order...";
     try {
-      cancelCheckoutBtn.disabled = false;
+      const orderResponse = await window.PaymentService.createOrder(currentBookingData);
+      if (!orderResponse.success) throw new Error(orderResponse.message || "Failed to create order");
+
+      document.getElementById("pay-now-text").textContent = "Awaiting Payment...";
+      let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+
+      var options = {
+        key: "rzp_test_dummykey123",
+        amount: currentBookingData.numericPrice * 100,
+        currency: "INR",
+        name: "Local Connect",
+        description: "Payment for " + currentBookingData.service,
+        handler: async function (response) {
+          document.getElementById("pay-now-text").textContent = "Verifying Payment...";
+          try {
+            const verifyResponse = await window.PaymentService.verifyPayment({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              bookingContext: currentBookingData,
+            });
+
+            if (verifyResponse.success) {
+              finalizeBooking({
+                ...currentBookingData,
+                paymentId: verifyResponse.paymentId || response.razorpay_payment_id,
+                paymentStatus: "Paid",
+                paymentMethod: "Online",
+                paymentTiming: "Upfront"
+              });
+            } else {
+              throw new Error("Payment Verification Failed");
+            }
+          } catch (err) {
+            handlePaymentFailure(err.message);
+          }
+        },
+        prefill: {
+          name: currentBookingData.customerName,
+          contact: currentBookingData.phone,
+          email: loggedInUser.email,
+        },
+        theme: { color: "#2563eb" },
+        modal: {
+          ondismiss: function () {
+            handlePaymentFailure("Payment cancelled.");
+          },
+        },
+      };
+
+      var rzp1 = new Razorpay(options);
       if (options.key === "rzp_test_dummykey123") {
-        setTimeout(() => {
-          options.handler({
-            razorpay_payment_id:
-              "pay_sim_" + Math.random().toString(36).substr(2, 9),
-            razorpay_order_id: "order_sim",
-            razorpay_signature: "sim_signature_123",
-          });
-        }, 2500);
+        setTimeout(() => options.handler({
+          razorpay_payment_id: "pay_sim_" + Math.random().toString(36).substr(2, 9),
+          razorpay_order_id: "order_sim",
+          razorpay_signature: "sim_signature_123",
+        }), 2000);
       } else {
         rzp1.open();
       }
-    } catch (err) {
-      handlePaymentFailure(
-        "Gateway initialization failed: Backend Dev missing API key.",
-      );
+    } catch (error) {
+      handlePaymentFailure(error.message);
     }
-  } catch (error) {
-    handlePaymentFailure(error.message);
+  } 
+  // Flow B: Pay After Service (Online or Cash)
+  else {
+    document.getElementById("pay-now-text").textContent = "Processing...";
+    finalizeBooking({
+      ...currentBookingData,
+      paymentId: "pending",
+      paymentStatus: "Pending",
+      paymentMethod: method,
+      paymentTiming: timing
+    });
   }
 });
+
+async function finalizeBooking(bookingPayload) {
+  try {
+    const data = await createBooking(bookingPayload);
+    
+    paymentMessage.classList.remove("hidden");
+    paymentMessage.className = "payment-status-success";
+    paymentMessage.textContent = bookingPayload.paymentTiming === "Upfront" 
+      ? "Payment Verified! Booking Confirmed." 
+      : "Booking Confirmed! You can pay after the service.";
+    
+    payNowBtn.classList.remove("btn-loading");
+    payNowBtn.classList.add("btn-success-payment");
+    document.getElementById("pay-now-text").textContent = "Success ✓";
+
+    simulateNotification(
+      currentBookingData.userEmail,
+      "booking_confirmed",
+      {
+        service: currentBookingData.service,
+        date: currentBookingData.date,
+      },
+    );
+
+    setTimeout(() => {
+      window.location.href = "user-dashboard.html";
+    }, 2000);
+  } catch (err) {
+    console.error("Failed to save booking:", err);
+    showToast("❌ Failed to save booking: " + err.message, "error");
+    payNowBtn.disabled = false;
+    cancelCheckoutBtn.disabled = false;
+    payNowBtn.classList.remove("btn-loading");
+    document.getElementById("pay-now-text").textContent = "Retry";
+  }
+}
+
 
 function handlePaymentFailure(errorMessage) {
   payNowBtn.disabled = false;
