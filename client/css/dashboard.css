@@ -352,6 +352,12 @@ table td {
   transform: translateY(-2px);
 }
 
+.calendar-day.selected {
+  border-color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.05);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
 .calendar-day.slot-available {
   background: rgba(16, 185, 129, 0.08);
   border-color: var(--accent-color);

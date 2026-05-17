@@ -7,6 +7,17 @@
  */
 
 const PaymentService = {
+  getKey: async function () {
+    try {
+      const response = await fetch('http://localhost:5000/api/payment/key');
+      const data = await response.json();
+      return data.key;
+    } catch (error) {
+      console.error("[PaymentService] Error fetching Razorpay key:", error);
+      return 'rzp_test_dummykey123';
+    }
+  },
+
   /**
    * Step 1: Create Order on the Backend
    * 
@@ -20,23 +31,17 @@ const PaymentService = {
   createOrder: async function (bookingData) {
     console.log("[PaymentService] Sending booking data to backend to create order...", bookingData);
 
-    // BACKEND DEV: Replace this timeout with your actual fetch call:
-    // return fetch('/api/payment/create-order', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(bookingData)
-    // }).then(res => res.json());
-
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Fake response
-        resolve({
-          success: true,
-          orderId: "order_mock_" + Math.random().toString(36).substr(2, 9),
-          message: "Order created successfully on backend"
-        });
-      }, 1000);
-    });
+    try {
+      const response = await fetch('http://localhost:5000/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("[PaymentService] Error creating order:", error);
+      return { success: false, message: error.message };
+    }
   },
 
   /**
@@ -52,24 +57,17 @@ const PaymentService = {
   verifyPayment: async function (paymentPayload) {
     console.log("[PaymentService] Verifying payment signature on backend...", paymentPayload);
 
-    // BACKEND DEV: Replace this timeout with your actual fetch call:
-    // return fetch('/api/payment/verify', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(paymentPayload)
-    // }).then(res => res.json());
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Fake response
-        // To simulate a failure, you could randomly reject() or return success: false
-        resolve({
-          success: true,
-          paymentId: "pay_verified_" + Math.random().toString(36).substr(2, 9),
-          message: "Payment successfully verified."
-        });
-      }, 1500);
-    });
+    try {
+      const response = await fetch('http://localhost:5000/api/payment/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentPayload)
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("[PaymentService] Error verifying payment:", error);
+      return { success: false, message: error.message };
+    }
   }
 };
 

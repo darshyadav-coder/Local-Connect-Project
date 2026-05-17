@@ -9,7 +9,9 @@
  * - CORS support
  */
 
-const API_BASE_URL = "http://localhost:5000/api";
+const isDevelopment = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const PROD_API_URL = "https://your-backend-url.onrender.com/api"; // Replace with your actual backend URL once deployed
+const API_BASE_URL = isDevelopment ? "http://localhost:5000/api" : PROD_API_URL;
 
 // ============================================
 // TOKEN MANAGEMENT

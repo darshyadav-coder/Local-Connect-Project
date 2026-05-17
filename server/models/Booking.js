@@ -53,7 +53,21 @@ const bookingSchema = mongoose.Schema({
     comment: { type: String },
     createdAt: { type: Date, default: Date.now }
   },
+  invoice: {
+    workScope: { type: String },
+    workDescription: { type: String },
+    basePrice: { type: String },
+    additionalCharges: { type: String },
+    totalAmount: { type: String },
+    generatedAt: { type: Date, default: Date.now }
+  },
   paymentId: {
+    type: String,
+  },
+  razorpayOrderId: {
+    type: String,
+  },
+  razorpaySignature: {
     type: String,
   },
   paymentStatus: {

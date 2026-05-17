@@ -98,19 +98,24 @@ document.addEventListener("DOMContentLoaded", () => {
           feedbackHtml = `<td><span class="text-muted small italic">Awaiting completion...</span></td>`;
         } else if (booking.status === "Completed") {
           const hasFeedback = booking.feedback && (booking.feedback.rating || booking.feedback.comment);
+          const hasInvoice = booking.invoice && booking.invoice.totalAmount;
           
+          let billBtn = hasInvoice ? `<button class="btn btn-sm btn-accent mt-1" onclick="viewBill('${booking._id || booking.id}')">🧾 View Bill</button>` : '';
+
           if (hasFeedback) {
             feedbackHtml = `<td>
               <div class="rating-info">
                 <span class="text-success bold">${booking.feedback.rating || "N/A"}</span><br>
                 <small class="text-muted italic">"${booking.feedback.comment || "No comment"}"</small>
               </div>
+              ${billBtn}
             </td>`;
           } else {
             feedbackHtml = `<td>
               <button class="btn btn-sm btn-success" onclick="openFeedback('${booking._id || booking.id}', '${booking.service.replace(/'/g, "\\'")}')">
                 Rate & Finish ⭐
-              </button>
+              </button><br>
+              ${billBtn}
             </td>`;
           }
         } else if (booking.status === "Cancelled" || booking.status === "Rejected") {
@@ -541,5 +546,77 @@ window.payNowAfterService = async function (bookingId) {
   } catch (err) {
     console.error("Payment error:", err);
     showToast("❌ Could not initiate payment: " + err.message, "error");
+  }
+};
+
+// View Bill / Invoice
+window.viewBill = async function(bookingId) {
+  try {
+    const booking = await getBooking(bookingId);
+    if (!booking || !booking.invoice) {
+      showToast("❌ Bill details not found.", "error");
+      return;
+    }
+
+    const inv = booking.invoice;
+    const dateStr = inv.generatedAt ? new Date(inv.generatedAt).toLocaleDateString() : new Date(booking.date).toLocaleDateString();
+
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay";
+
+    const dialogContent = document.createElement("div");
+    dialogContent.className = "modal-dialog";
+    dialogContent.style.maxWidth = "450px";
+    dialogContent.style.textAlign = "left";
+
+    dialogContent.innerHTML = `
+      <div style="border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 15px; text-align: center;">
+        <h2 class="text-primary m-0">Local Connect</h2>
+        <p class="text-muted small m-0">Service Invoice & Work Summary</p>
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 5px 0;"><strong>Date:</strong> ${dateStr}</p>
+        <p style="margin: 5px 0;"><strong>Service:</strong> ${booking.service}</p>
+        <p style="margin: 5px 0;"><strong>Provider:</strong> ${booking.provider}</p>
+        <p style="margin: 5px 0;"><strong>Customer:</strong> ${booking.customerName}</p>
+      </div>
+
+      <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; color: var(--text-color);">Work Details</h4>
+        <p style="margin: 5px 0;"><strong>Scope:</strong> <span class="text-primary">${inv.workScope || 'N/A'}</span></p>
+        <p style="margin: 5px 0; font-size: 14px;" class="text-muted"><em>"${inv.workDescription || 'No description provided.'}"</em></p>
+      </div>
+
+      <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 8px 0;">Base Service Charge</td>
+          <td style="padding: 8px 0; text-align: right;">${inv.basePrice || '-'}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 8px 0;">Additional Scope / Parts</td>
+          <td style="padding: 8px 0; text-align: right;">${inv.additionalCharges || '-'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 0; font-size: 18px;"><strong>Total Amount Paid</strong></td>
+          <td style="padding: 12px 0; text-align: right; font-size: 18px; color: #10b981;"><strong>${inv.totalAmount || booking.price}</strong></td>
+        </tr>
+      </table>
+
+      <div class="modal-btn-group" style="margin-top: 20px;">
+        <button id="close-bill" class="btn btn-flex">Close</button>
+      </div>
+    `;
+
+    modal.appendChild(dialogContent);
+    document.body.appendChild(modal);
+
+    dialogContent.querySelector("#close-bill").addEventListener("click", () => {
+      modal.remove();
+    });
+
+  } catch (err) {
+    console.error("View Bill error:", err);
+    showToast("❌ Could not load bill: " + err.message, "error");
   }
 };

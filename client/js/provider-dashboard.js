@@ -381,27 +381,10 @@ window.completeBooking = function (id) {
       
       modal.remove();
       
-      // Proceed with completion
+      // Proceed with Work Summary / Invoice Generation
       const booking = await getBooking(id);
-      const updateData = { status: "Completed" };
-      
-      if (booking.paymentMethod === "Cash" && booking.paymentStatus !== "Paid") {
-        updateData.paymentStatus = "Paid";
-        updateData.paymentId = "cash_" + Date.now();
-      }
+      openInvoiceModal(id, booking);
 
-      await updateBooking(id, updateData);
-
-      await createNotification({
-        email: booking.userEmail,
-        type: "booking_completed",
-        subject: "Service Completed ✅",
-        message: `Your ${booking.service} service has been completed successfully. Thank you for choosing Local Connect!`,
-        data: { bookingId: id, service: booking.service }
-      });
-
-      showToast("✅ OTP Verified & Service Completed!", "success");
-      setTimeout(() => renderProviderDashboard(), 800);
     } catch (err) {
       console.error("OTP Error:", err);
       otpError.textContent = err.message || "Incorrect OTP. Please ask the customer for the correct code.";
@@ -409,6 +392,130 @@ window.completeBooking = function (id) {
     }
   });
 };
+
+function openInvoiceModal(bookingId, booking) {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+
+  const dialogContent = document.createElement("div");
+  dialogContent.className = "modal-dialog";
+  dialogContent.style.maxWidth = "500px";
+
+  const basePriceStr = booking.price ? booking.price.toString().replace(/[^0-9.]/g, '') : "0";
+  
+  dialogContent.innerHTML = `
+        <h2 class="text-primary">Work Summary & Invoice</h2>
+        <p class="text-muted">
+            Please detail the work completed for <strong>${booking.service}</strong>. This helps the customer understand the pricing.
+        </p>
+        <div class="form-group mb-3">
+            <label for="invoice-scope">Scope of Work *</label>
+            <select id="invoice-scope" class="search-input" required>
+                <option value="" disabled selected>Select Scope</option>
+                <option value="Whole House">Whole House</option>
+                <option value="Specific Room/Area">Specific Room/Area</option>
+                <option value="Single Item/Appliance">Single Item/Appliance</option>
+                <option value="Inspection Only">Inspection Only</option>
+                <option value="Custom/Other">Custom / Other</option>
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label for="invoice-desc">Detailed Description *</label>
+            <textarea id="invoice-desc" class="search-input" rows="3" placeholder="E.g., Fixed kitchen sink pipe leakage and replaced the washer." required></textarea>
+        </div>
+        <div class="form-group mb-3">
+            <label for="invoice-base">Base Price (₹)</label>
+            <input type="number" id="invoice-base" class="search-input" value="${basePriceStr}" readonly>
+        </div>
+        <div class="form-group mb-3">
+            <label for="invoice-extra">Additional Charges (₹)</label>
+            <input type="number" id="invoice-extra" class="search-input" value="0" min="0" placeholder="0">
+        </div>
+        <div class="form-group mb-4">
+            <label for="invoice-total">Total Final Amount (₹)</label>
+            <input type="number" id="invoice-total" class="search-input text-primary bold" value="${basePriceStr}" readonly style="font-size: 18px;">
+        </div>
+        <div class="modal-btn-group">
+            <button id="cancel-invoice" class="btn btn-muted btn-flex">Cancel</button>
+            <button id="submit-invoice-btn" class="btn btn-flex">Complete Service</button>
+        </div>
+    `;
+
+  modal.appendChild(dialogContent);
+  document.body.appendChild(modal);
+
+  const scopeInput = dialogContent.querySelector("#invoice-scope");
+  const descInput = dialogContent.querySelector("#invoice-desc");
+  const baseInput = dialogContent.querySelector("#invoice-base");
+  const extraInput = dialogContent.querySelector("#invoice-extra");
+  const totalInput = dialogContent.querySelector("#invoice-total");
+
+  // Auto-update total amount
+  extraInput.addEventListener("input", () => {
+      const base = parseFloat(baseInput.value) || 0;
+      const extra = parseFloat(extraInput.value) || 0;
+      totalInput.value = base + extra;
+  });
+
+  // Event handlers
+  dialogContent.querySelector("#cancel-invoice").addEventListener("click", () => {
+    modal.remove();
+  });
+
+  dialogContent.querySelector("#submit-invoice-btn").addEventListener("click", async () => {
+    const scope = scopeInput.value;
+    const desc = descInput.value.trim();
+    const base = baseInput.value;
+    const extra = extraInput.value || "0";
+    const total = totalInput.value;
+
+    if (!scope || !desc) {
+      showToast("❌ Please fill in the Scope and Description.", "error");
+      return;
+    }
+
+    try {
+      showToast("Saving Invoice & Completing...");
+      
+      const invoiceData = {
+          workScope: scope,
+          workDescription: desc,
+          basePrice: "₹" + base,
+          additionalCharges: "₹" + extra,
+          totalAmount: "₹" + total,
+          generatedAt: new Date().toISOString()
+      };
+
+      const updateData = { 
+          status: "Completed",
+          price: "₹" + total, // update the main booking price to reflect the final total
+          invoice: invoiceData
+      };
+      
+      if (booking.paymentMethod === "Cash" && booking.paymentStatus !== "Paid") {
+        updateData.paymentStatus = "Paid";
+        updateData.paymentId = "cash_" + Date.now();
+      }
+
+      await updateBooking(bookingId, updateData);
+
+      await createNotification({
+        email: booking.userEmail,
+        type: "booking_completed",
+        subject: "Service Completed ✅",
+        message: `Your ${booking.service} service has been completed successfully. You can now view your bill.`,
+        data: { bookingId: bookingId, service: booking.service }
+      });
+
+      modal.remove();
+      showToast("✅ Service Completed & Invoice Generated!", "success");
+      setTimeout(() => renderProviderDashboard(), 800);
+    } catch (err) {
+      console.error("Invoice Error:", err);
+      showToast("❌ Error saving invoice: " + err.message, "error");
+    }
+  });
+}
 
 window.confirmCashPayment = function (id) {
   showConfirmDialog(
@@ -478,9 +585,9 @@ function renderAvailabilityCalendar() {
       <div class="slot-status">${isAvailable ? "Available" : "Unavailable"}</div>
     `;
 
-    daySlot.addEventListener("click", () =>
-      toggleDayAvailability(loggedInUser.email, dateStr),
-    );
+    daySlot.addEventListener("click", () => {
+      daySlot.classList.toggle("selected");
+    });
 
     calendarContainer.appendChild(daySlot);
   }
@@ -488,42 +595,32 @@ function renderAvailabilityCalendar() {
   // Add toggle availability button functionality
   const toggleBtn = document.getElementById("toggle-availability");
   if (toggleBtn) {
-    toggleBtn.addEventListener("click", () => {
-      const allAvailable = Object.values(providerAvailability).every((v) => v);
-      const newAvailability = !allAvailable;
+    // Clone and replace to remove any old event listeners
+    const newToggleBtn = toggleBtn.cloneNode(true);
+    toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
 
-      const availability =
-        JSON.parse(localStorage.getItem("providerAvailability")) || {};
-      availability[loggedInUser.email] = availability[loggedInUser.email] || {};
-
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        const dateStr = date.toISOString().split("T")[0];
-        availability[loggedInUser.email][dateStr] = newAvailability;
+    newToggleBtn.addEventListener("click", () => {
+      const selectedSlots = document.querySelectorAll(".calendar-day.selected");
+      
+      if (selectedSlots.length === 0) {
+        showToast("Please click on a date to select it first.", "info");
+        return;
       }
 
-      localStorage.setItem(
-        "providerAvailability",
-        JSON.stringify(availability),
-      );
+      const availability = JSON.parse(localStorage.getItem("providerAvailability")) || {};
+      availability[loggedInUser.email] = availability[loggedInUser.email] || {};
+
+      let changedCount = 0;
+      selectedSlots.forEach(slot => {
+        const dateStr = slot.dataset.date;
+        availability[loggedInUser.email][dateStr] = !availability[loggedInUser.email][dateStr];
+        changedCount++;
+      });
+
+      localStorage.setItem("providerAvailability", JSON.stringify(availability));
       renderAvailabilityCalendar();
 
-      showToast(
-        `${newAvailability ? "Available" : "Unavailable"} for the next 7 days!`,
-        "info",
-      );
+      showToast(`Updated availability for ${changedCount} day(s)!`, "success");
     });
   }
-}
-
-function toggleDayAvailability(providerEmail, dateStr) {
-  const availability =
-    JSON.parse(localStorage.getItem("providerAvailability")) || {};
-  if (!availability[providerEmail]) availability[providerEmail] = {};
-
-  availability[providerEmail][dateStr] = !availability[providerEmail][dateStr];
-  localStorage.setItem("providerAvailability", JSON.stringify(availability));
-
-  renderAvailabilityCalendar();
 }

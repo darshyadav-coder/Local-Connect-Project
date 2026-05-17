@@ -444,38 +444,73 @@ payNowBtn.addEventListener("click", async () => {
 
   // Flow A: Pay Now (Online Upfront)
   if (method === "Online" && timing === "Upfront") {
-    document.getElementById("pay-now-text").textContent = "Creating Order...";
+    document.getElementById("pay-now-text").textContent = "Creating Booking...";
     try {
-      const orderResponse = await window.PaymentService.createOrder(currentBookingData);
+      // Step 1: Create a Pending Booking first
+      const bookingResponse = await createBooking({
+        ...currentBookingData,
+        paymentId: "pending",
+        paymentStatus: "Pending",
+        paymentMethod: "Online",
+        paymentTiming: "Upfront"
+      });
+      
+      const createdBooking = bookingResponse.booking;
+      if (!createdBooking || !createdBooking._id) {
+        throw new Error("Failed to generate booking on server.");
+      }
+
+      document.getElementById("pay-now-text").textContent = "Creating Order...";
+      // Step 2: Create Razorpay Order
+      const orderResponse = await window.PaymentService.createOrder({
+        bookingId: createdBooking._id,
+        amount: currentBookingData.numericPrice
+      });
       if (!orderResponse.success) throw new Error(orderResponse.message || "Failed to create order");
 
       document.getElementById("pay-now-text").textContent = "Awaiting Payment...";
       let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+      const rzpKey = await window.PaymentService.getKey();
 
       var options = {
-        key: "rzp_test_dummykey123",
+        key: rzpKey,
         amount: currentBookingData.numericPrice * 100,
         currency: "INR",
         name: "Local Connect",
         description: "Payment for " + currentBookingData.service,
+        order_id: orderResponse.orderId,
         handler: async function (response) {
           document.getElementById("pay-now-text").textContent = "Verifying Payment...";
           try {
+            // Step 3: Verify Payment
             const verifyResponse = await window.PaymentService.verifyPayment({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
-              bookingContext: currentBookingData,
+              bookingId: createdBooking._id,
             });
 
             if (verifyResponse.success) {
-              finalizeBooking({
-                ...currentBookingData,
-                paymentId: verifyResponse.paymentId || response.razorpay_payment_id,
-                paymentStatus: "Paid",
-                paymentMethod: "Online",
-                paymentTiming: "Upfront"
-              });
+              paymentMessage.classList.remove("hidden");
+              paymentMessage.className = "payment-status-success";
+              paymentMessage.textContent = "Payment Verified! Booking Confirmed.";
+              
+              payNowBtn.classList.remove("btn-loading");
+              payNowBtn.classList.add("btn-success-payment");
+              document.getElementById("pay-now-text").textContent = "Success ✓";
+
+              simulateNotification(
+                currentBookingData.userEmail,
+                "booking_confirmed",
+                {
+                  service: currentBookingData.service,
+                  date: currentBookingData.date,
+                },
+              );
+
+              setTimeout(() => {
+                window.location.href = "user-dashboard.html";
+              }, 2000);
             } else {
               throw new Error("Payment Verification Failed");
             }
@@ -491,21 +526,16 @@ payNowBtn.addEventListener("click", async () => {
         theme: { color: "#2563eb" },
         modal: {
           ondismiss: function () {
-            handlePaymentFailure("Payment cancelled.");
+            handlePaymentFailure("Payment popup closed by user.");
           },
         },
       };
 
       var rzp1 = new Razorpay(options);
-      if (options.key === "rzp_test_dummykey123") {
-        setTimeout(() => options.handler({
-          razorpay_payment_id: "pay_sim_" + Math.random().toString(36).substr(2, 9),
-          razorpay_order_id: "order_sim",
-          razorpay_signature: "sim_signature_123",
-        }), 2000);
-      } else {
-        rzp1.open();
-      }
+      rzp1.on('payment.failed', function (response){
+        handlePaymentFailure(response.error.description);
+      });
+      rzp1.open();
     } catch (error) {
       handlePaymentFailure(error.message);
     }
